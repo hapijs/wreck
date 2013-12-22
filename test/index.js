@@ -23,38 +23,321 @@ var it = Lab.test;
 
 describe('Nipple', function () {
 
-    describe('#parse', function () {
-
-        it('handles errors with a boom response', function (done) {
-
-            var res = new Events.EventEmitter();
-            res.pipe = function () { };
-
-            Nipple.parse(res, function (err) {
-
-                expect(err.isBoom).to.equal(true);
-                done();
-            });
-
-            res.emit('error', new Error('my error'));
-        });
-
-        it('handles responses that close early', function (done) {
-
-            var res = new Events.EventEmitter();
-            res.pipe = function () { };
-
-            Nipple.parse(res, function (err) {
-
-                expect(err.isBoom).to.equal(true);
-                done();
-            });
-
-            res.emit('close');
-        });
-    });
+    var payload = '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789';
 
     describe('#request', function () {
+
+        it('requests a resource with callback', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(payload);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('post', 'http://localhost:' + server.address().port, { payload: payload }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource with stream payload', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('post', 'http://localhost:' + server.address().port, { payload: Nipple.toReadableStream(payload) }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a resource without callback', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(payload);
+                server.close();
+                done();
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {});
+            });
+        });
+
+        it('requests an https resource', function (done) {
+
+            Nipple.request('get', 'https://google.com', { rejectUnauthorized: true }, function (err, res) {
+
+                expect(err).to.not.exist;
+                Nipple.parse(res, function (err, body) {
+
+                    expect(err).to.not.exist;
+                    expect(body.toString()).to.contain('<HTML>');
+                    done();
+                });
+            });
+        });
+
+        it('requests a resource with downstream dependency', function (done) {
+
+            var up = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(payload);
+            });
+
+            up.listen(0, function () {
+
+                var down = Http.createServer(function (req, res1) {
+
+                    res1.writeHead(200, { 'Content-Type': 'text/plain' });
+                    Nipple.request('get', 'http://localhost:' + up.address().port, { downstreamRes: res1 }, function (err, res2) {
+
+                        expect(err).to.not.exist;
+                        res2.pipe(res1);
+                    });
+                });
+
+                down.listen(0, function () {
+
+                    Nipple.request('get', 'http://localhost:' + down.address().port, {}, function (err, res) {
+
+                        expect(err).to.not.exist;
+                        Nipple.parse(res, function (err, body) {
+
+                            expect(err).to.not.exist;
+                            expect(body.toString()).to.equal(payload);
+                            up.close();
+                            down.close();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('doen not follow redirections by default', function (done) {
+
+            var gen = 0;
+            var server = Http.createServer(function (req, res) {
+
+                if (!gen++) {
+                    res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                    res.end();
+                }
+                else {
+                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                    res.end(payload);
+                }
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(res.statusCode).to.equal(301);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('handles redirections', function (done) {
+
+            var gen = 0;
+            var server = Http.createServer(function (req, res) {
+
+                if (!gen++) {
+                    res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                    res.end();
+                }
+                else {
+                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                    res.end(payload);
+                }
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('handles redirections with relative location', function (done) {
+
+            var gen = 0;
+            var server = Http.createServer(function (req, res) {
+
+                if (!gen++) {
+                    res.writeHead(301, { 'Location': '/' });
+                    res.end();
+                }
+                else {
+                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                    res.end(payload);
+                }
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('reaches max redirections count', function (done) {
+
+            var gen = 0;
+            var server = Http.createServer(function (req, res) {
+
+                if (gen++ < 2) {
+                    res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                    res.end();
+                }
+                else {
+                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                    res.end(payload);
+                }
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+
+                    expect(err.message).to.equal('Maximum redirections reached');
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('handles malformed redirection response', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(301);
+                res.end();
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+
+                    expect(err.message).to.equal('Received redirection without location');
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('handles redirections with POST stream payload', function (done) {
+
+            var gen = 0;
+            var server = Http.createServer(function (req, res) {
+
+                if (!gen++) {
+                    res.writeHead(307, { 'Location': '/' });
+                    res.end();
+                }
+                else {
+                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                    Nipple.parse(req, function (err, res2) {
+
+                        res.end(res2);
+                    });
+                }
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Nipple.toReadableStream(payload) }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
 
         it('handles request errors with a boom response', function (done) {
 
@@ -196,6 +479,37 @@ describe('Nipple', function () {
             });
 
             server.listen(0);
+        });
+    });
+
+    describe('#parse', function () {
+
+        it('handles errors with a boom response', function (done) {
+
+            var res = new Events.EventEmitter();
+            res.pipe = function () { };
+
+            Nipple.parse(res, function (err) {
+
+                expect(err.isBoom).to.equal(true);
+                done();
+            });
+
+            res.emit('error', new Error('my error'));
+        });
+
+        it('handles responses that close early', function (done) {
+
+            var res = new Events.EventEmitter();
+            res.pipe = function () { };
+
+            Nipple.parse(res, function (err) {
+
+                expect(err.isBoom).to.equal(true);
+                done();
+            });
+
+            res.emit('close');
         });
     });
 
