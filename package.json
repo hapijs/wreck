@@ -1,0 +1,31 @@
+{
+  "name": "nipple",
+  "description": "HTTP Client Utilities",
+  "version": "0.0.1",
+  "repository": "git://github.com/spumko/nipple",
+  "main": "index",
+  "keywords": [
+    "utilities",
+    "http",
+    "client"
+  ],
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "hoek": "1.x.x",
+    "boom": "1.x.x"
+  },
+  "devDependencies": {
+    "lab": "1.x.x"
+  },
+  "scripts": {
+    "test": "make test-cov"
+  },
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "http://github.com/spumko/nipple/raw/master/LICENSE"
+    }
+  ]
+}
