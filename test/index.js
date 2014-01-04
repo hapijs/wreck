@@ -167,7 +167,7 @@ describe('Nipple', function () {
             });
         });
 
-        it('doen not follow redirections by default', function (done) {
+        it('does not follow redirections by default', function (done) {
 
             var gen = 0;
             var server = Http.createServer(function (req, res) {
@@ -510,6 +510,31 @@ describe('Nipple', function () {
             });
 
             res.emit('close');
+        });
+
+        it('times out when stream read takes too long', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.write(payload);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, { timeout: 100 }, function (err, body) {
+
+                        expect(err).to.exist;
+                        expect(err.output.statusCode).to.equal(408);
+                        expect(body).to.not.exist;
+                        server.close();
+                        done();
+                    });
+                });
+            });
         });
     });
 
