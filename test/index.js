@@ -536,6 +536,32 @@ describe('Nipple', function () {
                 });
             });
         });
+
+        it('errors when stream is too big', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.write(payload);
+                res.end(payload);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.parse(res, { maxBytes: 120 }, function (err, body) {
+
+                        expect(err).to.exist;
+                        expect(err.output.statusCode).to.equal(400);
+                        expect(body).to.not.exist;
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('#parseCacheControl', function () {
