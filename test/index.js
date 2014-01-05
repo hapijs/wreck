@@ -1,8 +1,11 @@
 // Load modules
 
-var Lab = require('lab');
 var Http = require('http');
 var Events = require('events');
+var Path = require('path');
+var Fs = require('fs');
+var Events = require('events');
+var Lab = require('lab');
 var Boom = require('boom');
 var Nipple = require('../');
 
@@ -556,6 +559,68 @@ describe('Nipple', function () {
                         expect(err).to.exist;
                         expect(err.output.statusCode).to.equal(400);
                         expect(body).to.not.exist;
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('reads a file streamed via HTTP', function (done) {
+
+            var path = Path.join(__dirname, '../images/nipple.png');
+            var stats = Fs.statSync(path);
+            var fileStream = Fs.createReadStream(path);
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                fileStream.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(body.length).to.equal(stats.size);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('writes a file streamed via HTTP', function (done) {
+
+            var path = Path.join(__dirname, '../images/nipple.png');
+            var stats = Fs.statSync(path);
+            var fileStream = Fs.createReadStream(path);
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+
+                Nipple.parse(req, function (err, body) {
+
+                    res.end(body);
+                });
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('post', 'http://localhost:' + server.address().port, { payload: fileStream }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+
+                    Nipple.parse(res, function (err, body) {
+
+                        expect(body.length).to.equal(stats.size);
                         server.close();
                         done();
                     });
