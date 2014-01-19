@@ -663,4 +663,112 @@ describe('Nipple', function () {
             done();
         });
     });
+
+    describe('Shortcut', function () {
+
+        it('get request', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.end('ok');
+            });
+
+            server.listen(0, function () {
+
+                Nipple.get('http://localhost:' + server.address().port, function (err, res, payload) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.equal('ok');
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
+    it('post request', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            Nipple.post('http://localhost:' + server.address().port, { payload: '123' }, function (err, res, payload) {
+
+                expect(err).to.not.exist;
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('put request', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            Nipple.put('http://localhost:' + server.address().port, function (err, res, payload) {
+
+                expect(err).to.not.exist;
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('delete request', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            Nipple.delete('http://localhost:' + server.address().port, function (err, res, payload) {
+
+                expect(err).to.not.exist;
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('errors on bad request', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            var port = server.address().port;
+            server.close();
+
+            Nipple.get('http://localhost:' + port, function (err, res, payload) {
+
+                expect(err).to.exist;
+                done();
+            });
+        });
+    });
 });
