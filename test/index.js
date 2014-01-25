@@ -354,7 +354,7 @@ describe('Nipple', function () {
 
                 Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, function (err) {
 
-                    expect(err.data.err.code).to.equal('ECONNRESET');
+                    expect(err.code).to.equal('ECONNRESET');
                     done();
                 });
             });
@@ -374,7 +374,7 @@ describe('Nipple', function () {
 
                 Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, function (err) {
 
-                    expect(err.data.err.code).to.equal('ECONNRESET');
+                    expect(err.code).to.equal('ECONNRESET');
                     done();
                 });
             });
@@ -393,7 +393,7 @@ describe('Nipple', function () {
 
                 Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, function (err) {
 
-                    expect(err.data.err.code).to.equal('ECONNRESET');
+                    expect(err.code).to.equal('ECONNRESET');
                     done();
                 });
             });
