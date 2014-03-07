@@ -484,7 +484,7 @@ describe('Nipple', function () {
             server.listen(0);
         });
 
-        it('allows request with maxSockets greater than 0', function (done) {
+        it('accept agent option without error', function (done) {
 
             var server = Http.createServer(function (req,res) {
 
@@ -492,24 +492,8 @@ describe('Nipple', function () {
             });
 
             server.once('listening', function () {
-                
-                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { maxSockets: 30 });
-                done();
-            });
 
-            server.listen(0);
-        });
-
-        it('allows maxSockets to be less than 0 without error', function (done) {
-
-            var server = Http.createServer(function (req,res) {
-
-                res.end('ok');
-            });
-
-            server.once('listening', function () {
-                
-                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { maxSockets: 'asdf' });
+                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { agent: new Http.Agent() });
                 done();
             });
 
@@ -524,9 +508,11 @@ describe('Nipple', function () {
             });
 
             var maxSockets = 10;
+            var testAgent = new Http.Agent()
+            testAgent.maxSockets = maxSockets;
 
             server.once('listening', function () {
-                
+
                 Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { maxSockets: 'asdf' }, function () {
 
                     expect(maxSockets - Http.globalAgent.maxSockets).to.equal(5)
@@ -534,7 +520,7 @@ describe('Nipple', function () {
                 });
             });
 
-            server.listen(0);           
+            server.listen(0);
         })
     });
 
