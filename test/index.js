@@ -851,7 +851,7 @@ describe('Nipple', function () {
             });
         });
 
-        it('json requested but not received', function (done) {
+        it('json requested but not received - flag is ignored', function (done) {
 
             var server = Http.createServer(function (req, res) {
 
@@ -868,7 +868,9 @@ describe('Nipple', function () {
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
 
-                    expect(err).to.exist;
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
                     server.close();
                     done();
                 });
