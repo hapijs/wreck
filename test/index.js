@@ -484,47 +484,20 @@ describe('Nipple', function () {
             server.listen(0);
         });
 
-        it('accept agent option without error', function (done) {
+        it('uses agent option', function (done) {
 
-            var server = Http.createServer(function (req,res) {
+            var agent = new Http.Agent();
+            expect(Object.keys(agent.sockets).length).to.equal(0);
 
-                res.end('ok');
-            });
+            Nipple.request('get', 'http://localhost/', { agent: agent }, function (err, res) {
 
-            server.once('listening', function () {
-
-                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { agent: new Http.Agent() });
+                expect(Object.keys(agent.sockets).length).to.equal(1);
                 done();
             });
-
-            server.listen(0);
-        })
-
-        it('does not change Http.globalAgent.maxSockets value', function (done) {
-
-            var server = Http.createServer(function (req,res) {
-
-                res.end('ok');
-            });
-
-            var maxSockets = 10;
-            var testAgent = new Http.Agent()
-            testAgent.maxSockets = maxSockets;
-
-            server.once('listening', function () {
-
-                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { maxSockets: 'asdf' }, function () {
-
-                    expect(maxSockets - Http.globalAgent.maxSockets).to.equal(5)
-                    done();
-                });
-            });
-
-            server.listen(0);
         })
     });
 
-    describe('#parse', function () {
+    describe('#read', function () {
 
         it('handles errors with a boom response', function (done) {
 
@@ -634,6 +607,40 @@ describe('Nipple', function () {
             });
         });
 
+        it('reads a multiple buffers response', function (done) {
+
+            var path = Path.join(__dirname, '../images/nipple.png');
+            var stats = Fs.statSync(path);
+            var file = Fs.readFileSync(path);
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.write(file);
+                setTimeout(function () {
+
+                    res.write(file);
+                    res.end();
+                }, 100);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+
+                    Nipple.read(res, function (err, body) {
+
+                        expect(body.length).to.equal(stats.size * 2);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
         it('writes a file streamed via HTTP', function (done) {
 
             var path = Path.join(__dirname, '../images/nipple.png');
@@ -690,7 +697,7 @@ describe('Nipple', function () {
 
         it('errors on invalid header', function (done) {
 
-            var header = Nipple.parseCacheControl('must-revalidate, max-age =3600');
+            var header = Nipple.parseCacheControl('must-revalidate, b =3600');
             expect(header).to.not.exist;
             done();
         });
