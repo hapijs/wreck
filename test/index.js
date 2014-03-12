@@ -836,7 +836,7 @@ describe('Nipple', function () {
 
                 var port = server.address().port;
                 var options = {
-                        parseJSON: true
+                        json: true
                     };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
@@ -863,7 +863,7 @@ describe('Nipple', function () {
 
                 var port = server.address().port;
                 var options = {
-                        parseJSON: true
+                        json: true
                     };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
@@ -889,7 +889,7 @@ describe('Nipple', function () {
 
                 var port = server.address().port;
                 var options = {
-                        parseJSON: true
+                        json: true
                     };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
@@ -917,7 +917,7 @@ describe('Nipple', function () {
 
                 var port = server.address().port;
                 var options = {
-                        parseJSON: false
+                        json: false
                     };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
