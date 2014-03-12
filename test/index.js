@@ -483,6 +483,45 @@ describe('Nipple', function () {
 
             server.listen(0);
         });
+
+        it('accept agent option without error', function (done) {
+
+            var server = Http.createServer(function (req,res) {
+
+                res.end('ok');
+            });
+
+            server.once('listening', function () {
+
+                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { agent: new Http.Agent() });
+                done();
+            });
+
+            server.listen(0);
+        })
+
+        it('does not change Http.globalAgent.maxSockets value', function (done) {
+
+            var server = Http.createServer(function (req,res) {
+
+                res.end('ok');
+            });
+
+            var maxSockets = 10;
+            var testAgent = new Http.Agent()
+            testAgent.maxSockets = maxSockets;
+
+            server.once('listening', function () {
+
+                Nipple.request('get', 'http://127.0.0.1:' + server.address().port, { maxSockets: 'asdf' }, function () {
+
+                    expect(maxSockets - Http.globalAgent.maxSockets).to.equal(5)
+                    done();
+                });
+            });
+
+            server.listen(0);
+        })
     });
 
     describe('#parse', function () {

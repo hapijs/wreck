@@ -33,6 +33,7 @@ var options = {
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
+    maxSockets: 10 //Defaults to Http(s) Global Agent Setting
 };
 
 var optionalCallback = function (err, res) {
