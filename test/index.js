@@ -817,4 +817,120 @@ describe('Nipple', function () {
             });
         });
     });
+
+    describe('json', function () {
+
+        it('json requested and received', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, {
+                    'Content-Type': 'application/json'
+                });
+                res.end(JSON.stringify({
+                    foo: 'bar'
+                }));
+            });
+
+            server.listen(0, function () {
+
+                var port = server.address().port;
+                var options = {
+                        json: true
+                    };
+
+                Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    expect(payload.foo).to.exist;
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('json requested but not received - flag is ignored', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.end('ok');
+            });
+
+            server.listen(0, function () {
+
+                var port = server.address().port;
+                var options = {
+                        json: true
+                    };
+
+                Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('invalid json received', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, {
+                    'Content-Type': 'application/json'
+                });
+                res.end('ok');
+            });
+
+            server.listen(0, function () {
+
+                var port = server.address().port;
+                var options = {
+                        json: true
+                    };
+
+                Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                    expect(err).to.exist;
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('json not requested but received as string', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, {
+                    'Content-Type': 'application/json'
+                });
+                res.end(JSON.stringify({
+                    foo: 'bar'
+                }));
+            });
+
+            server.listen(0, function () {
+
+                var port = server.address().port;
+                var options = {
+                        json: false
+                    };
+
+                Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
 });
