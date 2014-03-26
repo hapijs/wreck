@@ -5,6 +5,7 @@ var Events = require('events');
 var Path = require('path');
 var Fs = require('fs');
 var Events = require('events');
+var Stream = require('stream');
 var Lab = require('lab');
 var Boom = require('boom');
 var Nipple = require('../');
@@ -557,10 +558,7 @@ describe('Nipple', function () {
 
             server.listen(0, function () {
 
-                Nipple.request('post', 'http://localhost:' + server.address().port,
-                    {   headers:{"connection":'close'},
-                        payload: null},
-                    function (err, res) {
+                Nipple.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null }, function (err, res) {
 
                     expect(err).to.not.exist;
                     Nipple.read(res, function (err, body) {
@@ -577,27 +575,25 @@ describe('Nipple', function () {
         it('handles read timeout', function (done) {
 
             var server = Http.createServer(function (req, res) {
-                var seconds = 2;
-                setTimeout( function() {
+
+                setTimeout(function () {
+
                     reply(request.payload).code(200);
                     res.statusCode = 200;
                     res.end();
-                }, seconds * 1000);
+                }, 2000);
             });
 
             server.listen(0, function () {
 
-                Nipple.request('get', 'http://localhost:' + server.address().port,
-                    { timeout: 100 },
-                    function (err, res) {
+                Nipple.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, function (err, res) {
 
-                        expect(err).to.exist;
-                        expect(err.output.statusCode).to.equal(504);
-                        done();
-                    });
+                    expect(err).to.exist;
+                    expect(err.output.statusCode).to.equal(504);
+                    done();
+                });
             });
         });
-
     });
 
     describe('#read', function () {
@@ -938,20 +934,16 @@ describe('Nipple', function () {
 
             var server = Http.createServer(function (req, res) {
 
-                res.writeHead(200, {
-                    'Content-Type': 'application/json'
-                });
-                res.end(JSON.stringify({
-                    foo: 'bar'
-                }));
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ foo: 'bar' }));
             });
 
             server.listen(0, function () {
 
                 var port = server.address().port;
                 var options = {
-                        json: true
-                    };
+                    json: true
+                };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
 
@@ -977,8 +969,8 @@ describe('Nipple', function () {
 
                 var port = server.address().port;
                 var options = {
-                        json: true
-                    };
+                    json: true
+                };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
 
@@ -995,9 +987,7 @@ describe('Nipple', function () {
 
             var server = Http.createServer(function (req, res) {
 
-                res.writeHead(200, {
-                    'Content-Type': 'application/json'
-                });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end('ok');
             });
 
@@ -1005,8 +995,8 @@ describe('Nipple', function () {
 
                 var port = server.address().port;
                 var options = {
-                        json: true
-                    };
+                    json: true
+                };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
 
@@ -1021,20 +1011,16 @@ describe('Nipple', function () {
 
             var server = Http.createServer(function (req, res) {
 
-                res.writeHead(200, {
-                    'Content-Type': 'application/json'
-                });
-                res.end(JSON.stringify({
-                    foo: 'bar'
-                }));
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ foo: 'bar' }));
             });
 
             server.listen(0, function () {
 
                 var port = server.address().port;
                 var options = {
-                        json: false
-                    };
+                    json: false
+                };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
 
@@ -1049,17 +1035,18 @@ describe('Nipple', function () {
     });
 
     describe('#toReadableStream', function () {
-        var Stream = require('stream');
 
         it('handle empty payload', function (done) {
-            var stream = Nipple.toReadableStream(/* empty */);
+
+            var stream = Nipple.toReadableStream();
             expect(stream instanceof Stream).to.be.true;
-            var read = stream.read();   // make sure read has no problems
+            var read = stream.read();                           // Make sure read has no problems
             expect(read).to.be.null;
             done();
         });
 
         it('handle explicit encoding', function (done) {
+
             var data = 'Hello';
             var buf = new Buffer(data, 'ascii');
             var stream = Nipple.toReadableStream(data, 'ascii');
@@ -1068,6 +1055,5 @@ describe('Nipple', function () {
             expect(read.toString()).to.equal(data);
             done();
         });
-
     });
 });
