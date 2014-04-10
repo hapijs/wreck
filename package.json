@@ -13,7 +13,7 @@
     "node": ">=0.10.22"
   },
   "dependencies": {
-    "hoek": "1.x.x",
+    "hoek": "2.x.x",
     "boom": "2.x.x"
   },
   "devDependencies": {
