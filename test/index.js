@@ -495,6 +495,109 @@ describe('Nipple', function () {
                 done();
             });
         })
+
+        it('requests payload in buffer', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                var buf = new Buffer(payload, 'ascii');
+
+                Nipple.request('post', 'http://localhost:' + server.address().port, {payload: buf}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.read(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests head method', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                req.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                var buf = new Buffer(payload, 'ascii');
+
+                Nipple.request('head', 'http://localhost:' + server.address().port, {payload: null}, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.read(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal('');
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('post null payload', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+                res.statusCode = 500;
+                res.end();
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('post', 'http://localhost:' + server.address().port,
+                    {   headers:{"connection":'close'},
+                        payload: null},
+                    function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.read(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal('');
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('handles read timeout', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+                var seconds = 2;
+                setTimeout( function() {
+                    reply(request.payload).code(200);
+                    res.statusCode = 200;
+                    res.end();
+                }, seconds * 1000);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('get', 'http://localhost:' + server.address().port,
+                    { timeout: 100 },
+                    function (err, res) {
+
+                        expect(err).to.exist;
+                        expect(err.output.statusCode).to.equal(504);
+                        done();
+                    });
+            });
+        });
+
     });
 
     describe('#read', function () {
@@ -673,6 +776,17 @@ describe('Nipple', function () {
                 });
             });
         });
+
+        it('handles responses with no headers', function (done) {
+
+            var res = Nipple.toReadableStream(payload);
+            Nipple.read(res, {json:true}, function (err) {
+
+                expect(err).to.equal(null);
+                done();
+            });
+        });
+
     });
 
     describe('#parseCacheControl', function () {
@@ -932,5 +1046,28 @@ describe('Nipple', function () {
                 });
             });
         });
+    });
+
+    describe('#toReadableStream', function () {
+        var Stream = require('stream');
+
+        it('handle empty payload', function (done) {
+            var stream = Nipple.toReadableStream(/* empty */);
+            expect(stream instanceof Stream).to.be.true;
+            var read = stream.read();   // make sure read has no problems
+            expect(read).to.be.null;
+            done();
+        });
+
+        it('handle explicit encoding', function (done) {
+            var data = 'Hello';
+            var buf = new Buffer(data, 'ascii');
+            var stream = Nipple.toReadableStream(data, 'ascii');
+            expect(stream instanceof Stream).to.be.true;
+            var read = stream.read();
+            expect(read.toString()).to.equal(data);
+            done();
+        });
+
     });
 });

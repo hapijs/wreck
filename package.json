@@ -17,7 +17,7 @@
     "boom": "2.x.x"
   },
   "devDependencies": {
-    "lab": "1.x.x"
+    "lab": "3.x.x"
   },
   "scripts": {
     "test": "make test-cov"
