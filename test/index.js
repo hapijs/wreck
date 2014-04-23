@@ -27,7 +27,7 @@ var it = Lab.test;
 
 describe('Nipple', function () {
 
-    var payload = '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789';
+    var payload = new Array(1640).join('0123456789'); // make sure we have a payload larger than 16384 bytes for chunking coverage
 
     describe('#request', function () {
 
