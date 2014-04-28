@@ -509,7 +509,7 @@ describe('Nipple', function () {
 
                 var buf = new Buffer(payload, 'ascii');
 
-                Nipple.request('post', 'http://localhost:' + server.address().port, {payload: buf}, function (err, res) {
+                Nipple.request('post', 'http://localhost:' + server.address().port, { payload: buf }, function (err, res) {
 
                     expect(err).to.not.exist;
                     Nipple.read(res, function (err, body) {
@@ -535,7 +535,7 @@ describe('Nipple', function () {
 
                 var buf = new Buffer(payload, 'ascii');
 
-                Nipple.request('head', 'http://localhost:' + server.address().port, {payload: null}, function (err, res) {
+                Nipple.request('head', 'http://localhost:' + server.address().port, { payload: null }, function (err, res) {
 
                     expect(err).to.not.exist;
                     Nipple.read(res, function (err, body) {
@@ -605,13 +605,14 @@ describe('Nipple', function () {
                 res.write('foo');
 
                 complete = complete || function () {
+
                     res.end();
                 };
             });
 
             server.listen(0, function () {
 
-                var agent = new Http.Agent({maxSockets: 1});
+                var agent = new Http.Agent({ maxSockets: 1 });
                 expect(Object.keys(agent.sockets).length).to.equal(0);
 
                 Nipple.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 10 }, function (err, res) {
@@ -630,9 +631,9 @@ describe('Nipple', function () {
 
                         complete();
 
-                        Nipple.read(res, function() {
+                        Nipple.read(res, function () {
 
-                            setTimeout(function() {
+                            setTimeout(function () {
 
                                 expect(Object.keys(agent.sockets).length).to.equal(0);
                                 expect(Object.keys(agent.requests).length).to.equal(0);
@@ -826,7 +827,7 @@ describe('Nipple', function () {
         it('handles responses with no headers', function (done) {
 
             var res = Nipple.toReadableStream(payload);
-            Nipple.read(res, {json:true}, function (err) {
+            Nipple.read(res, { json: true }, function (err) {
 
                 expect(err).to.equal(null);
                 done();
