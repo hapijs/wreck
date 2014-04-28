@@ -495,7 +495,7 @@ describe('Nipple', function () {
                 expect(Object.keys(agent.sockets).length).to.equal(1);
                 done();
             });
-        })
+        });
 
         it('requests payload in buffer', function (done) {
 
@@ -578,8 +578,8 @@ describe('Nipple', function () {
 
                 setTimeout(function () {
 
-                    reply(request.payload).code(200);
-                    res.statusCode = 200;
+                    res.writeHead(200);
+                    res.write(payload);
                     res.end();
                 }, 2000);
             });
@@ -591,6 +591,56 @@ describe('Nipple', function () {
                     expect(err).to.exist;
                     expect(err.output.statusCode).to.equal(504);
                     done();
+                });
+            });
+        });
+
+        it('cleans socket on agent deferred read timeout', function (done) {
+
+            var complete;
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.write('foo');
+
+                complete = complete || function () {
+                    res.end();
+                };
+            });
+
+            server.listen(0, function () {
+
+                var agent = new Http.Agent({maxSockets: 1});
+                expect(Object.keys(agent.sockets).length).to.equal(0);
+
+                Nipple.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 10 }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    expect(Object.keys(agent.sockets).length).to.equal(1);
+                    expect(Object.keys(agent.requests).length).to.equal(0);
+
+                    Nipple.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 10 }, function (err, innerRes) {
+
+                        expect(err).to.exist;
+                        expect(err.output.statusCode).to.equal(504);
+
+                        expect(Object.keys(agent.sockets).length).to.equal(1);
+                        expect(Object.keys(agent.requests).length).to.equal(1);
+
+                        complete();
+
+                        Nipple.read(res, function() {
+
+                            setTimeout(function() {
+
+                                expect(Object.keys(agent.sockets).length).to.equal(0);
+                                expect(Object.keys(agent.requests).length).to.equal(0);
+
+                                done();
+                            }, 100);
+                        });
+                    });
                 });
             });
         });
