@@ -27,7 +27,7 @@ var it = Lab.test;
 
 describe('Nipple', function () {
 
-    var payload = '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789';
+    var payload = new Array(1640).join('0123456789'); // make sure we have a payload larger than 16384 bytes for chunking coverage
 
     describe('#request', function () {
 
@@ -1104,6 +1104,26 @@ describe('Nipple', function () {
             expect(stream instanceof Stream).to.be.true;
             var read = stream.read();
             expect(read.toString()).to.equal(data);
+            done();
+        });
+
+        it('chunks to requested size', function (done) {
+            var buf;
+            var data = new Array(101).join('0123456789');
+            var stream = Nipple.toReadableStream(data);
+
+            buf = stream.read(100);
+            expect(buf.length).to.equal(100);
+
+            buf = stream.read(400);
+            expect(buf.length).to.equal(400);
+
+            buf = stream.read();
+            expect(buf.length).to.equal(500);
+
+            buf = stream.read();
+            expect(buf).to.equal(null);
+
             done();
         });
     });
