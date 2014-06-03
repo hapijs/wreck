@@ -59,6 +59,7 @@ describe('Nipple', function () {
 
             var server = Http.createServer(function (req, res) {
 
+                expect(req.headers['content-length']).to.equal('16390');
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 req.pipe(res);
             });
@@ -66,6 +67,30 @@ describe('Nipple', function () {
             server.listen(0, function () {
 
                 Nipple.request('post', 'http://localhost:' + server.address().port, { payload: payload }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.read(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource with headers', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                Nipple.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'nipple' }, payload: payload }, function (err, res) {
 
                     expect(err).to.not.exist;
                     Nipple.read(res, function (err, body) {
@@ -615,13 +640,13 @@ describe('Nipple', function () {
                 var agent = new Http.Agent({ maxSockets: 1 });
                 expect(Object.keys(agent.sockets).length).to.equal(0);
 
-                Nipple.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 10 }, function (err, res) {
+                Nipple.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
 
                     expect(err).to.not.exist;
                     expect(Object.keys(agent.sockets).length).to.equal(1);
                     expect(Object.keys(agent.requests).length).to.equal(0);
 
-                    Nipple.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 10 }, function (err, innerRes) {
+                    Nipple.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, function (err, innerRes) {
 
                         expect(err).to.exist;
                         expect(err.output.statusCode).to.equal(504);
