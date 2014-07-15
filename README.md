@@ -46,14 +46,3 @@ var optionalCallback = function (err, res) {
 
 Nipple.request(method, uri, options, optionalCallback);
 ```
-
-### Stream Dependencies
-```javascript
-var Nipple = require('nipple');
-
-Nipple.get('http://google.com', { downstreamRes: dependentStream }, function (err, res) {
-
-    expect(err).to.not.exist;
-    res.pipe(dependentStream);
-});
-```
