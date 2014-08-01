@@ -32,7 +32,7 @@ var options = {
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
-    agent: null // Http.Agent
+    agent: null         // Node Core http.Agent
 };
 
 var optionalCallback = function (err, res) {
