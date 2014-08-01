@@ -18,7 +18,6 @@ Nipple.get('https://google.com/', function (err, res, payload) {
 ### Advanced
 ```javascript
 var Nipple = require('nipple');
-var Http   = require('http');
 
 var method = 'GET'; // GET, POST, PUT, DELETE
 var uri    = 'https://google.com/';
