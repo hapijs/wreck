@@ -1,9 +1,9 @@
-<a href="https://github.com/spumko"><img src="https://raw.github.com/spumko/spumko/master/images/from.png" align="right" /></a>
-![nipple Logo](https://raw.github.com/spumko/nipple/master/images/nipple.png)
+<a href="https://github.com/hapijs"><img src="https://raw.github.com/hapijs/spumko/master/images/from.png" align="right" /></a>
+![nipple Logo](https://raw.github.com/hapijs/nipple/master/images/nipple.png)
 
 HTTP Client Utilities
 
-[![Build Status](https://secure.travis-ci.org/spumko/nipple.png)](http://travis-ci.org/spumko/nipple)
+[![Build Status](https://secure.travis-ci.org/hapijs/nipple.png)](http://travis-ci.org/hapijs/nipple)
 
 Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
 

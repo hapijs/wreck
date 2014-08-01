@@ -2,7 +2,7 @@
   "name": "nipple",
   "description": "HTTP Client Utilities",
   "version": "2.5.3",
-  "repository": "git://github.com/spumko/nipple",
+  "repository": "git://github.com/hapijs/nipple",
   "main": "index",
   "keywords": [
     "utilities",
@@ -25,7 +25,7 @@
   "licenses": [
     {
       "type": "BSD",
-      "url": "http://github.com/spumko/nipple/raw/master/LICENSE"
+      "url": "http://github.com/hapijs/nipple/raw/master/LICENSE"
     }
   ]
 }
