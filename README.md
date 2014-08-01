@@ -5,6 +5,8 @@ HTTP Client Utilities
 
 [![Build Status](https://secure.travis-ci.org/spumko/nipple.png)](http://travis-ci.org/spumko/nipple)
 
+Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
+
 ## Usage
 ### Basic
 ```javascript
