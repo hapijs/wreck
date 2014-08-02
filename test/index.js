@@ -80,6 +80,32 @@ describe('Nipple', function () {
             });
         });
 
+        it('requests a POST resource with unicode characters in payload', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                expect(req.headers['content-length']).to.equal('14');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(0, function () {
+
+                var unicodePayload = JSON.stringify({ field: 'ć' });
+                Nipple.request('post', 'http://localhost:' + server.address().port, { payload: unicodePayload }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    Nipple.read(res, function (err, body) {
+
+                        expect(err).to.not.exist;
+                        expect(body.toString()).to.equal(unicodePayload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
         it('requests a POST resource with headers', function (done) {
 
             var server = Http.createServer(function (req, res) {
