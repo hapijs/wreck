@@ -4,7 +4,7 @@ HTTP Client Utilities
 
 [![Build Status](https://secure.travis-ci.org/hapijs/nipple.png)](http://travis-ci.org/hapijs/nipple)
 
-Lead Maintainer: [Eran Hammer](https://github.com/hueniverse)
+Lead Maintainer: [Wyatt Preul](https://github.com/wpreul)
 
 ## Usage
 ### Basic
