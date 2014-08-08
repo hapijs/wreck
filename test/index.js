@@ -1,13 +1,11 @@
 // Load modules
 
 var Http = require('http');
-var Events = require('events');
 var Path = require('path');
 var Fs = require('fs');
 var Events = require('events');
 var Stream = require('stream');
 var Lab = require('lab');
-var Boom = require('boom');
 var Nipple = require('../');
 
 
@@ -18,11 +16,12 @@ var internals = {};
 
 // Test shortcuts
 
+var lab = exports.lab = Lab.script();
+var before = lab.before;
+var after = lab.after;
+var describe = lab.describe;
+var it = lab.it;
 var expect = Lab.expect;
-var before = Lab.before;
-var after = Lab.after;
-var describe = Lab.experiment;
-var it = Lab.test;
 
 
 describe('Nipple', function () {
