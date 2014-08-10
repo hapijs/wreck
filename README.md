@@ -81,7 +81,7 @@ Initiate an HTTP request.
 
 ### `get(uri, [options], callback)`
 
-Convenience method for DELETE operations.
+Convenience method for GET operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
@@ -93,7 +93,7 @@ Convenience method for DELETE operations.
 
 ### `post(uri, [options], callback)`
 
-Convenience method for DELETE operations.
+Convenience method for POST operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
@@ -105,7 +105,7 @@ Convenience method for DELETE operations.
 
 ### `put(uri, [options], callback)`
 
-Convenience method for DELETE operations.
+Convenience method for PUT operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
