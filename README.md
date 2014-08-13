@@ -48,12 +48,14 @@ Nipple.request(method, uri, options, optionalCallback);
 ```
 
 
-### `request(method, uri, [options], [callback])`
+### `request(method, uri, [options, [callback]])`
 
 Initiate an HTTP request.
 - `method` - A string specifying the HTTP request method, defaulting to 'GET'.
 - `uri` - The URI of the requested resource.
-- `options` - An optional configuration object with the following optional keys:
+- `options` - An optional configuration object. To omit this argument but still
+  use callback pass `null` for this argument. The object supports the following
+  optional keys:
     - `payload` - The request body as string, Buffer, or Readable Stream.
     - `headers` - An object containing request headers.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
@@ -61,7 +63,7 @@ Initiate an HTTP request.
     - `redirects` - The maximum number of redirects to follow.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
     - `timeout` - The number of milliseconds to wait without receiving a response
-    before aborting the request. Defaults to unlimited.
+      before aborting the request. Defaults to unlimited.
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
