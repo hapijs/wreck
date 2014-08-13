@@ -54,8 +54,8 @@ Initiate an HTTP request.
 - `method` - A string specifying the HTTP request method, defaulting to 'GET'.
 - `uri` - The URI of the requested resource.
 - `options` - An optional configuration object. To omit this argument but still
-  use callback pass `null` for this argument. The object supports the following
-  optional keys:
+  use a callback, pass `null` in this position. The options object supports the
+  following optional keys:
     - `payload` - The request body as string, Buffer, or Readable Stream.
     - `headers` - An object containing request headers.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
