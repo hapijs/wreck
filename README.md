@@ -34,7 +34,7 @@ var options = {
     rejectUnauthorized: true || false,
     downstreamRes: null,
     agent: null,         // Node Core http.Agent
-    auth: {username: 'foo', password: 'bar'}
+    auth: { username: 'foo', password: 'bar' }
 };
 
 var optionalCallback = function (err, res) {
