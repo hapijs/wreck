@@ -33,7 +33,8 @@ var options = {
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
-    agent: null         // Node Core http.Agent
+    agent: null,         // Node Core http.Agent
+    auth: { username: 'foo', password: 'bar' }
 };
 
 var optionalCallback = function (err, res) {
@@ -62,6 +63,7 @@ Initiate an HTTP request.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
     - `timeout` - The number of milliseconds to wait without receiving a response
     before aborting the request. Defaults to unlimited.
+    - `auth` - Username and password for HTTP basic access authentication
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
