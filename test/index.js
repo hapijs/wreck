@@ -1182,25 +1182,21 @@ describe('Nipple', function () {
 
         it('should support http basic access authentication', function (done) {
 
-            var auth = {username: 'joe', password: '1234'};
+            var auth = { username: 'joe', password: '1234' };
             var basicAuth = 'Basic ' +
-                new Buffer(auth.username + ':' + auth.password).
-                toString('base64');
+                            new Buffer(auth.username + ':' + auth.password).toString('base64');
 
             var server = Http.createServer(function (req, res) {
 
                 res.writeHead(200);
                 res.end('ok');
-
                 expect(req.headers).to.have.property('authorization', basicAuth);
             });
 
             server.listen(0, function () {
 
                 var port = server.address().port;
-                var options = {
-                    auth: auth
-                };
+                var options = { auth: auth };
 
                 Nipple.get('http://localhost:' + port, options, function (err, res, payload) {
 
