@@ -39,7 +39,7 @@ var options = {
 var optionalCallback = function (err, res) {
 
     // buffer the response stream
-    Nipple.read(res, function (err, body) {
+    Nipple.read(res, null, function (err, body) {
         /* do stuff */
     });
 };
@@ -69,9 +69,9 @@ Initiate an HTTP request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
 
-### `read(response, [options], callback)`
+### `read(response, options, callback)`
 - `response` - An HTTP Incoming Message object.
-- `options` - An optional configuration object with the following optional keys:
+- `options` -  A configuration object, can be null or an object with the following optional keys:
     - `timeout` - The number of milliseconds to wait while reading data before
     aborting handling of the response. Defaults to unlimited.
     - `json` - A flag indicating whether the payload should be parsed as JSON
