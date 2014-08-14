@@ -1,7 +1,7 @@
 {
   "name": "nipple",
   "description": "HTTP Client Utilities",
-  "version": "2.5.5",
+  "version": "3.0.0",
   "repository": "git://github.com/hapijs/nipple",
   "main": "index",
   "keywords": [
