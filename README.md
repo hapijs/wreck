@@ -1,28 +1,28 @@
-![nipple Logo](https://raw.github.com/hapijs/nipple/master/images/nipple.png)
+#wreck
 
 HTTP Client Utilities
 
-[![Build Status](https://secure.travis-ci.org/hapijs/nipple.png)](http://travis-ci.org/hapijs/nipple)
+[![Build Status](https://secure.travis-ci.org/hapijs/wreck.png)](http://travis-ci.org/hapijs/wreck)
 
 Lead Maintainer: [Wyatt Preul](https://github.com/wpreul)
 
 ## Usage
 ### Basic
 ```javascript
-var Nipple = require('nipple');
+var Wreck = require('wreck');
 
-Nipple.get('https://google.com/', function (err, res, payload) {
+Wreck.get('https://google.com/', function (err, res, payload) {
     /* do stuff */
 });
 ```
 
 ### Advanced
 ```javascript
-var Nipple = require('nipple');
+var Wreck = require('wreck');
 
 var method = 'GET'; // GET, POST, PUT, DELETE
 var uri    = 'https://google.com/';
-var readableStream = Nipple.toReadableStream('foo=bar');
+var readableStream = Wreck.toReadableStream('foo=bar');
 
 // all attributes are optional
 var options = {
@@ -39,12 +39,12 @@ var options = {
 var optionalCallback = function (err, res) {
 
     // buffer the response stream
-    Nipple.read(res, function (err, body) {
+    Wreck.read(res, function (err, body) {
         /* do stuff */
     });
 };
 
-Nipple.request(method, uri, options, optionalCallback);
+Wreck.request(method, uri, options, optionalCallback);
 ```
 
 
@@ -138,7 +138,7 @@ for the provided payload and encoding.
 - `encoding` - The encoding to use. Must be a valid Buffer encoding, such as 'utf8' or 'ascii'.
 
 ```javascript
-var stream = Nipple.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
+var stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
 var read = stream.read();
 // read -> 'Hello'
 ```

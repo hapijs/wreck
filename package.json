@@ -1,8 +1,8 @@
 {
-  "name": "nipple",
+  "name": "wreck",
   "description": "HTTP Client Utilities",
-  "version": "2.5.5",
-  "repository": "git://github.com/hapijs/nipple",
+  "version": "3.0.1",
+  "repository": "git://github.com/hapijs/wreck",
   "main": "index",
   "keywords": [
     "utilities",
@@ -25,7 +25,7 @@
   "licenses": [
     {
       "type": "BSD",
-      "url": "http://github.com/hapijs/nipple/raw/master/LICENSE"
+      "url": "http://github.com/hapijs/wreck/raw/master/LICENSE"
     }
   ]
 }
