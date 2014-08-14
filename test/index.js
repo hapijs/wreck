@@ -43,7 +43,7 @@ describe('Nipple', function () {
                 Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -68,7 +68,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { payload: payload }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -94,7 +94,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { payload: unicodePayload }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(unicodePayload);
@@ -118,7 +118,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'nipple' }, payload: payload }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -142,7 +142,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { payload: Nipple.toReadableStream(payload) }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -174,7 +174,7 @@ describe('Nipple', function () {
             Nipple.request('get', 'https://google.com', { rejectUnauthorized: true }, function (err, res) {
 
                 expect(err).to.not.exist;
-                Nipple.read(res, function (err, body) {
+                Nipple.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist;
                     expect(body.toString()).to.contain('<HTML>');
@@ -208,7 +208,7 @@ describe('Nipple', function () {
                     Nipple.request('get', 'http://localhost:' + down.address().port, {}, function (err, res) {
 
                         expect(err).to.not.exist;
-                        Nipple.read(res, function (err, body) {
+                        Nipple.read(res, null, function (err, body) {
 
                             expect(err).to.not.exist;
                             expect(body.toString()).to.equal(payload);
@@ -241,7 +241,7 @@ describe('Nipple', function () {
                 Nipple.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(res.statusCode).to.equal(301);
@@ -272,7 +272,7 @@ describe('Nipple', function () {
                 Nipple.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -303,7 +303,7 @@ describe('Nipple', function () {
                 Nipple.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -370,7 +370,7 @@ describe('Nipple', function () {
                 }
                 else {
                     res.writeHead(200, { 'Content-Type': 'text/plain' });
-                    Nipple.read(req, function (err, res2) {
+                    Nipple.read(req, null, function (err, res2) {
 
                         res.end(res2);
                     });
@@ -382,7 +382,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Nipple.toReadableStream(payload) }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -562,7 +562,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { payload: buf }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal(payload);
@@ -588,7 +588,7 @@ describe('Nipple', function () {
                 Nipple.request('head', 'http://localhost:' + server.address().port, { payload: null }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal('');
@@ -611,7 +611,7 @@ describe('Nipple', function () {
                 Nipple.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null }, function (err, res) {
 
                     expect(err).to.not.exist;
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist;
                         expect(body.toString()).to.equal('');
@@ -681,7 +681,7 @@ describe('Nipple', function () {
 
                         complete();
 
-                        Nipple.read(res, function () {
+                        Nipple.read(res, null, function () {
 
                             setTimeout(function () {
 
@@ -704,7 +704,7 @@ describe('Nipple', function () {
             var res = new Events.EventEmitter();
             res.pipe = function () { };
 
-            Nipple.read(res, function (err) {
+            Nipple.read(res, null, function (err) {
 
                 expect(err.isBoom).to.equal(true);
                 done();
@@ -718,7 +718,7 @@ describe('Nipple', function () {
             var res = new Events.EventEmitter();
             res.pipe = function () { };
 
-            Nipple.read(res, function (err) {
+            Nipple.read(res, null, function (err) {
 
                 expect(err.isBoom).to.equal(true);
                 done();
@@ -797,7 +797,7 @@ describe('Nipple', function () {
                     expect(err).to.not.exist;
                     expect(res.statusCode).to.equal(200);
 
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(body.length).to.equal(stats.size);
                         server.close();
@@ -831,7 +831,7 @@ describe('Nipple', function () {
                     expect(err).to.not.exist;
                     expect(res.statusCode).to.equal(200);
 
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(body.length).to.equal(stats.size * 2);
                         server.close();
@@ -851,7 +851,7 @@ describe('Nipple', function () {
 
                 res.writeHead(200);
 
-                Nipple.read(req, function (err, body) {
+                Nipple.read(req, null, function (err, body) {
 
                     res.end(body);
                 });
@@ -864,7 +864,7 @@ describe('Nipple', function () {
                     expect(err).to.not.exist;
                     expect(res.statusCode).to.equal(200);
 
-                    Nipple.read(res, function (err, body) {
+                    Nipple.read(res, null, function (err, body) {
 
                         expect(body.length).to.equal(stats.size);
                         server.close();
