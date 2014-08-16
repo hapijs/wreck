@@ -1,4 +1,4 @@
-#wreck
+![wreck Logo](https://raw.github.com/hapijs/wreck/master/images/wreck.png)
 
 HTTP Client Utilities
 
