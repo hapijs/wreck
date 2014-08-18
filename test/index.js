@@ -933,7 +933,7 @@ describe('Wreck', function () {
 
             server.listen(0, function () {
 
-                Wreck.get('http://localhost:' + server.address().port, function (err, res, payload) {
+                Wreck.get('http://localhost:' + server.address().port, null, function (err, res, payload) {
 
                     expect(err).to.not.exist;
                     expect(res.statusCode).to.equal(200);
@@ -975,7 +975,7 @@ describe('Wreck', function () {
 
             server.listen(0, function () {
 
-                Wreck.put('http://localhost:' + server.address().port, function (err, res, payload) {
+                Wreck.put('http://localhost:' + server.address().port, null, function (err, res, payload) {
 
                     expect(err).to.not.exist;
                     expect(res.statusCode).to.equal(200);
@@ -996,7 +996,7 @@ describe('Wreck', function () {
 
             server.listen(0, function () {
 
-                Wreck.delete('http://localhost:' + server.address().port, function (err, res, payload) {
+                Wreck.delete('http://localhost:' + server.address().port, null, function (err, res, payload) {
 
                     expect(err).to.not.exist;
                     expect(res.statusCode).to.equal(200);
@@ -1020,7 +1020,7 @@ describe('Wreck', function () {
                 var port = server.address().port;
                 server.close();
 
-                Wreck.get('http://localhost:' + port, function (err, res, payload) {
+                Wreck.get('http://localhost:' + port, null, function (err, res, payload) {
 
                     expect(err).to.exist;
                     done();

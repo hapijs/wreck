@@ -48,7 +48,7 @@ Wreck.request(method, uri, options, optionalCallback);
 ```
 
 
-### `request(method, uri, [options, [callback]])`
+### `request(method, uri, options, [callback])`
 
 Initiate an HTTP request.
 - `method` - A string specifying the HTTP request method, defaulting to 'GET'.
@@ -81,48 +81,48 @@ Initiate an HTTP request.
     - `err` - Any error that may have occurred while reading the response.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-### `get(uri, [options], callback)`
+### `get(uri, options, callback)`
 
 Convenience method for GET operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
-  `read` operations.
+  `read` operations.  To omit this argument but still use a callback, pass `null` in this position.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-### `post(uri, [options], callback)`
+### `post(uri, options, callback)`
 
 Convenience method for POST operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
-  `read` operations.
+  `read` operations.  To omit this argument but still use a callback, pass `null` in this position.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-### `put(uri, [options], callback)`
+### `put(uri, options, callback)`
 
 Convenience method for PUT operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
-  `read` operations.
+  `read` operations.  To omit this argument but still use a callback, pass `null` in this position.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-### `delete(uri, [options], callback)`
+### `delete(uri, options, callback)`
 
 Convenience method for DELETE operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
-  `read` operations.
+  `read` operations.  To omit this argument but still use a callback, pass `null` in this position.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
