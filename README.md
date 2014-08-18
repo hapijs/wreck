@@ -48,7 +48,7 @@ Wreck.request(method, uri, options, optionalCallback);
 ```
 
 
-### `request(method, uri, [options, [callback]])`
+### `request(method, uri, options, [callback])`
 
 Initiate an HTTP request.
 - `method` - A string specifying the HTTP request method, defaulting to 'GET'.
