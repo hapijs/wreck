@@ -151,7 +151,7 @@ or "no-cache" will be set to the boolean `true`.
 - `field` - The header cache control value to be parsed.
 
 ```javascript
-var  result = Nipple.parseCacheControl('private, max-age=0, no-cache');
+var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 // result.private -> true
 // result['max-age'] -> 0
 // result['no-cache'] -> true
