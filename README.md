@@ -38,6 +38,8 @@ var options = {
 
 var optionalCallback = function (err, res) {
 
+    /* handle err if it exists, in which case res will be undefined */
+    
     // buffer the response stream
     Wreck.read(res, null, function (err, body) {
         /* do stuff */
