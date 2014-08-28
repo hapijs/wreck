@@ -769,53 +769,6 @@ describe('Wreck', function () {
             });
         });
 
-        it('setting agent to false disables pooling', function (done) {
-
-            var complete;
-
-            var server = Http.createServer(function (req, res) {
-
-                res.writeHead(200);
-                res.write('foo');
-
-                complete = complete || function () {
-
-                    res.end();
-                };
-            });
-
-            server.listen(0, function () {
-
-                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, function (err, res) {
-
-                    expect(err).to.not.exist;
-                    expect(Object.keys(Http.globalAgent.sockets).length).to.equal(0);
-                    expect(Object.keys(Http.globalAgent.requests).length).to.equal(0);
-
-                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 }, function (err, innerRes) {
-
-                        expect(err).to.not.exist;
-
-                        expect(Object.keys(Http.globalAgent.sockets).length).to.equal(0);
-                        expect(Object.keys(Http.globalAgent.requests).length).to.equal(0);
-
-                        complete();
-
-                        Wreck.read(res, null, function () {
-
-                            setTimeout(function () {
-
-                                expect(Object.keys(Http.globalAgent.sockets).length).to.equal(0);
-                                expect(Object.keys(Http.globalAgent.requests).length).to.equal(0);
-
-                                done();
-                            }, 100);
-                        });
-                    });
-                });
-            });
-        });
-
         it('passing maxSockets overrides the agents default count', function (done) {
 
             var complete;
