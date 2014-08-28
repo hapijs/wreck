@@ -665,13 +665,13 @@ describe('Wreck', function () {
                 var agent = new Http.Agent({ maxSockets: 1 });
                 expect(Object.keys(agent.sockets).length).to.equal(0);
 
-                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
+                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, maxSockets: false, timeout: 15 }, function (err, res) {
 
                     expect(err).to.not.exist;
                     expect(Object.keys(agent.sockets).length).to.equal(1);
                     expect(Object.keys(agent.requests).length).to.equal(0);
 
-                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, function (err, innerRes) {
+                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, maxSockets: false, timeout: 15 }, function (err, innerRes) {
 
                         expect(err).to.exist;
                         expect(err.output.statusCode).to.equal(504);

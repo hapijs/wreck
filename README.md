@@ -66,7 +66,7 @@ Initiate an HTTP request.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
-    - `maxSockets` - The maximum number of [sockets to share](http://nodejs.org/api/http.html#http_agent_maxsockets) on the agent. Defaults to `Infinity`.  Please note that the `maxSockets` for the global agent will be changed to `Infinity` when using the default settings.
+    - `maxSockets` - The maximum number of [sockets to share](http://nodejs.org/api/http.html#http_agent_maxsockets) on the agent. `false` means to use the node.js default value.  Defaults to `Infinity`.
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
