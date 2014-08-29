@@ -665,13 +665,13 @@ describe('Wreck', function () {
                 var agent = new Http.Agent({ maxSockets: 1 });
                 expect(Object.keys(agent.sockets).length).to.equal(0);
 
-                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
+                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, maxSockets: false, timeout: 15 }, function (err, res) {
 
                     expect(err).to.not.exist;
                     expect(Object.keys(agent.sockets).length).to.equal(1);
                     expect(Object.keys(agent.requests).length).to.equal(0);
 
-                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, function (err, innerRes) {
+                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, maxSockets: false, timeout: 15 }, function (err, innerRes) {
 
                         expect(err).to.exist;
                         expect(err.output.statusCode).to.equal(504);
@@ -690,6 +690,67 @@ describe('Wreck', function () {
 
                                 done();
                             }, 100);
+                        });
+                    });
+                });
+            });
+        });
+
+        it('defaults maxSockets to Infinity', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.write(payload);
+                res.end();
+            });
+
+            server.listen(0, function () {
+
+                Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    expect(res.statusCode).to.equal(200);
+                    expect(Wreck.agents.http.maxSockets).to.equal(Infinity);
+                    done();
+                });
+            });
+        });
+
+        it('maxSockets on default agents can be changed', function (done) {
+
+            var complete;
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.write('foo');
+
+                complete = complete || function () {
+
+                    res.end();
+                };
+            });
+
+            server.listen(0, function () {
+
+                Wreck.agents.http.maxSockets = 1;
+
+                Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 }, function (err, res) {
+
+                    expect(err).to.not.exist;
+
+                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 }, function (err, innerRes) {
+
+                        expect(err).to.exist;
+                        expect(err.output.statusCode).to.equal(504);
+
+                        complete();
+
+                        Wreck.read(res, null, function () {
+
+                            Wreck.agents.http.maxSockets = Infinity;
+                            done();
                         });
                     });
                 });
