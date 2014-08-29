@@ -63,10 +63,9 @@ Initiate an HTTP request.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
       whether the client should reject a response from a server with invalid certificates.
     - `redirects` - The maximum number of redirects to follow.
-    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
+    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).  Defaults to either `wreck.agents.http` or `wreck.agents.https`.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
-    - `maxSockets` - The maximum number of [sockets to share](http://nodejs.org/api/http.html#http_agent_maxsockets) on the agent. `false` means to use the node.js default value.  Defaults to `Infinity`.
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
@@ -159,3 +158,15 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 // result['max-age'] -> 0
 // result['no-cache'] -> true
 ```
+
+### `agents`
+
+Object that contains the default `http` and `https` agents to use when making requests.  Both agents have `maxSockets`
+configured to `Infinity`.  Both agents are instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
+ and expose the standard properties.  For example, the following code demonstrates changing `maxSockets` on the `http` agent.
+
+ ```js
+ var Wreck = require('wreck');
+
+ Wreck.agents.http.maxSockets = 20;
+ ```
