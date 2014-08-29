@@ -63,7 +63,8 @@ Initiate an HTTP request.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
       whether the client should reject a response from a server with invalid certificates.
     - `redirects` - The maximum number of redirects to follow.
-    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).  Defaults to either `wreck.agents.http` or `wreck.agents.https`.
+    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
+      Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
 - `callback` - The optional callback function using the signature `function (err, response)` where:

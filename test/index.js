@@ -547,6 +547,55 @@ describe('Wreck', function () {
             });
         });
 
+        it('pooling can be disable by setting agent to false', function (done) {
+
+            var complete;
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.write('foo');
+
+                complete = complete || function () {
+
+                    res.end();
+                };
+            });
+
+            server.listen(0, function () {
+
+                expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
+
+                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, function (err, res) {
+
+                    expect(err).to.not.exist;
+                    expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
+                    expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
+
+                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 }, function (err, innerRes) {
+
+                        expect(err).to.not.exist;
+
+                        expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
+                        expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
+
+                        complete();
+
+                        Wreck.read(res, null, function () {
+
+                            setTimeout(function () {
+
+                                expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
+                                expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
+
+                                done();
+                            }, 100);
+                        });
+                    });
+                });
+            });
+        });
+
         it('requests payload in buffer', function (done) {
 
             var server = Http.createServer(function (req, res) {
@@ -665,13 +714,13 @@ describe('Wreck', function () {
                 var agent = new Http.Agent({ maxSockets: 1 });
                 expect(Object.keys(agent.sockets).length).to.equal(0);
 
-                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, maxSockets: false, timeout: 15 }, function (err, res) {
+                Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
 
                     expect(err).to.not.exist;
                     expect(Object.keys(agent.sockets).length).to.equal(1);
                     expect(Object.keys(agent.requests).length).to.equal(0);
 
-                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, maxSockets: false, timeout: 15 }, function (err, innerRes) {
+                    Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, function (err, innerRes) {
 
                         expect(err).to.exist;
                         expect(err.output.statusCode).to.equal(504);
