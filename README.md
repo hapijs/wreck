@@ -61,8 +61,8 @@ Initiate an HTTP request.
     - `payload` - The request body as string, Buffer, or Readable Stream.
     - `headers` - An object containing request headers.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
-      whether the client should reject a response from a server with invalid certificates.  This causes the `agent`
-      option to be silently ignored as using `rejectUnauthorized` creates a new `https` `Agent`.
+      whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
+      same time as the `agent` option is set to an `Agent` object.
     - `redirects` - The maximum number of redirects to follow.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
       Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.

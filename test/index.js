@@ -170,6 +170,28 @@ describe('Wreck', function () {
             });
         });
 
+        it('cannot set agent and rejectUnauthorized at the same time', function (done) {
+
+            var fn = function () {
+
+                Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, function (err, res) {});
+            };
+
+            expect(fn).to.throw();
+            done();
+        });
+
+        it('can set a false agent and rejectUnauthorized at the same time', function (done) {
+
+            var fn = function () {
+
+                Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, function (err, res) {});
+            };
+
+            expect(fn).to.not.throw();
+            done();
+        });
+
         it('requests an https resource', function (done) {
 
             Wreck.request('get', 'https://google.com', { rejectUnauthorized: true }, function (err, res) {
@@ -598,7 +620,7 @@ describe('Wreck', function () {
             });
         });
 
-        it('pooling can be disable by setting agent to false', function (done) {
+        it('pooling can be disabled by setting agent to false', function (done) {
 
             var complete;
 
@@ -615,7 +637,6 @@ describe('Wreck', function () {
 
             server.listen(0, function () {
 
-                expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
 
                 Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, function (err, res) {
 
