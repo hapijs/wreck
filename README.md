@@ -61,7 +61,8 @@ Initiate an HTTP request.
     - `payload` - The request body as string, Buffer, or Readable Stream.
     - `headers` - An object containing request headers.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
-      whether the client should reject a response from a server with invalid certificates.
+      whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
+      same time as the `agent` option is set.
     - `redirects` - The maximum number of redirects to follow.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
       Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
@@ -162,9 +163,12 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 ### `agents`
 
-Object that contains the default `http` and `https` agents to use when making requests.  Both agents have `maxSockets`
-configured to `Infinity`.  Both agents are instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
- and expose the standard properties.  For example, the following code demonstrates changing `maxSockets` on the `http` agent.
+Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
+`httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
+configured to `Infinity`.  They are each instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
+and expose the standard properties.
+
+For example, the following code demonstrates changing `maxSockets` on the `http` agent.
 
  ```js
  var Wreck = require('wreck');
