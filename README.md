@@ -46,7 +46,7 @@ var optionalCallback = function (err, res) {
     });
 };
 
-Wreck.request(method, uri, options, optionalCallback);
+var req = Wreck.request(method, uri, options, optionalCallback);
 ```
 
 
@@ -72,6 +72,9 @@ Initiate an HTTP request.
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
+
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
 
 ### `read(response, options, callback)`
 - `response` - An HTTP Incoming Message object.

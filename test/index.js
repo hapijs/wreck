@@ -619,6 +619,48 @@ describe('Wreck', function () {
             server.listen(0);
         });
 
+        it('requests can be aborted', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.end();
+            });
+
+            server.listen(0, function () {
+
+                var req = Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err) {
+
+                    expect(err).to.exist;
+                    expect(err.code).to.equal('ECONNRESET');
+                    done();
+                });
+
+                req.abort();
+            });
+        });
+
+        it('request shortcuts can be aborted', function (done) {
+
+            var server = Http.createServer(function (req, res) {
+
+                res.writeHead(200);
+                res.end();
+            });
+
+            server.listen(0, function () {
+
+                var req = Wreck.get('http://localhost:' + server.address().port, function (err) {
+
+                    expect(err).to.exist;
+                    expect(err.code).to.equal('ECONNRESET');
+                    done();
+                });
+
+                req.abort();
+            });
+        });
+
         it('uses agent option', function (done) {
 
             var agent = new Http.Agent();
