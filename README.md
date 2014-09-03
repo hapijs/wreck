@@ -88,6 +88,7 @@ Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.ht
     - `err` - Any error that may have occurred while reading the response.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
+
 ### `get(uri, [options], callback)`
 
 Convenience method for GET operations.
@@ -99,6 +100,9 @@ Convenience method for GET operations.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
 
 ### `post(uri, [options], callback)`
 
@@ -112,6 +116,9 @@ Convenience method for POST operations.
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
+
 ### `put(uri, [options], callback)`
 
 Convenience method for PUT operations.
@@ -124,6 +131,9 @@ Convenience method for PUT operations.
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
+
 ### `delete(uri, [options], callback)`
 
 Convenience method for DELETE operations.
@@ -135,6 +145,8 @@ Convenience method for DELETE operations.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
 
 
 ### `toReadableStream(payload, [encoding])`
