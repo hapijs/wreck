@@ -46,7 +46,7 @@ var optionalCallback = function (err, res) {
     });
 };
 
-Wreck.request(method, uri, options, optionalCallback);
+var req = Wreck.request(method, uri, options, optionalCallback);
 ```
 
 
@@ -73,6 +73,9 @@ Initiate an HTTP request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
 
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
+
 ### `read(response, options, callback)`
 - `response` - An HTTP Incoming Message object.
 - `options` - `null` or a configuration object with the following optional keys:
@@ -84,6 +87,7 @@ Initiate an HTTP request.
 - `callback` - The callback function using the signature `function (err, payload)` where:
     - `err` - Any error that may have occurred while reading the response.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+
 
 ### `get(uri, [options], callback)`
 
@@ -97,6 +101,9 @@ Convenience method for GET operations.
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
+
 ### `post(uri, [options], callback)`
 
 Convenience method for POST operations.
@@ -108,6 +115,9 @@ Convenience method for POST operations.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
 
 ### `put(uri, [options], callback)`
 
@@ -121,6 +131,9 @@ Convenience method for PUT operations.
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+
+
 ### `delete(uri, [options], callback)`
 
 Convenience method for DELETE operations.
@@ -132,6 +145,8 @@ Convenience method for DELETE operations.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+
+Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
 
 
 ### `toReadableStream(payload, [encoding])`
