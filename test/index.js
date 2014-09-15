@@ -223,6 +223,7 @@ describe('Wreck', function () {
 
                 expect(err).to.not.exist;
                 Wreck.read(res, null, function (err, body) {
+                    
                     expect(err).to.not.exist;
                     expect(body.toString()).to.contain('<HTML>');
                     done();
@@ -943,8 +944,6 @@ describe('Wreck', function () {
                 });
             });
         });
-
-        
     });
 
     describe('#read', function () {
