@@ -33,7 +33,7 @@ var options = {
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
-    agent: null         // Node Core http.Agent
+    agent: null,         // Node Core http.Agent
     secureProtocol: 'SSLv3_method' // The SSL method to use
 };
 
