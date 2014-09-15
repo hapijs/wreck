@@ -217,6 +217,19 @@ describe('Wreck', function () {
             });
         });
 
+        it('requests an https resource with secure protocol set', function (done) {
+
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv3_method' }, function (err, res) {
+
+                expect(err).to.not.exist;
+                Wreck.read(res, null, function (err, body) {
+                    expect(err).to.not.exist;
+                    expect(body.toString()).to.contain('<HTML>');
+                    done();
+                });
+            });
+        });
+
         it('fails when an https resource has invalid certs and the default rejectUnauthorized', function (done) {
 
             var httpsOptions = {
@@ -930,6 +943,8 @@ describe('Wreck', function () {
                 });
             });
         });
+
+        
     });
 
     describe('#read', function () {

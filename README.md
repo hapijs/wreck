@@ -34,6 +34,7 @@ var options = {
     rejectUnauthorized: true || false,
     downstreamRes: null,
     agent: null         // Node Core http.Agent
+    secureProtocol: 'SSLv3_method' // The SSL method to use
 };
 
 var optionalCallback = function (err, res) {
@@ -68,6 +69,7 @@ Initiate an HTTP request.
       Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
+    - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method` to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).  
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
