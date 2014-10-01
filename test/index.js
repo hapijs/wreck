@@ -700,19 +700,18 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
+            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false }, function (err, res) {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, function (err, res) {
+                var agentKey = 'localhost:' + server.address().port;
 
                 expect(err).to.not.exist;
-                expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
-                expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
+                expect(Wreck.agents.http.sockets[agentKey]).to.not.exist;
 
-                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 }, function (err, innerRes) {
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false }, function (err, innerRes) {
 
                     expect(err).to.not.exist;
 
-                    expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
-                    expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
+                    expect(Wreck.agents.http.sockets[agentKey]).to.not.exist;
 
                     complete();
 
@@ -720,8 +719,7 @@ describe('request()', function () {
 
                         setTimeout(function () {
 
-                            expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
-                            expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
+                            expect(Wreck.agents.http.sockets[agentKey]).to.not.exist;
 
                             done();
                         }, 100);
@@ -849,7 +847,7 @@ describe('request()', function () {
             var agent = new Http.Agent({ maxSockets: 1 });
             expect(Object.keys(agent.sockets).length).to.equal(0);
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent }, function (err, res) {
 
                 expect(err).to.not.exist;
                 expect(Object.keys(agent.sockets).length).to.equal(1);
@@ -903,33 +901,25 @@ describe('request()', function () {
 
     it('maxSockets on default agents can be changed', function (done) {
 
-        var complete;
-
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200);
             res.write('foo');
-
-            complete = complete || function () {
-
-                res.end();
-            };
+            res.end();
         });
 
         server.listen(0, function () {
 
             Wreck.agents.http.maxSockets = 1;
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 50 }, function (err, res) {
 
                 expect(err).to.not.exist;
 
-                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 }, function (err, innerRes) {
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 60 }, function (err, innerRes) {
 
                     expect(err).to.exist;
                     expect(err.output.statusCode).to.equal(504);
-
-                    complete();
 
                     Wreck.read(res, null, function () {
 

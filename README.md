@@ -67,6 +67,7 @@ Initiate an HTTP request.
     - `redirects` - The maximum number of redirects to follow.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
       Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
+      Please note that the default agent used by *wreck* uses keep-alive pooling.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
     - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method`
