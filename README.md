@@ -195,3 +195,8 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 
  Wreck.agents.http.maxSockets = 20;
  ```
+
+
+## Acknowledgements
+
+*wreck* [agent]() code adapted from [keep-alive-agent](https://github.com/ceejbot/keep-alive-agent).
