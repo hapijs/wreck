@@ -223,6 +223,29 @@ describe('Http()', function () {
         expect(agent._idleSockets['localhost:0:/local'].length).to.equal(0);
         done();
     });
+
+    it('maxFreeSockets setting is honored', function (done) {
+
+        var existingAgent = Http.Agent;
+        Http.Agent = function (options) {
+
+            existingAgent.call(this, options);
+            this.keepAlive = undefined;
+        };
+        Hoek.inherits(Http.Agent, existingAgent);
+
+        var agent = new Agent.Http({ maxFreeSockets: 1 });
+        Http.Agent = existingAgent;
+
+        var req = new Http.ClientRequest({ agent: agent });
+        req.on('error', function () {});
+        agent.emit('free', req, 'localhost', '0', '/local');
+        agent.emit('free', req, 'localhost', '0', '/local');
+        agent.emit('free', req, 'localhost', '0', '/local');
+
+        expect(agent._idleSockets['localhost:0:/local'].length).to.equal(1);
+        done();
+    });
 });
 
 

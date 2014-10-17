@@ -33,7 +33,7 @@ var options = {
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
-    agent: null,         // Node Core http.Agent
+    agent: null,         // Wreck custom agent
     secureProtocol: 'SSLv3_method' // The SSL method to use
 };
 
@@ -186,9 +186,11 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
 `httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
 configured to `Infinity`.  They are each instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
-and expose the standard properties.
+and expose the standard properties.  Agents are also configured for pooling keep-alive connections.  By default, each agent
+will allow up to 256 idle sockets per origin.  This can be changed on the `Wreck.agents.http.options.maxFreeSockets` property,
+or `https` and `httpsAllowUnauthorized` agents.
 
-For example, the following code demonstrates changing `maxSockets` on the `http` agent.
+The following code demonstrates changing `maxSockets` on the `http` agent.
 
  ```js
  var Wreck = require('wreck');
