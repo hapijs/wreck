@@ -198,6 +198,10 @@ The following code demonstrates changing `maxSockets` on the `http` agent.
  Wreck.agents.http.maxSockets = 20;
  ```
 
+The following options are available for *wreck* agents:
+- `maxFreeSockets` - The max number of sockets to keep in idle array per origin.  Defaults to 256.
+- `freeSocketsTimeout` - The timeout (ms) for idle sockets in the idle array before destroying.  Defaults to 2 minutes.
+
 
 ## Acknowledgements
 

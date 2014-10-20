@@ -246,6 +246,70 @@ describe('Http()', function () {
         expect(agent._idleSockets['localhost:0:/local'].length).to.equal(1);
         done();
     });
+
+    it('freeSocketsTimeout setting is honored when set', function (done) {
+
+        var existingAgent = Http.Agent;
+        Http.Agent = function (options) {
+
+            existingAgent.call(this, options);
+            this.keepAlive = undefined;
+        };
+        Hoek.inherits(Http.Agent, existingAgent);
+
+        var agent = new Agent.Http({ freeSocketsTimeout: 1 });
+        Http.Agent = existingAgent;
+
+        var server = Http.createServer(function (req, res) {}, 0);
+
+        server.listen(function () {
+
+            var port = server.address().port;
+            var req = new Http.ClientRequest({ agent: agent, port: port });
+            req.on('error', function () {});
+            agent.emit('free', req, 'localhost', port);
+            var socket = req.agent.sockets['localhost:' + port][0];
+            expect(socket.destroyed).to.equal(false);
+
+            setTimeout(function () {
+
+                expect(socket.destroyed).to.equal(true);
+                done();
+            }, 10);
+        });
+    });
+
+    it('won\'t destroy a socket when freeSocketsTimeout is 0', function (done) {
+
+        var existingAgent = Http.Agent;
+        Http.Agent = function (options) {
+
+            existingAgent.call(this, options);
+            this.keepAlive = undefined;
+        };
+        Hoek.inherits(Http.Agent, existingAgent);
+
+        var agent = new Agent.Http({ freeSocketsTimeout: 0 });
+        Http.Agent = existingAgent;
+
+        var server = Http.createServer(function (req, res) {}, 0);
+
+        server.listen(function () {
+
+            var port = server.address().port;
+            var req = new Http.ClientRequest({ agent: agent, port: port });
+            req.on('error', function () {});
+            agent.emit('free', req, 'localhost', port);
+            var socket = req.agent.sockets['localhost:' + port][0];
+            expect(socket.destroyed).to.equal(false);
+
+            setTimeout(function () {
+
+                expect(socket.destroyed).to.equal(false);
+                done();
+            }, 10);
+        });
+    });
 });
 
 
