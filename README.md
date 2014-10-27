@@ -33,7 +33,7 @@ var options = {
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
-    agent: null,         // Node Core http.Agent
+    agent: null,         // Wreck custom agent
     secureProtocol: 'SSLv3_method' // The SSL method to use
 };
 
@@ -67,6 +67,7 @@ Initiate an HTTP request.
     - `redirects` - The maximum number of redirects to follow.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
       Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
+      Please note that the default agent used by *wreck* uses keep-alive pooling.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
     - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method`
@@ -185,12 +186,23 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
 `httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
 configured to `Infinity`.  They are each instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
-and expose the standard properties.
+and expose the standard properties.  Agents are also configured for pooling keep-alive connections.  By default, each agent
+will allow up to 256 idle sockets per origin.  This can be changed on the `Wreck.agents.http.options.maxFreeSockets` property,
+or `https` and `httpsAllowUnauthorized` agents.
 
-For example, the following code demonstrates changing `maxSockets` on the `http` agent.
+The following code demonstrates changing `maxSockets` on the `http` agent.
 
  ```js
  var Wreck = require('wreck');
 
  Wreck.agents.http.maxSockets = 20;
  ```
+
+The following options are available for *wreck* agents:
+- `maxFreeSockets` - The max number of sockets to keep in idle array per origin.  Defaults to 256.
+- `freeSocketsTimeout` - The timeout (ms) for idle sockets in the idle array before destroying.  Defaults to 2 minutes.
+
+
+## Acknowledgements
+
+*wreck* [agent](/lib/agent.js) code adapted from [keep-alive-agent](https://github.com/ceejbot/keep-alive-agent).
