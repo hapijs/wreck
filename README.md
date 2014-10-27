@@ -205,4 +205,4 @@ The following options are available for *wreck* agents:
 
 ## Acknowledgements
 
-*wreck* [agent]() code adapted from [keep-alive-agent](https://github.com/ceejbot/keep-alive-agent).
+*wreck* [agent](/lib/agent.js) code adapted from [keep-alive-agent](https://github.com/ceejbot/keep-alive-agent).
