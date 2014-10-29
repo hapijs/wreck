@@ -6,13 +6,9 @@ var Path = require('path');
 var Fs = require('fs');
 var Events = require('events');
 var Stream = require('stream');
+var Code = require('code');
 var Lab = require('lab');
 var Wreck = require('../');
-
-
-// Declare internals
-
-var internals = {};
 
 
 // Test shortcuts
@@ -20,7 +16,7 @@ var internals = {};
 var lab = exports.lab = Lab.script();
 var describe = lab.describe;
 var it = lab.it;
-var expect = Lab.expect;
+var expect = Code.expect;
 
 
 var payload = new Array(1640).join('0123456789'); // make sure we have a payload larger than 16384 bytes for chunking coverage
@@ -39,10 +35,10 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -64,10 +60,10 @@ describe('request()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: payload }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -90,10 +86,10 @@ describe('request()', function () {
             var unicodePayload = JSON.stringify({ field: 'ć' });
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: unicodePayload }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(unicodePayload);
                     server.close();
                     done();
@@ -114,10 +110,10 @@ describe('request()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'wreck' }, payload: payload }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -138,10 +134,10 @@ describe('request()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: Wreck.toReadableStream(payload) }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -203,10 +199,10 @@ describe('request()', function () {
 
         Wreck.request('get', 'https://google.com', { rejectUnauthorized: true }, function (err, res) {
 
-            expect(err).to.not.exist;
+            expect(err).to.not.exist();
             Wreck.read(res, null, function (err, body) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(body.toString()).to.contain('<HTML>');
                 done();
             });
@@ -217,10 +213,10 @@ describe('request()', function () {
 
         Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv3_method' }, function (err, res) {
 
-            expect(err).to.not.exist;
+            expect(err).to.not.exist();
             Wreck.read(res, null, function (err, body) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(body.toString()).to.contain('<HTML>');
                 done();
             });
@@ -242,11 +238,11 @@ describe('request()', function () {
 
         server.listen(0, function (err) {
 
-            expect(err).to.not.exist;
+            expect(err).to.not.exist();
 
             Wreck.request('get', 'https://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 done();
             });
         });
@@ -267,11 +263,11 @@ describe('request()', function () {
 
         server.listen(0, function (err) {
 
-            expect(err).to.not.exist;
+            expect(err).to.not.exist();
 
             Wreck.request('get', 'https://localhost:' + server.address().port, { rejectUnauthorized: false }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 done();
             });
         });
@@ -292,7 +288,7 @@ describe('request()', function () {
                 res1.writeHead(200, { 'Content-Type': 'text/plain' });
                 Wreck.request('get', 'http://localhost:' + up.address().port, { downstreamRes: res1 }, function (err, res2) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     res2.pipe(res1);
                 });
             });
@@ -301,10 +297,10 @@ describe('request()', function () {
 
                 Wreck.request('get', 'http://localhost:' + down.address().port, {}, function (err, res) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     Wreck.read(res, null, function (err, body) {
 
-                        expect(err).to.not.exist;
+                        expect(err).to.not.exist();
                         expect(body.toString()).to.equal(payload);
                         up.close();
                         down.close();
@@ -334,10 +330,10 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(res.statusCode).to.equal(301);
                     server.close();
                     done();
@@ -365,10 +361,10 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -396,10 +392,10 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -475,10 +471,10 @@ describe('request()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Wreck.toReadableStream(payload) }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -550,7 +546,7 @@ describe('request()', function () {
 
         Wreck.request('get', 'http://127.0.0.1:10', { payload: '' }, function (err) {
 
-            expect(err).to.exist;
+            expect(err).to.exist();
             done();
         });
     });
@@ -574,7 +570,7 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '', timeout: 5 }, function (err) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 server.close();
 
                 setTimeout(done, 5);
@@ -603,7 +599,7 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '', timeout: 5 }, function (err) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 server.close();
 
                 setTimeout(done, 5);
@@ -641,7 +637,7 @@ describe('request()', function () {
 
             var req = Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 expect(err.code).to.equal('ECONNRESET');
                 done();
             });
@@ -662,7 +658,7 @@ describe('request()', function () {
 
             var req = Wreck.get('http://localhost:' + server.address().port, function (err) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 expect(err.code).to.equal('ECONNRESET');
                 done();
             });
@@ -703,13 +699,13 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
                 expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
 
                 Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 }, function (err, innerRes) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
 
                     expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
                     expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
@@ -745,10 +741,10 @@ describe('request()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
@@ -771,10 +767,10 @@ describe('request()', function () {
 
             Wreck.request('head', 'http://localhost:' + server.address().port, { payload: null }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal('');
                     server.close();
                     done();
@@ -794,10 +790,10 @@ describe('request()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     expect(body.toString()).to.equal('');
                     server.close();
                     done();
@@ -822,7 +818,7 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, function (err, res) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 expect(err.output.statusCode).to.equal(504);
                 done();
             });
@@ -851,13 +847,13 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(Object.keys(agent.sockets).length).to.equal(1);
                 expect(Object.keys(agent.requests).length).to.equal(0);
 
                 Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, function (err, innerRes) {
 
-                    expect(err).to.exist;
+                    expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(504);
 
                     expect(Object.keys(agent.sockets).length).to.equal(1);
@@ -893,7 +889,7 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(Wreck.agents.http.maxSockets).to.equal(Infinity);
                 done();
@@ -922,11 +918,11 @@ describe('request()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
 
                 Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 }, function (err, innerRes) {
 
-                    expect(err).to.exist;
+                    expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(504);
 
                     complete();
@@ -984,12 +980,12 @@ describe('read()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, { timeout: 100 }, function (err, body) {
 
-                    expect(err).to.exist;
+                    expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(408);
-                    expect(body).to.not.exist;
+                    expect(body).to.not.exist();
                     server.close();
                     done();
                 });
@@ -1010,12 +1006,12 @@ describe('read()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 Wreck.read(res, { maxBytes: 120 }, function (err, body) {
 
-                    expect(err).to.exist;
+                    expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(400);
-                    expect(body).to.not.exist;
+                    expect(body).to.not.exist();
                     server.close();
                     done();
                 });
@@ -1039,7 +1035,7 @@ describe('read()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
 
                 Wreck.read(res, null, function (err, body) {
@@ -1073,7 +1069,7 @@ describe('read()', function () {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
 
                 Wreck.read(res, null, function (err, body) {
@@ -1106,7 +1102,7 @@ describe('read()', function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: fileStream }, function (err, res) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
 
                 Wreck.read(res, null, function (err, body) {
@@ -1136,7 +1132,7 @@ describe('parseCacheControl()', function () {
     it('parses valid header', function (done) {
 
         var header = Wreck.parseCacheControl('must-revalidate, max-age=3600');
-        expect(header).to.exist;
+        expect(header).to.exist();
         expect(header['must-revalidate']).to.equal(true);
         expect(header['max-age']).to.equal(3600);
         done();
@@ -1145,7 +1141,7 @@ describe('parseCacheControl()', function () {
     it('parses valid header with quoted string', function (done) {
 
         var header = Wreck.parseCacheControl('must-revalidate, max-age="3600"');
-        expect(header).to.exist;
+        expect(header).to.exist();
         expect(header['must-revalidate']).to.equal(true);
         expect(header['max-age']).to.equal(3600);
         done();
@@ -1154,14 +1150,14 @@ describe('parseCacheControl()', function () {
     it('errors on invalid header', function (done) {
 
         var header = Wreck.parseCacheControl('must-revalidate, b =3600');
-        expect(header).to.not.exist;
+        expect(header).to.not.exist();
         done();
     });
 
     it('errors on invalid max-age', function (done) {
 
         var header = Wreck.parseCacheControl('must-revalidate, max-age=a3600');
-        expect(header).to.not.exist;
+        expect(header).to.not.exist();
         done();
     });
 });
@@ -1180,7 +1176,7 @@ describe('Shortcut', function () {
 
             Wreck.get('http://localhost:' + server.address().port, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.equal('ok');
                 server.close();
@@ -1201,7 +1197,7 @@ describe('Shortcut', function () {
 
             Wreck.post('http://localhost:' + server.address().port, { payload: '123' }, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.equal('ok');
                 server.close();
@@ -1222,7 +1218,7 @@ describe('Shortcut', function () {
 
             Wreck.put('http://localhost:' + server.address().port, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.equal('ok');
                 server.close();
@@ -1243,7 +1239,7 @@ describe('Shortcut', function () {
 
             Wreck.delete('http://localhost:' + server.address().port, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.equal('ok');
                 server.close();
@@ -1267,7 +1263,7 @@ describe('Shortcut', function () {
 
             Wreck.get('http://localhost:' + port, function (err, res, payload) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 done();
             });
         });
@@ -1293,10 +1289,10 @@ describe('json', function () {
 
             Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.not.equal(null);
-                expect(payload.foo).to.exist;
+                expect(payload.foo).to.exist();
                 server.close();
                 done();
             });
@@ -1320,7 +1316,7 @@ describe('json', function () {
 
             Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.not.equal(null);
                 server.close();
@@ -1346,7 +1342,7 @@ describe('json', function () {
 
             Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
 
-                expect(err).to.exist;
+                expect(err).to.exist();
                 server.close();
                 done();
             });
@@ -1370,7 +1366,7 @@ describe('json', function () {
 
             Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.not.equal(null);
                 server.close();
