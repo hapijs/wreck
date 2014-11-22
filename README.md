@@ -85,8 +85,7 @@ Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.ht
 - `options` - `null` or a configuration object with the following optional keys:
     - `timeout` - The number of milliseconds to wait while reading data before
     aborting handling of the response. Defaults to unlimited.
-    - `json` - A boolean indicating whether the payload should be parsed as JSON
-    if the response indicates a JSON content-type. Setting to 'force' will parse payload despite content-type.
+    - `json` - If true, the payload will be parsed as JSON as long as the resonse headers indicate a JSON content-type. If set to 'force' the payload will always be parsed as JSON.
     - `maxBytes` - The maximum allowed response payload size. Defaults to unlimited.
 - `callback` - The callback function using the signature `function (err, payload)` where:
     - `err` - Any error that may have occurred while reading the response.
