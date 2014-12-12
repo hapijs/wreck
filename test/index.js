@@ -1374,6 +1374,32 @@ describe('json', function () {
             });
         });
     });
+
+    it('should not be parsed on empty buffer', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(204, { 'Content-Type': 'application/json' });
+            res.end();
+        });
+
+        server.listen(0, function () {
+
+            var port = server.address().port;
+            var options = {
+                json: true
+            };
+
+            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(204);
+                expect(payload).to.equal(null);
+                server.close();
+                done();
+            });
+        });
+    });
 });
 
 describe('toReadableStream()', function () {
@@ -1418,4 +1444,3 @@ describe('toReadableStream()', function () {
         done();
     });
 });
-
