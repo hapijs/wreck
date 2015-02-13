@@ -1387,7 +1387,7 @@ describe('json', function () {
 
             var port = server.address().port;
             var options = {
-                json: true
+                json: 'SMART'
             };
 
             Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
@@ -1395,6 +1395,59 @@ describe('json', function () {
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(204);
                 expect(payload).to.equal(null);
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('will try to parse json in "force" mode, regardless of the header', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(JSON.stringify({ foo: 'bar' }));
+        });
+
+        server.listen(0, function () {
+
+            var port = server.address().port;
+            var options = {
+                json: 'force'
+            };
+
+            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.not.equal(null);
+                expect(payload).to.deep.equal({
+                    foo: 'bar'
+                });
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('will error on invalid json received in "force" mode', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            var port = server.address().port;
+            var options = {
+                json: 'force'
+            };
+
+            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                expect(err).to.exist();
                 server.close();
                 done();
             });
