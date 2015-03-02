@@ -47,6 +47,106 @@ describe('request()', function () {
         });
     });
 
+    it('requests a resource with console debugging enabled', function (done) {
+
+        var consoleOut;
+        var currentStdout = process.stdout.write;
+        process.stdout.write = function (data) {
+
+            consoleOut = data;
+        };
+
+        process.env.WRECK_DEBUG_CONSOLE = true;
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(payload);
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+
+                expect(err).to.not.exist();
+
+                Wreck.read(res, null, function (err, body) {
+
+                    expect(err).to.not.exist();
+                    process.stdout.write = currentStdout;
+                    var jsonOut = JSON.parse(consoleOut);
+                    expect(jsonOut.response.payload).to.equal(payload);
+                    server.close();
+                    delete process.env.WRECK_DEBUG_CONSOLE;
+                    done();
+                });
+            });
+        });
+    });
+
+    it('requests a resource with console debugging enabled and getting errors', function (done) {
+
+        var consoleOut;
+        var currentStdout = process.stdout.write;
+        process.stdout.write = function (data) {
+
+            consoleOut = data;
+        };
+
+        process.env.WRECK_DEBUG_CONSOLE = true;
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(payload);
+        });
+
+        server.listen(0, function () {
+
+            var port = server.address().port;
+            server.close();
+            Wreck.request('get', 'http://localhost:' + port, {}, function (err, res) {
+
+                expect(err).to.exist();
+                process.stdout.write = currentStdout;
+                var jsonOut = JSON.parse(consoleOut);
+                expect(jsonOut.error).to.exist();
+                delete process.env.WRECK_DEBUG_CONSOLE;
+                done();
+            });
+        });
+    });
+
+    it('requests a resource with file debugging enabled', function (done) {
+
+        var tmpFile = '/tmp/' + Math.random() + '.json';
+        process.env.WRECK_DEBUG_FILE = tmpFile;
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(payload);
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, function (err, body) {
+
+                    var jsonOut = require(tmpFile);
+                    expect(err).to.not.exist();
+                    expect(jsonOut.response.payload).to.equal(payload);
+                    server.close();
+                    Fs.unlinkSync(tmpFile);
+                    delete process.env.WRECK_DEBUG_FILE;
+                    done();
+                });
+            });
+        });
+    });
+
     it('requests a POST resource', function (done) {
 
         var server = Http.createServer(function (req, res) {

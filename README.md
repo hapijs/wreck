@@ -40,7 +40,7 @@ var options = {
 var optionalCallback = function (err, res) {
 
     /* handle err if it exists, in which case res will be undefined */
-    
+
     // buffer the response stream
     Wreck.read(res, null, function (err, body) {
         /* do stuff */
@@ -190,8 +190,14 @@ and expose the standard properties.
 
 For example, the following code demonstrates changing `maxSockets` on the `http` agent.
 
- ```js
- var Wreck = require('wreck');
+```javascript
+var Wreck = require('wreck');
 
- Wreck.agents.http.maxSockets = 20;
- ```
+Wreck.agents.http.maxSockets = 20;
+```
+
+## Logging Options
+
+- `Console`: Set environmental variable `WRECK_DEBUG_CONSOLE=true` to see log statements in the console
+- `File`: Set environmental variable `WRECK_DEBUG_FILE=<filename.log>` for any library which uses Wreck to see
+request debug output logged to a file.
