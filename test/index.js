@@ -211,7 +211,7 @@ describe('request()', function () {
 
     it('requests an https resource with secure protocol set', function (done) {
 
-        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv3_method' }, function (err, res) {
+        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv23_method' }, function (err, res) {
 
             expect(err).to.not.exist();
             Wreck.read(res, null, function (err, body) {
@@ -664,6 +664,28 @@ describe('request()', function () {
             });
 
             req.abort();
+        });
+    });
+
+    it('in-progress requests can be aborted', function (done) {
+
+        var wreck;
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end();
+
+            wreck.abort();
+        });
+
+        server.listen(0, function () {
+
+            wreck = Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err) {
+
+                expect(err).to.exist();
+                expect(err.code).to.equal('ECONNRESET');
+                done();
+            });
         });
     });
 
