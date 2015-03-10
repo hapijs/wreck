@@ -195,3 +195,10 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 
  Wreck.agents.http.maxSockets = 20;
  ```
+
+
+## Logging Options
+
+- `Console`: Set environmental variable `WRECK_DEBUG_CONSOLE=true` to see log statements in the console
+- `File`: Set environmental variable `WRECK_DEBUG_FILE=<filename.log>` for any library which uses Wreck to see
+request debug output logged to a file.

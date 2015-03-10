@@ -1519,3 +1519,145 @@ describe('toReadableStream()', function () {
         done();
     });
 });
+
+describe('log()', function () {
+
+    it('logs requests to console when debugging enabled', function (done) {
+
+        var currentStdout = process.stdout;
+        var currentDescriptor = Object.getOwnPropertyDescriptor(process, 'stdout');
+        var testingStdout = new Stream.PassThrough();
+        Object.defineProperty(process, 'stdout', {
+            enumerable: true,
+            configurable: true,
+            value: testingStdout
+        });
+
+        var stdoutData = '';
+        testingStdout.on('data', function (chunk) {
+
+            stdoutData += chunk.toString();
+        });
+
+        process.env.WRECK_DEBUG_CONSOLE = true;
+        delete process.env.WRECK_DEBUG_FILE;
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(payload);
+        });
+
+        server.on('error', function (err) {
+
+            expect(err).to.not.exist();
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port + '/hello', {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                process.nextTick(function () {
+
+                    expect(stdoutData).to.contain('/hello');
+
+                    // Cleanup
+                    Object.defineProperty(process, 'stdout', {
+                        enumerable: currentDescriptor.enumerable,
+                        configurable: currentDescriptor.configurable,
+                        value: currentStdout
+                    });
+                    testingStdout.end();
+                    server.close();
+                    delete process.env.WRECK_DEBUG_CONSOLE;
+                    done();
+                });
+            });
+        });
+    });
+
+    it('logs requests to file when debugging enabled', function (done) {
+
+        var tmpFile = '/tmp/' + Math.random() + '.json';
+        process.env.WRECK_DEBUG_FILE = tmpFile;
+        delete process.env.WRECK_DEBUG_CONSOLE;
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(payload);
+        });
+
+        server.on('error', function (err) {
+
+            expect(err).to.not.exist();
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port + '/hello', {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                // Account for any FS write delay
+                setTimeout(function () {
+
+                    var fileData = Fs.readFileSync(tmpFile).toString();
+                    expect(fileData).to.contain('/hello');
+
+                    // Cleanup
+                    server.close();
+                    Fs.unlinkSync(tmpFile);
+                    delete process.env.WRECK_DEBUG_FILE;
+                    done();
+                }, 20);
+            });
+        });
+    });
+
+    it('logs multiple requests to file when debugging enabled', function (done) {
+
+        var tmpFile = '/tmp/' + Math.random() + '.json';
+
+        process.env.WRECK_DEBUG_FILE = tmpFile;
+        delete process.env.WRECK_DEBUG_CONSOLE;
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(payload);
+        });
+
+        server.on('error', function (err) {
+
+            expect(err).to.not.exist();
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port + '/hello', {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/goodbye', {}, function (err, res) {
+
+                    expect(err).to.not.exist();
+                    // Account for any FS write delay
+                    setTimeout(function () {
+
+                        var fileData = Fs.readFileSync(tmpFile).toString();
+                        expect(fileData).to.contain('/hello');
+                        expect(fileData).to.contain('/goodbye');
+
+                        // Cleanup
+                        server.close();
+                        Fs.unlinkSync(tmpFile);
+                        delete process.env.WRECK_DEBUG_FILE;
+                        done();
+                    }, 20);
+                });
+            });
+        });
+    });
+});
