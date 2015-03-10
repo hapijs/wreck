@@ -1525,18 +1525,12 @@ describe('log()', function () {
     it('logs requests to console when debugging enabled', function (done) {
 
         var currentStdout = process.stdout;
-        var currentDescriptor = Object.getOwnPropertyDescriptor(process, 'stdout');
         var testingStdout = new Stream.PassThrough();
         Object.defineProperty(process, 'stdout', {
             enumerable: true,
             configurable: true,
+            writable: true,
             value: testingStdout
-        });
-
-        var stdoutData = '';
-        testingStdout.on('data', function (chunk) {
-
-            stdoutData += chunk.toString();
         });
 
         process.env.WRECK_DEBUG_CONSOLE = true;
@@ -1544,7 +1538,7 @@ describe('log()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end(payload);
+            res.end('');
         });
 
         server.on('error', function (err) {
@@ -1558,19 +1552,15 @@ describe('log()', function () {
 
                 expect(err).to.not.exist();
 
-                process.nextTick(function () {
+                // Cleanup
+                server.close();
 
-                    expect(stdoutData).to.contain('/hello');
+                testingStdout.once('data', function (chunk) {
 
-                    // Cleanup
-                    Object.defineProperty(process, 'stdout', {
-                        enumerable: currentDescriptor.enumerable,
-                        configurable: currentDescriptor.configurable,
-                        value: currentStdout
-                    });
-                    testingStdout.end();
-                    server.close();
                     delete process.env.WRECK_DEBUG_CONSOLE;
+                    process.stdout = currentStdout;
+                    testingStdout.removeAllListeners();
+                    expect(chunk.toString()).to.contain('/hello');
                     done();
                 });
             });
@@ -1586,7 +1576,7 @@ describe('log()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end(payload);
+            res.end('');
         });
 
         server.on('error', function (err) {
@@ -1604,12 +1594,13 @@ describe('log()', function () {
                 setTimeout(function () {
 
                     var fileData = Fs.readFileSync(tmpFile).toString();
-                    expect(fileData).to.contain('/hello');
 
                     // Cleanup
                     server.close();
                     Fs.unlinkSync(tmpFile);
                     delete process.env.WRECK_DEBUG_FILE;
+
+                    expect(fileData).to.contain('/hello');
                     done();
                 }, 20);
             });
@@ -1626,7 +1617,7 @@ describe('log()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end(payload);
+            res.end('');
         });
 
         server.on('error', function (err) {

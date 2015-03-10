@@ -57,13 +57,24 @@ describe('Log()', function () {
         });
     });
 
-    it('won\'t include the response if there isn\'t one', function (done) {
+    it('includes the request wrapper when no request is provided', function (done) {
+
+        var log = new Log({ res: {} });
+        log.once('readable', function () {
+
+            var data = log.read();
+            expect(data.toString()).to.contain('request');
+            done();
+        });
+    });
+
+    it('includes the response wrapper when no response is provided', function (done) {
 
         var log = new Log({ req: {} });
         log.once('readable', function () {
 
             var data = log.read();
-            expect(data.toString()).to.not.contain('res');
+            expect(data.toString()).to.contain('response');
             done();
         });
     });
