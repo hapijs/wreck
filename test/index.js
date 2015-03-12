@@ -1519,3 +1519,136 @@ describe('toReadableStream()', function () {
         done();
     });
 });
+
+describe('log()', function () {
+
+    it('logs requests to console when debugging enabled', function (done) {
+
+        var currentStdout = process.stdout;
+        var testingStdout = new Stream.PassThrough();
+        Object.defineProperty(process, 'stdout', {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: testingStdout
+        });
+
+        process.env.WRECK_DEBUG_CONSOLE = true;
+        delete process.env.WRECK_DEBUG_FILE;
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('');
+        });
+
+        server.on('error', function (err) {
+
+            expect(err).to.not.exist();
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port + '/hello', {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                // Cleanup
+                server.close();
+
+                testingStdout.once('data', function (chunk) {
+
+                    delete process.env.WRECK_DEBUG_CONSOLE;
+                    process.stdout = currentStdout;
+                    testingStdout.removeAllListeners();
+                    expect(chunk.toString()).to.contain('/hello');
+                    done();
+                });
+            });
+        });
+    });
+
+    it('logs requests to file when debugging enabled', function (done) {
+
+        var tmpFile = '/tmp/' + Math.random() + '.json';
+        process.env.WRECK_DEBUG_FILE = tmpFile;
+        delete process.env.WRECK_DEBUG_CONSOLE;
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('');
+        });
+
+        server.on('error', function (err) {
+
+            expect(err).to.not.exist();
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port + '/hello', {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                // Account for any FS write delay
+                setTimeout(function () {
+
+                    var fileData = Fs.readFileSync(tmpFile).toString();
+
+                    // Cleanup
+                    server.close();
+                    Fs.unlinkSync(tmpFile);
+                    delete process.env.WRECK_DEBUG_FILE;
+
+                    expect(fileData).to.contain('/hello');
+                    done();
+                }, 20);
+            });
+        });
+    });
+
+    it('logs multiple requests to file when debugging enabled', function (done) {
+
+        var tmpFile = '/tmp/' + Math.random() + '.json';
+
+        process.env.WRECK_DEBUG_FILE = tmpFile;
+        delete process.env.WRECK_DEBUG_CONSOLE;
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('');
+        });
+
+        server.on('error', function (err) {
+
+            expect(err).to.not.exist();
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port + '/hello', {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/goodbye', {}, function (err, res) {
+
+                    expect(err).to.not.exist();
+                    // Account for any FS write delay
+                    setTimeout(function () {
+
+                        var fileData = Fs.readFileSync(tmpFile).toString();
+                        expect(fileData).to.contain('/hello');
+                        expect(fileData).to.contain('/goodbye');
+
+                        // Cleanup
+                        server.close();
+                        Fs.unlinkSync(tmpFile);
+                        delete process.env.WRECK_DEBUG_FILE;
+                        done();
+                    }, 20);
+                });
+            });
+        });
+    });
+});
