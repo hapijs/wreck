@@ -14,8 +14,7 @@
   },
   "dependencies": {
     "hoek": "2.x.x",
-    "boom": "2.x.x",
-    "json-stringify-safe": "5.x.x"
+    "boom": "2.x.x"
   },
   "devDependencies": {
     "lab": "5.x.x",
