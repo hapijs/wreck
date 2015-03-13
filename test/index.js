@@ -1519,3 +1519,50 @@ describe('toReadableStream()', function () {
         done();
     });
 });
+
+describe('Events', function () {
+
+    it('emits response event when wreck is finished', function (done) {
+
+        Wreck.once('response', function (err, req, res) {
+
+            expect(err).to.not.exist();
+            expect(req).to.exist();
+            expect(res).to.exist();
+            done();
+        });
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            Wreck.put('http://localhost:' + server.address().port, function (err, res, payload) {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.equal('ok');
+                server.close();
+            });
+        });
+    });
+
+    it('response event includes error when it occurs', function (done) {
+
+        Wreck.once('response', function (err, req, res) {
+
+            expect(err).to.exist();
+            expect(req).to.exist();
+            expect(res).to.not.exist();
+            done();
+        });
+
+        Wreck.get('http://unknownserver', function (err) {
+
+            expect(err).to.exist();
+        });
+    });
+});

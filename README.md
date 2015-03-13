@@ -4,9 +4,10 @@ HTTP Client Utilities
 
 [![Build Status](https://secure.travis-ci.org/hapijs/wreck.png)](http://travis-ci.org/hapijs/wreck)
 
-Lead Maintainer: [Wyatt Preul](https://github.com/wpreul)
+Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 
 ## Usage
+
 ### Basic
 ```javascript
 var Wreck = require('wreck');
@@ -49,7 +50,6 @@ var optionalCallback = function (err, res) {
 
 var req = Wreck.request(method, uri, options, optionalCallback);
 ```
-
 
 ### `request(method, uri, [options, [callback]])`
 
@@ -195,3 +195,12 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 
  Wreck.agents.http.maxSockets = 20;
  ```
+
+
+### Events
+
+#### `response`
+
+The response event is always executed for any request that *wreck* makes.  The handler should accept the following
+arguments `(error, request, response)`.  This event is useful for logging all requests that go through wreck.  The 
+error and response arguments can be undefined depending on if an error occurs.
