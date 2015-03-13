@@ -1565,4 +1565,31 @@ describe('Events', function () {
             expect(err).to.exist();
         });
     });
+
+    it('multiple requests execute the same response handler', function (done) {
+
+        var count = 0;
+        var handler = function (err, req, res) {
+
+            expect(err).to.exist();
+            expect(req).to.exist();
+            expect(res).to.not.exist();
+            count++;
+        };
+
+        Wreck.on('response', handler);
+
+        Wreck.get('http://unknownserver', function (err) {
+
+            expect(err).to.exist();
+        });
+
+        Wreck.get('http://unknownserver', function (err) {
+
+            expect(err).to.exist();
+            expect(count).to.equal(2);
+            Wreck.removeListener('response', handler);
+            done();
+        });
+    });
 });
