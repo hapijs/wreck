@@ -1560,7 +1560,7 @@ describe('Events', function () {
             done();
         });
 
-        Wreck.get('http://unknownserver', function (err) {
+        Wreck.get('http://0', function (err) {
 
             expect(err).to.exist();
         });
@@ -1579,17 +1579,17 @@ describe('Events', function () {
 
         Wreck.on('response', handler);
 
-        Wreck.get('http://unknownserver', function (err) {
+        Wreck.get('http://0', function (err) {
 
             expect(err).to.exist();
-        });
 
-        Wreck.get('http://unknownserver', function (err) {
+            Wreck.get('http://0', function (err) {
 
-            expect(err).to.exist();
-            expect(count).to.equal(2);
-            Wreck.removeListener('response', handler);
-            done();
+                expect(err).to.exist();
+                expect(count).to.equal(2);
+                Wreck.removeListener('response', handler);
+                done();
+            });
         });
     });
 });
