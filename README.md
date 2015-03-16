@@ -185,8 +185,8 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
 `httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
-configured to `Infinity`.  They are each instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
-and expose the standard properties.
+configured to `Infinity`.  They are each instances of the node.js 
+[Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the standard properties.
 
 For example, the following code demonstrates changing `maxSockets` on the `http` agent.
 
@@ -202,5 +202,7 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 #### `response`
 
 The response event is always executed for any request that *wreck* makes.  The handler should accept the following
-arguments `(error, request, response)`.  This event is useful for logging all requests that go through wreck.  The 
-error and response arguments can be undefined depending on if an error occurs.
+arguments `(error, request, response)`.  This event is useful for logging all requests that go through *wreck*.  The 
+error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple 
+modules are depending on the same cached *wreck* module that this event can fire for each request made across all 
+modules.
