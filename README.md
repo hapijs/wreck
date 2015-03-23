@@ -4,9 +4,10 @@ HTTP Client Utilities
 
 [![Build Status](https://secure.travis-ci.org/hapijs/wreck.png)](http://travis-ci.org/hapijs/wreck)
 
-Lead Maintainer: [Wyatt Preul](https://github.com/wpreul)
+Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 
 ## Usage
+
 ### Basic
 ```javascript
 var Wreck = require('wreck');
@@ -49,7 +50,6 @@ var optionalCallback = function (err, res) {
 
 var req = Wreck.request(method, uri, options, optionalCallback);
 ```
-
 
 ### `request(method, uri, [options, [callback]])`
 
@@ -185,8 +185,8 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
 `httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
-configured to `Infinity`.  They are each instances of the node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent)
-and expose the standard properties.
+configured to `Infinity`.  They are each instances of the node.js 
+[Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the standard properties.
 
 For example, the following code demonstrates changing `maxSockets` on the `http` agent.
 
@@ -195,3 +195,14 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 
  Wreck.agents.http.maxSockets = 20;
  ```
+
+
+### Events
+
+#### `response`
+
+The response event is always emitted for any request that *wreck* makes.  The handler should accept the following
+arguments `(error, request, response)`.  This event is useful for logging all requests that go through *wreck*.  The 
+error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple 
+modules are depending on the same cached *wreck* module that this event can fire for each request made across all 
+modules.
