@@ -1524,11 +1524,12 @@ describe('Events', function () {
 
     it('emits response event when wreck is finished', function (done) {
 
-        Wreck.once('response', function (err, req, res) {
+        Wreck.once('response', function (err, req, res, start) {
 
             expect(err).to.not.exist();
             expect(req).to.exist();
             expect(res).to.exist();
+            expect(typeof start).to.equal('number');
             done();
         });
 
