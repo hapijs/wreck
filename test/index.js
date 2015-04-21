@@ -1524,20 +1524,22 @@ describe('Events', function () {
 
     it('emits response event when wreck is finished', function (done) {
 
-        Wreck.once('response', function (err, req, res, start) {
-
-            expect(err).to.not.exist();
-            expect(req).to.exist();
-            expect(res).to.exist();
-            expect(typeof start).to.equal('number');
-            done();
-        });
-
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200);
             res.end('ok');
         });
+
+        Wreck.once('response', function (err, req, res, start, uri) {
+
+            expect(err).to.not.exist();
+            expect(req).to.exist();
+            expect(res).to.exist();
+            expect(typeof start).to.equal('number');
+            expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            done();
+        });
+
 
         server.listen(0, function () {
 
