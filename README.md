@@ -202,11 +202,12 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 #### `response`
 
 The response event is always emitted for any request that *wreck* makes.  The handler should accept the following
-arguments `(error, request, response, start, uri)` where:  
-  -`error` - a Boom error
+arguments `(error, request, response, start, uri)` where:
+  - `error` - a Boom error
   - `request` - the raw `ClientHttp` request object
-  - `response` - the raw `IncomingMessage#` response object
+  - `response` - the raw `IncomingMessage` response object
   - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.
+
 This event is useful for logging all requests that go through *wreck*.  
 The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple
 modules are depending on the same cached *wreck* module that this event can fire for each request made across all
