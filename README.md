@@ -206,6 +206,7 @@ arguments `(error, request, response, start, uri)` where:
   - `error` - a Boom error
   - `request` - the raw `ClientHttp` request object
   - `response` - the raw `IncomingMessage` response object
+  - `start` - the time that the request was initiated
   - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes
     the headers and method.
 
