@@ -41,7 +41,7 @@ var options = {
 var optionalCallback = function (err, res) {
 
     /* handle err if it exists, in which case res will be undefined */
-    
+
     // buffer the response stream
     Wreck.read(res, null, function (err, body) {
         /* do stuff */
@@ -185,7 +185,7 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
 `httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
-configured to `Infinity`.  They are each instances of the node.js 
+configured to `Infinity`.  They are each instances of the node.js
 [Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the standard properties.
 
 For example, the following code demonstrates changing `maxSockets` on the `http` agent.
@@ -202,8 +202,14 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 #### `response`
 
 The response event is always emitted for any request that *wreck* makes.  The handler should accept the following
-arguments `(error, request, response, start)`.  This event is useful for logging all requests that go through *wreck*.  
-The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple 
-modules are depending on the same cached *wreck* module that this event can fire for each request made across all 
+arguments `(error, request, response, start, uri)` where:
+  - `error` - a Boom error
+  - `request` - the raw `ClientHttp` request object
+  - `response` - the raw `IncomingMessage` response object
+  - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.
+
+This event is useful for logging all requests that go through *wreck*.  
+The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple
+modules are depending on the same cached *wreck* module that this event can fire for each request made across all
 modules.  The start argument is the timestamp when the request was started.  This can be useful for determining how long
 it takes *wreck* to get a response back and processed.
