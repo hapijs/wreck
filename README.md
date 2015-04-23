@@ -206,7 +206,8 @@ arguments `(error, request, response, start, uri)` where:
   - `error` - a Boom error
   - `request` - the raw `ClientHttp` request object
   - `response` - the raw `IncomingMessage` response object
-  - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.
+  - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes
+    the headers and method.
 
 This event is useful for logging all requests that go through *wreck*.  
 The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple
