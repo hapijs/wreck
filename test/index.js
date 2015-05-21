@@ -960,6 +960,54 @@ describe('request()', function () {
     });
 });
 
+describe('baseUrl', function () {
+
+    it('uses baseUrl option with trailing slash and uri is prefixed with a slash', function (done) {
+
+        var r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost/' }, function (err, res) {
+
+            expect(r._headers.host).to.equal('localhost');
+            done();
+        });
+    });
+
+    it('uses baseUrl option without trailing slash and uri is prefixed with a slash', function (done) {
+
+        var r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' }, function (err, res) {
+
+            expect(r._headers.host).to.equal('localhost');
+            done();
+        });
+    });
+
+    it('uses baseUrl option with trailing slash and uri is prefixed without a slash', function (done) {
+
+        var r = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' }, function (err, res) {
+
+            expect(r._headers.host).to.equal('localhost');
+            done();
+        });
+    });
+
+    it('uses baseUrl option without trailing slash and uri is prefixed without a slash', function (done) {
+
+        var r = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' }, function (err, res) {
+
+            expect(r._headers.host).to.equal('localhost');
+            done();
+        });
+    });
+
+    it('uses baseUrl option when uri is an empty string', function (done) {
+
+        var r = Wreck.request('get', '', { baseUrl: 'http://localhost' }, function (err, res) {
+
+            expect(r._headers.host).to.equal('localhost');
+            done();
+        });
+    });
+});
+
 describe('read()', function () {
 
     it('handles errors with a boom response', function (done) {
@@ -1146,7 +1194,6 @@ describe('read()', function () {
             done();
         });
     });
-
 });
 
 describe('parseCacheControl()', function () {

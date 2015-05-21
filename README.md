@@ -27,6 +27,7 @@ var readableStream = Wreck.toReadableStream('foo=bar');
 
 // all attributes are optional
 var options = {
+    baseUrl:   fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.  If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. When `baseUrl` is given, `uri` must also be a string.
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
     redirects: 3,
@@ -210,7 +211,7 @@ arguments `(error, request, response, start, uri)` where:
   - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes
     the headers and method.
 
-This event is useful for logging all requests that go through *wreck*.  
+This event is useful for logging all requests that go through *wreck*.
 The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple
 modules are depending on the same cached *wreck* module that this event can fire for each request made across all
 modules.  The start argument is the timestamp when the request was started.  This can be useful for determining how long
