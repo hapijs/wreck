@@ -804,6 +804,7 @@ describe('request()', function () {
     it('post null payload', function (done) {
 
         var server = Http.createServer(function (req, res) {
+
             res.statusCode = 500;
             res.end();
         });
@@ -1482,9 +1483,9 @@ describe('toReadableStream()', function () {
     it('handle empty payload', function (done) {
 
         var stream = Wreck.toReadableStream();
-        expect(stream instanceof Stream).to.be.true;
+        expect(stream instanceof Stream).to.be.true();
         var read = stream.read();                           // Make sure read has no problems
-        expect(read).to.be.null;
+        expect(read).to.be.null();
         done();
     });
 
@@ -1493,13 +1494,14 @@ describe('toReadableStream()', function () {
         var data = 'Hello';
         var buf = new Buffer(data, 'ascii');
         var stream = Wreck.toReadableStream(data, 'ascii');
-        expect(stream instanceof Stream).to.be.true;
+        expect(stream instanceof Stream).to.be.true();
         var read = stream.read();
         expect(read.toString()).to.equal(data);
         done();
     });
 
     it('chunks to requested size', function (done) {
+
         var buf;
         var data = new Array(101).join('0123456789');
         var stream = Wreck.toReadableStream(data);
@@ -1553,7 +1555,7 @@ describe('Events', function () {
         });
     });
 
-    it('response event includes error when it occurs', function (done) {
+    it('response event includes error when it occurs', { timeout: 2500 }, function (done) {
 
         Wreck.once('response', function (err, req, res) {
 
@@ -1567,9 +1569,10 @@ describe('Events', function () {
 
             expect(err).to.exist();
         });
+
     });
 
-    it('multiple requests execute the same response handler', function (done) {
+    it('multiple requests execute the same response handler', { timeout: 5000 }, function (done) {
 
         var count = 0;
         var handler = function (err, req, res) {
