@@ -3,7 +3,7 @@
   "description": "HTTP Client Utilities",
   "version": "5.5.1",
   "repository": "git://github.com/hapijs/wreck",
-  "main": "index",
+  "main": "lib/index",
   "keywords": [
     "utilities",
     "http",
@@ -21,7 +21,8 @@
     "code": "1.x.x"
   },
   "scripts": {
-    "test": "make test-cov"
+    "test": "lab -t 100 -L -a code",
+    "test-cov-html": "lab -r html -o coverage.html -a code"
   },
   "license": "BSD-3-Clause"
 }
