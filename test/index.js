@@ -1322,6 +1322,33 @@ describe('json', function () {
         });
     });
 
+    it('json-based type requested and received', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'application/vnd.api+json' });
+            res.end(JSON.stringify({ foo: 'bar' }));
+        });
+
+        server.listen(0, function () {
+
+            var port = server.address().port;
+            var options = {
+                json: true
+            };
+
+            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.not.equal(null);
+                expect(payload.foo).to.exist();
+                server.close();
+                done();
+            });
+        });
+    });
+
     it('json requested but not received - flag is ignored', function (done) {
 
         var server = Http.createServer(function (req, res) {
