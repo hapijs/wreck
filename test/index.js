@@ -1672,9 +1672,6 @@ describe('Events', function () {
                     done();
                 });
             });
-
         });
-
-
     });
 });
