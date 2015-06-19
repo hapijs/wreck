@@ -1625,4 +1625,56 @@ describe('Events', function () {
             });
         });
     });
+
+    it('rejects attempts to use defaults without an options hash', function (done) {
+
+        var fn = function () {
+
+            Wreck.defaults();
+        };
+
+        expect(fn).to.throw();
+        done();
+    });
+
+    it('respects defaults without bleeding across instances', function (done) {
+
+        var req;
+
+        var optionsA = { headers: { foo: 123 } };
+        var optionsB = { headers: { bar: 321 } };
+
+        var wreckA = Wreck.defaults(optionsA);
+        var wreckB = Wreck.defaults(optionsB);
+        var wreckAB = wreckA.defaults(optionsB);
+
+        // var agent = new Http.Agent();
+        // expect(Object.keys(agent.sockets).length).to.equal(0);
+
+        req = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res) {
+
+            expect(req._headers.banana).to.exist();
+            expect(req._headers.foo).to.exist();
+            expect(req._headers.bar).to.not.exist();
+
+            req = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res) {
+
+                expect(req._headers.banana).to.exist();
+                expect(req._headers.foo).to.not.exist();
+                expect(req._headers.bar).to.exist();
+
+                req = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res) {
+
+                    expect(req._headers.banana).to.exist();
+                    expect(req._headers.foo).to.exist();
+                    expect(req._headers.bar).to.exist();
+
+                    done();
+                });
+            });
+
+        });
+
+
+    });
 });

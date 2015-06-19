@@ -25,6 +25,15 @@ var method = 'GET'; // GET, POST, PUT, DELETE
 var uri    = 'https://google.com/';
 var readableStream = Wreck.toReadableStream('foo=bar');
 
+var wreck = Wreck.defaults({
+    headers: { 'x-foo-bar': 123 }
+});
+
+// cascading example -- does not alter `wreck`
+var wreckWithTimeout = wreck.defaults({
+    timeout: 5
+});
+
 // all attributes are optional
 var options = {
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
@@ -48,8 +57,13 @@ var optionalCallback = function (err, res) {
     });
 };
 
-var req = Wreck.request(method, uri, options, optionalCallback);
+var req = wreck.request(method, uri, options, optionalCallback);
 ```
+
+### `defaults(options)`
+
+Returns a *new* instance of Wreck which merges the provided `options` with those provided on a per-request basis. You can call defaults repeatedly to build up multiple http clients.
+- `options` - Config object containing settings for both `request` and `read` operations.
 
 ### `request(method, uri, [options, [callback]])`
 
@@ -210,7 +224,7 @@ arguments `(error, request, response, start, uri)` where:
   - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes
     the headers and method.
 
-This event is useful for logging all requests that go through *wreck*.  
+This event is useful for logging all requests that go through *wreck*.
 The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple
 modules are depending on the same cached *wreck* module that this event can fire for each request made across all
 modules.  The start argument is the timestamp when the request was started.  This can be useful for determining how long
