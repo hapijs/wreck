@@ -38,7 +38,7 @@ var wreckWithTimeout = wreck.defaults({
 var options = {
     baseUrl:   fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
                If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
-               querystring in the `baseUrl` will be merged with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
+               querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
     redirects: 3,
