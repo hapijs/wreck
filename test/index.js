@@ -7,6 +7,7 @@ var Fs = require('fs');
 var Events = require('events');
 var Stream = require('stream');
 var Code = require('code');
+var Hoek = require('hoek');
 var Lab = require('lab');
 var Wreck = require('../');
 
@@ -961,7 +962,7 @@ describe('request()', function () {
     });
 });
 
-describe('baseUrl', function () {
+describe('options.baseUrl', function () {
 
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', function (done) {
 
@@ -974,38 +975,65 @@ describe('baseUrl', function () {
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', function (done) {
 
-        var r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' }, function (err, res) {
+        var request = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
-            expect(r._headers.host).to.equal('localhost');
-            done();
-        });
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo');
+        done();
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed without a slash', function (done) {
 
-        var r = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' }, function (err, res) {
+        var request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' }, Hoek.ignore);
 
-            expect(r._headers.host).to.equal('localhost');
-            done();
-        });
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo');
+        done();
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed without a slash', function (done) {
 
-        var r = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' }, function (err, res) {
+        var request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
-            expect(r._headers.host).to.equal('localhost');
-            done();
-        });
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo');
+        done();
     });
 
     it('uses baseUrl option when uri is an empty string', function (done) {
 
-        var r = Wreck.request('get', '', { baseUrl: 'http://localhost' }, function (err, res) {
+        var request = Wreck.request('get', '', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
-            expect(r._headers.host).to.equal('localhost');
-            done();
-        });
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/');
+        done();
+    });
+
+    it('uses baseUrl option with a path', function (done) {
+
+        var request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
+
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo/bar');
+        done();
+    });
+
+    it('uses baseUrl option with a path and removes extra slashes', function (done) {
+
+        var request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo/' }, Hoek.ignore);
+
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo/bar');
+        done();
+    });
+
+    it('uses baseUrl option with a url that has a querystring', function (done) {
+
+        var request = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
+
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo/bar?test=hello');
+        done();
     });
 });
 
