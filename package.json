@@ -1,7 +1,7 @@
 {
   "name": "wreck",
   "description": "HTTP Client Utilities",
-  "version": "5.5.1",
+  "version": "5.6.0",
   "repository": "git://github.com/hapijs/wreck",
   "main": "lib/index",
   "keywords": [
