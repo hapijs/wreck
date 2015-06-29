@@ -20,7 +20,7 @@ var it = lab.it;
 var expect = Code.expect;
 
 
-var payload = new Array(1640).join('0123456789'); // make sure we have a payload larger than 16384 bytes for chunking coverage
+var sample = new Array(1640).join('0123456789'); // make sure we have a payload larger than 16384 bytes for chunking coverage
 
 describe('request()', function () {
 
@@ -29,7 +29,7 @@ describe('request()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end(payload);
+            res.end(sample);
         });
 
         server.listen(0, function () {
@@ -40,7 +40,7 @@ describe('request()', function () {
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -59,13 +59,13 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: payload }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: sample }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -109,13 +109,13 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'wreck' }, payload: payload }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'wreck' }, payload: sample }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -133,13 +133,13 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: Wreck.toReadableStream(payload) }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: Wreck.toReadableStream(sample) }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -152,7 +152,7 @@ describe('request()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end(payload);
+            res.end(sample);
             server.close();
             done();
         });
@@ -167,7 +167,7 @@ describe('request()', function () {
 
         var fn = function () {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, function (err, res) {});
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, function (err, res) { });
         };
 
         expect(fn).to.throw();
@@ -178,7 +178,7 @@ describe('request()', function () {
 
         var fn = function () {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, function (err, res) {});
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, function (err, res) { });
         };
 
         expect(fn).to.throw();
@@ -189,7 +189,7 @@ describe('request()', function () {
 
         var fn = function () {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, function (err, res) {});
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, function (err, res) { });
         };
 
         expect(fn).to.not.throw();
@@ -313,7 +313,7 @@ describe('request()', function () {
         var up = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end(payload);
+            res.end(sample);
         });
 
         up.listen(0, function () {
@@ -336,7 +336,7 @@ describe('request()', function () {
                     Wreck.read(res, null, function (err, body) {
 
                         expect(err).to.not.exist();
-                        expect(body.toString()).to.equal(payload);
+                        expect(body.toString()).to.equal(sample);
                         up.close();
                         down.close();
                         done();
@@ -357,7 +357,7 @@ describe('request()', function () {
             }
             else {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end(payload);
+                res.end(sample);
             }
         });
 
@@ -388,7 +388,7 @@ describe('request()', function () {
             }
             else {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end(payload);
+                res.end(sample);
             }
         });
 
@@ -400,7 +400,7 @@ describe('request()', function () {
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -420,7 +420,7 @@ describe('request()', function () {
             else {
                 expect(req.url).to.equal('/');
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end(payload);
+                res.end(sample);
             }
         });
 
@@ -432,7 +432,7 @@ describe('request()', function () {
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -451,7 +451,7 @@ describe('request()', function () {
             }
             else {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end(payload);
+                res.end(sample);
             }
         });
 
@@ -505,13 +505,13 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Wreck.toReadableStream(payload) }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Wreck.toReadableStream(sample) }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -832,7 +832,7 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            var buf = new Buffer(payload, 'ascii');
+            var buf = new Buffer(sample, 'ascii');
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf }, function (err, res) {
 
@@ -840,7 +840,7 @@ describe('request()', function () {
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(payload);
+                    expect(body.toString()).to.equal(sample);
                     server.close();
                     done();
                 });
@@ -858,7 +858,7 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            var buf = new Buffer(payload, 'ascii');
+            var buf = new Buffer(sample, 'ascii');
 
             Wreck.request('head', 'http://localhost:' + server.address().port, { payload: null }, function (err, res) {
 
@@ -977,7 +977,7 @@ describe('request()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200);
-            res.write(payload);
+            res.write(sample);
             res.end();
         });
 
@@ -1144,7 +1144,7 @@ describe('read()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.write(payload);
+            res.write(sample);
         });
 
         server.listen(0, function () {
@@ -1169,8 +1169,8 @@ describe('read()', function () {
         var server = Http.createServer(function (req, res) {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.write(payload);
-            res.end(payload);
+            res.write(sample);
+            res.end(sample);
         });
 
         server.listen(0, function () {
@@ -1288,11 +1288,39 @@ describe('read()', function () {
 
     it('handles responses with no headers', function (done) {
 
-        var res = Wreck.toReadableStream(payload);
+        var res = Wreck.toReadableStream(sample);
         Wreck.read(res, { json: true }, function (err) {
 
             expect(err).to.equal(null);
             done();
+        });
+    });
+
+    it('skips destroy when not available', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.write(sample);
+            res.end(sample);
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                res.destroy = null;
+                Wreck.read(res, { maxBytes: 120 }, function (err, body) {
+
+                    expect(err).to.exist();
+                    expect(err.output.statusCode).to.equal(400);
+                    expect(body).to.not.exist();
+                    server.close();
+                    done();
+                });
+            });
         });
     });
 });
@@ -1786,8 +1814,6 @@ describe('Events', function () {
 
     it('respects defaults without bleeding across instances', function (done) {
 
-        var req;
-
         var optionsA = { headers: { foo: 123 } };
         var optionsB = { headers: { bar: 321 } };
 
@@ -1798,23 +1824,23 @@ describe('Events', function () {
         // var agent = new Http.Agent();
         // expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        req = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res) {
+        var req1 = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res1) {
 
-            expect(req._headers.banana).to.exist();
-            expect(req._headers.foo).to.exist();
-            expect(req._headers.bar).to.not.exist();
+            expect(req1._headers.banana).to.exist();
+            expect(req1._headers.foo).to.exist();
+            expect(req1._headers.bar).to.not.exist();
 
-            req = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res) {
+            var req2 = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res2) {
 
-                expect(req._headers.banana).to.exist();
-                expect(req._headers.foo).to.not.exist();
-                expect(req._headers.bar).to.exist();
+                expect(req2._headers.banana).to.exist();
+                expect(req2._headers.foo).to.not.exist();
+                expect(req2._headers.bar).to.exist();
 
-                req = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res) {
+                var req3 = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err, res3) {
 
-                    expect(req._headers.banana).to.exist();
-                    expect(req._headers.foo).to.exist();
-                    expect(req._headers.bar).to.exist();
+                    expect(req3._headers.banana).to.exist();
+                    expect(req3._headers.foo).to.exist();
+                    expect(req3._headers.bar).to.exist();
 
                     done();
                 });
