@@ -172,7 +172,7 @@ describe('request()', function () {
 
         var fn = function () {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, function (err, res) {});
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, function (err, res) { });
         };
 
         expect(fn).to.throw();
@@ -183,7 +183,7 @@ describe('request()', function () {
 
         var fn = function () {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, function (err, res) {});
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, function (err, res) { });
         };
 
         expect(fn).to.throw();
@@ -194,7 +194,7 @@ describe('request()', function () {
 
         var fn = function () {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, function (err, res) {});
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, function (err, res) { });
         };
 
         expect(fn).to.not.throw();
@@ -1300,6 +1300,34 @@ describe('read()', function () {
             done();
         });
     });
+
+    it('skips destroy when not available', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.write(internals.payload);
+            res.end(internals.payload);
+        });
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+
+                expect(err).to.not.exist();
+
+                res.destroy = null;
+                Wreck.read(res, { maxBytes: 120 }, function (err, body) {
+
+                    expect(err).to.exist();
+                    expect(err.output.statusCode).to.equal(400);
+                    expect(body).to.not.exist();
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
 });
 
 describe('parseCacheControl()', function () {
@@ -1791,8 +1819,6 @@ describe('Events', function () {
 
     it('respects defaults without bleeding across instances', function (done) {
 
-        var req;
-
         var optionsA = { headers: { foo: 123 } };
         var optionsB = { headers: { bar: 321 } };
 
@@ -1803,23 +1829,23 @@ describe('Events', function () {
         // var agent = new Http.Agent();
         // expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        req = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
+        var req1 = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
 
-            expect(req._headers.banana).to.exist();
-            expect(req._headers.foo).to.exist();
-            expect(req._headers.bar).to.not.exist();
+            expect(req1._headers.banana).to.exist();
+            expect(req1._headers.foo).to.exist();
+            expect(req1._headers.bar).to.not.exist();
 
-            req = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
+            var req2 = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
 
-                expect(req._headers.banana).to.exist();
-                expect(req._headers.foo).to.not.exist();
-                expect(req._headers.bar).to.exist();
+                expect(req2._headers.banana).to.exist();
+                expect(req2._headers.foo).to.not.exist();
+                expect(req2._headers.bar).to.exist();
 
-                req = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
+                var req3 = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
 
-                    expect(req._headers.banana).to.exist();
-                    expect(req._headers.foo).to.exist();
-                    expect(req._headers.bar).to.exist();
+                    expect(req3._headers.banana).to.exist();
+                    expect(req3._headers.foo).to.exist();
+                    expect(req3._headers.bar).to.exist();
 
                     done();
                 });
