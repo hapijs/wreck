@@ -45,6 +45,7 @@ describe('request()', function () {
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
+                    expect(Buffer.isBuffer(body)).to.equal(true);
                     expect(body.toString()).to.equal(internals.payload);
                     server.close();
                     done();
@@ -1381,7 +1382,7 @@ describe('Shortcut', function () {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
-                expect(payload).to.equal('ok');
+                expect(payload.toString()).to.equal('ok');
                 server.close();
                 done();
             });
@@ -1402,7 +1403,7 @@ describe('Shortcut', function () {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
-                expect(payload).to.equal('ok');
+                expect(payload.toString()).to.equal('ok');
                 server.close();
                 done();
             });
@@ -1423,7 +1424,7 @@ describe('Shortcut', function () {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
-                expect(payload).to.equal('ok');
+                expect(payload.toString()).to.equal('ok');
                 server.close();
                 done();
             });
@@ -1444,7 +1445,7 @@ describe('Shortcut', function () {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
-                expect(payload).to.equal('ok');
+                expect(payload.toString()).to.equal('ok');
                 server.close();
                 done();
             });
@@ -1756,7 +1757,7 @@ describe('Events', function () {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
-                expect(payload).to.equal('ok');
+                expect(payload.toString()).to.equal('ok');
                 server.close();
             });
         });
