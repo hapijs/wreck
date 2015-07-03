@@ -400,7 +400,7 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, redirected: null }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
@@ -523,6 +523,59 @@ describe('request()', function () {
                 });
             });
         });
+    });
+
+    it('calls redirected option callback on redirections', function (done) {
+
+        var gen = 0;
+        var server = Http.createServer(function (req, res) {
+
+            if (gen++ < 2) {
+                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
+                res.end();
+            }
+            else {
+                expect(req.url).to.equal('/redirected/');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+            }
+        });
+
+        var redirects = 0;
+        var redirectedCallback = function (statusCode, location, req) {
+
+            expect(statusCode).to.equal(301);
+            expect(location).to.equal('http://localhost:' + server.address().port + '/redirected/');
+            expect(req).to.exist();
+            redirects++;
+        };
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, redirected: redirectedCallback }, function (err, res) {
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, function (err, body) {
+
+                    expect(err).to.not.exist();
+                    expect(body.toString()).to.equal(internals.payload);
+                    expect(redirects).to.equal(2);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
+    it('rejects non-function value for redirected option', function (done) {
+
+        var fn = function () {
+
+            Wreck.request('get', 'https://google.com', { redirects: 1, redirected: true }, function (err, res) { });
+        };
+
+        expect(fn).to.throw();
+        done();
     });
 
     it('handles request errors with a boom response', function (done) {

@@ -42,6 +42,7 @@ var options = {
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
     redirects: 3,
+    redirected: function (statusCode, location, req) {},
     timeout:   1000,    // 1 second, default: unlimited
     maxBytes:  1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
@@ -82,6 +83,10 @@ Initiate an HTTP request.
       whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
       same time as the `agent` option is set.
     - `redirects` - The maximum number of redirects to follow.
+    - `redirected` - A callback function that is called when a redirect was triggered, using the signature `function (statusCode, location, req)` where:
+      - `statusCode` - HTTP status code of the response that triggered the redirect.
+      - `location` - The redirected location string.
+      - `req` - The new [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object which replaces the one initially returned.
     - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
       Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
     - `timeout` - The number of milliseconds to wait without receiving a response
