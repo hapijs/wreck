@@ -1501,6 +1501,27 @@ describe('Shortcut', function () {
         });
     });
 
+    it('patch request', function (done) {
+
+        var server = Http.createServer(function (req, res) {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, function () {
+
+            Wreck.patch('http://localhost:' + server.address().port, { payload: '123' }, function (err, res, payload) {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload.toString()).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
+
     it('put request', function (done) {
 
         var server = Http.createServer(function (req, res) {
