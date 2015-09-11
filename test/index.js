@@ -552,7 +552,7 @@ describe('request()', function () {
 
             var payload = new Array(1639).join('0123456789');
             var stream = Wreck.toReadableStream(payload);
-            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: payload }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: stream }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
