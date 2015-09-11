@@ -550,13 +550,15 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Wreck.toReadableStream(internals.payload) }, function (err, res) {
+            var payload = new Array(1639).join('0123456789');
+            var stream = Wreck.toReadableStream(payload);
+            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: payload }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
 
                     expect(err).to.not.exist();
-                    expect(body.toString()).to.equal(internals.payload);
+                    expect(body.toString()).to.equal(payload);
                     server.close();
                     done();
                 });
