@@ -400,7 +400,7 @@ describe('request()', function () {
 
         server.listen(0, function () {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, redirected: null }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
@@ -551,6 +551,52 @@ describe('request()', function () {
         server.listen(0, function () {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: Wreck.toReadableStream(internals.payload) }, function (err, res) {
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, function (err, body) {
+
+                    expect(err).to.not.exist();
+                    expect(body.toString()).to.equal(internals.payload);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
+    it('calls beforeRedirect option callback before redirections', function (done) {
+
+        var gen = 0;
+        var server = Http.createServer(function (req, res) {
+
+            if (gen++ < 2) {
+                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
+                res.end();
+            }
+            else {
+                expect(req.url).to.equal('/redirected/');
+                expect(req.headers['x-test']).to.equal('Modified');
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+            }
+        });
+
+        var beforeRedirectCallback = function (redirectMethod, statusCode, location, redirectOptions) {
+
+            expect(redirectMethod).to.equal('GET');
+            expect(statusCode).to.equal(301);
+            expect(location).to.equal('http://localhost:' + server.address().port + '/redirected/');
+            expect(redirectOptions).to.exist();
+
+            redirectOptions.headers = {
+                'x-test': 'Modified'
+            };
+        };
+
+        server.listen(0, function () {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback }, function (err, res) {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, function (err, body) {
@@ -1002,7 +1048,7 @@ describe('request()', function () {
             setTimeout(function () {
 
                 res.writeHead(200);
-                res.write(payload);
+                res.write(internals.payload);
                 res.end();
             }, 2000);
         });
