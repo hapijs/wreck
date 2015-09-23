@@ -42,6 +42,7 @@ var options = {
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
     redirects: 3,
+    beforeRedirect: function (redirectMethod, statusCode, location, redirectOptions) {},
     redirected: function (statusCode, location, req) {},
     timeout:   1000,    // 1 second, default: unlimited
     maxBytes:  1048576, // 1 MB, default: unlimited
@@ -83,6 +84,11 @@ Initiate an HTTP request.
       whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
       same time as the `agent` option is set.
     - `redirects` - The maximum number of redirects to follow.
+    - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature function (redirectMethod, statusCode, location, redirectOptions) where:
+      - `redirectMethod` - A string specifying the redirect method.
+      - `statusCode` - HTTP status code of the response that triggered the redirect.
+      - `location` - The redirect location string.
+      - `redirectOptions` - Options that will be applied to the redirect request.
     - `redirected` - A callback function that is called when a redirect was triggered, using the signature `function (statusCode, location, req)` where:
       - `statusCode` - HTTP status code of the response that triggered the redirect.
       - `location` - The redirected location string.
