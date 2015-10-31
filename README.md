@@ -10,7 +10,7 @@ Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 
 ### Basic
 ```javascript
-var Wreck = require('wreck');
+const Wreck = require('wreck');
 
 Wreck.get('https://google.com/', function (err, res, payload) {
     /* do stuff */
@@ -19,23 +19,23 @@ Wreck.get('https://google.com/', function (err, res, payload) {
 
 ### Advanced
 ```javascript
-var Wreck = require('wreck');
+const Wreck = require('wreck');
 
-var method = 'GET'; // GET, POST, PUT, DELETE
-var uri    = 'https://google.com/';
-var readableStream = Wreck.toReadableStream('foo=bar');
+const method = 'GET'; // GET, POST, PUT, DELETE
+const uri    = 'https://google.com/';
+const readableStream = Wreck.toReadableStream('foo=bar');
 
-var wreck = Wreck.defaults({
+const wreck = Wreck.defaults({
     headers: { 'x-foo-bar': 123 }
 });
 
 // cascading example -- does not alter `wreck`
-var wreckWithTimeout = wreck.defaults({
+const wreckWithTimeout = wreck.defaults({
     timeout: 5
 });
 
 // all attributes are optional
-var options = {
+const options = {
     baseUrl:   fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
                If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
                querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
@@ -52,7 +52,7 @@ var options = {
     secureProtocol: 'SSLv3_method' // The SSL method to use
 };
 
-var optionalCallback = function (err, res) {
+const optionalCallback = function (err, res) {
 
     /* handle err if it exists, in which case res will be undefined */
 
@@ -62,7 +62,7 @@ var optionalCallback = function (err, res) {
     });
 };
 
-var req = wreck.request(method, uri, options, optionalCallback);
+const req = wreck.request(method, uri, options, optionalCallback);
 ```
 
 ### `defaults(options)`
@@ -204,8 +204,8 @@ for the provided payload and encoding.
 - `encoding` - The encoding to use. Must be a valid Buffer encoding, such as 'utf8' or 'ascii'.
 
 ```javascript
-var stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
-var read = stream.read();
+const stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
+const read = stream.read();
 // read -> 'Hello'
 ```
 
@@ -217,7 +217,7 @@ or "no-cache" will be set to the boolean `true`.
 - `field` - The header cache control value to be parsed.
 
 ```javascript
-var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
+const result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 // result.private -> true
 // result['max-age'] -> 0
 // result['no-cache'] -> true
@@ -233,7 +233,7 @@ configured to `Infinity`.  They are each instances of the node.js
 For example, the following code demonstrates changing `maxSockets` on the `http` agent.
 
  ```js
- var Wreck = require('wreck');
+ const Wreck = require('wreck');
 
  Wreck.agents.http.maxSockets = 20;
  ```
