@@ -1,48 +1,50 @@
+'use strict';
+
 // Load modules
 
-var Http = require('http');
-var Https = require('https');
-var Path = require('path');
-var Fs = require('fs');
-var Events = require('events');
-var Stream = require('stream');
-var Code = require('code');
-var Hoek = require('hoek');
-var Lab = require('lab');
-var Wreck = require('../');
+const Http = require('http');
+const Https = require('https');
+const Path = require('path');
+const Fs = require('fs');
+const Events = require('events');
+const Stream = require('stream');
+const Code = require('code');
+const Hoek = require('hoek');
+const Lab = require('lab');
+const Wreck = require('../');
 
 
 // Declare internals
 
-var internals = {
+const internals = {
     payload: new Array(1640).join('0123456789') // make sure we have a payload larger than 16384 bytes for chunking coverage
 };
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var describe = lab.describe;
-var it = lab.it;
-var expect = Code.expect;
+const lab = exports.lab = Lab.script();
+const describe = lab.describe;
+const it = lab.it;
+const expect = Code.expect;
 
 
-describe('request()', function () {
+describe('request()', () => {
 
-    it('requests a resource with callback', function (done) {
+    it('requests a resource with callback', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end(internals.payload);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(Buffer.isBuffer(body)).to.equal(true);
@@ -54,21 +56,21 @@ describe('request()', function () {
         });
     });
 
-    it('requests a POST resource', function (done) {
+    it('requests a POST resource', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             expect(req.headers['content-length']).to.equal('16390');
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             req.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: internals.payload }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: internals.payload }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -79,22 +81,22 @@ describe('request()', function () {
         });
     });
 
-    it('requests a POST resource with unicode characters in payload', function (done) {
+    it('requests a POST resource with unicode characters in payload', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             expect(req.headers['content-length']).to.equal('14');
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             req.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var unicodePayload = JSON.stringify({ field: 'ć' });
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: unicodePayload }, function (err, res) {
+            const unicodePayload = JSON.stringify({ field: 'ć' });
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: unicodePayload }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(unicodePayload);
@@ -105,20 +107,20 @@ describe('request()', function () {
         });
     });
 
-    it('requests a POST resource with headers', function (done) {
+    it('requests a POST resource with headers', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             req.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'wreck' }, payload: internals.payload }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'wreck' }, payload: internals.payload }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -129,20 +131,20 @@ describe('request()', function () {
         });
     });
 
-    it('requests a POST resource with stream payload', function (done) {
+    it('requests a POST resource with stream payload', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             req.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: Wreck.toReadableStream(internals.payload) }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: Wreck.toReadableStream(internals.payload) }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -153,9 +155,9 @@ describe('request()', function () {
         });
     });
 
-    it('requests a resource without callback', function (done) {
+    it('requests a resource without callback', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end(internals.payload);
@@ -163,51 +165,45 @@ describe('request()', function () {
             done();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {});
         });
     });
 
-    it('cannot set agent and rejectUnauthorized at the same time', function (done) {
+    it('cannot set agent and rejectUnauthorized at the same time', (done) => {
 
-        var fn = function () {
+        expect(() => {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, function (err, res) { });
-        };
-
-        expect(fn).to.throw();
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, (err, res) => { });
+        }).to.throw();
         done();
     });
 
-    it('cannot set a false agent and rejectUnauthorized at the same time', function (done) {
+    it('cannot set a false agent and rejectUnauthorized at the same time', (done) => {
 
-        var fn = function () {
+        expect(() => {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, function (err, res) { });
-        };
-
-        expect(fn).to.throw();
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, (err, res) => { });
+        }).to.throw();
         done();
     });
 
-    it('can set a null agent and rejectUnauthorized at the same time', function (done) {
+    it('can set a null agent and rejectUnauthorized at the same time', (done) => {
 
-        var fn = function () {
+        expect(() => {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, function (err, res) { });
-        };
-
-        expect(fn).to.not.throw();
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, (err, res) => { });
+        }).to.not.throw();
         done();
     });
 
-    it('requests an https resource', function (done) {
+    it('requests an https resource', (done) => {
 
-        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true }, function (err, res) {
+        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true }, (err, res) => {
 
             expect(err).to.not.exist();
-            Wreck.read(res, null, function (err, body) {
+            Wreck.read(res, null, (err, body) => {
 
                 expect(err).to.not.exist();
                 expect(body.toString()).to.contain('<HTML>');
@@ -216,12 +212,12 @@ describe('request()', function () {
         });
     });
 
-    it('requests an https resource with secure protocol set', function (done) {
+    it('requests an https resource with secure protocol set', (done) => {
 
-        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv23_method' }, function (err, res) {
+        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv23_method' }, (err, res) => {
 
             expect(err).to.not.exist();
-            Wreck.read(res, null, function (err, body) {
+            Wreck.read(res, null, (err, body) => {
 
                 expect(err).to.not.exist();
                 expect(body.toString()).to.contain('<HTML>');
@@ -230,24 +226,24 @@ describe('request()', function () {
         });
     });
 
-    it('fails when an https resource has invalid certs and the default rejectUnauthorized', function (done) {
+    it('fails when an https resource has invalid certs and the default rejectUnauthorized', (done) => {
 
-        var httpsOptions = {
+        const httpsOptions = {
             key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0UqyXDCqWDKpoNQQK/fdr0OkG4gW6DUafxdufH9GmkX/zoKz\ng/SFLrPipzSGINKWtyMvo7mPjXqqVgE10LDI3VFV8IR6fnART+AF8CW5HMBPGt/s\nfQW4W4puvBHkBxWSW1EvbecgNEIS9hTGvHXkFzm4xJ2e9DHp2xoVAjREC73B7JbF\nhc5ZGGchKw+CFmAiNysU0DmBgQcac0eg2pWoT+YGmTeQj6sRXO67n2xy/hA1DuN6\nA4WBK3wM3O4BnTG0dNbWUEbe7yAbV5gEyq57GhJIeYxRvveVDaX90LoAqM4cUH06\n6rciON0UbDHV2LP/JaH5jzBjUyCnKLLo5snlbwIDAQABAoIBAQDJm7YC3pJJUcxb\nc8x8PlHbUkJUjxzZ5MW4Zb71yLkfRYzsxrTcyQA+g+QzA4KtPY8XrZpnkgm51M8e\n+B16AcIMiBxMC6HgCF503i16LyyJiKrrDYfGy2rTK6AOJQHO3TXWJ3eT3BAGpxuS\n12K2Cq6EvQLCy79iJm7Ks+5G6EggMZPfCVdEhffRm2Epl4T7LpIAqWiUDcDfS05n\nNNfAGxxvALPn+D+kzcSF6hpmCVrFVTf9ouhvnr+0DpIIVPwSK/REAF3Ux5SQvFuL\njPmh3bGwfRtcC5d21QNrHdoBVSN2UBLmbHUpBUcOBI8FyivAWJhRfKnhTvXMFG8L\nwaXB51IZAoGBAP/E3uz6zCyN7l2j09wmbyNOi1AKvr1WSmuBJveITouwblnRSdvc\nsYm4YYE0Vb94AG4n7JIfZLKtTN0xvnCo8tYjrdwMJyGfEfMGCQQ9MpOBXAkVVZvP\ne2k4zHNNsfvSc38UNSt7K0HkVuH5BkRBQeskcsyMeu0qK4wQwdtiCoBDAoGBANF7\nFMppYxSW4ir7Jvkh0P8bP/Z7AtaSmkX7iMmUYT+gMFB5EKqFTQjNQgSJxS/uHVDE\nSC5co8WGHnRk7YH2Pp+Ty1fHfXNWyoOOzNEWvg6CFeMHW2o+/qZd4Z5Fep6qCLaa\nFvzWWC2S5YslEaaP8DQ74aAX4o+/TECrxi0z2lllAoGAdRB6qCSyRsI/k4Rkd6Lv\nw00z3lLMsoRIU6QtXaZ5rN335Awyrfr5F3vYxPZbOOOH7uM/GDJeOJmxUJxv+cia\nPQDflpPJZU4VPRJKFjKcb38JzO6C3Gm+po5kpXGuQQA19LgfDeO2DNaiHZOJFrx3\nm1R3Zr/1k491lwokcHETNVkCgYBPLjrZl6Q/8BhlLrG4kbOx+dbfj/euq5NsyHsX\n1uI7bo1Una5TBjfsD8nYdUr3pwWltcui2pl83Ak+7bdo3G8nWnIOJ/WfVzsNJzj7\n/6CvUzR6sBk5u739nJbfgFutBZBtlSkDQPHrqA7j3Ysibl3ZIJlULjMRKrnj6Ans\npCDwkQKBgQCM7gu3p7veYwCZaxqDMz5/GGFUB1My7sK0hcT7/oH61yw3O8pOekee\nuctI1R3NOudn1cs5TAy/aypgLDYTUGQTiBRILeMiZnOrvQQB9cEf7TFgDoRNCcDs\nV/ZWiegVB/WY7H0BkCekuq5bHwjgtJTpvHGqQ9YD7RhE8RSYOhdQ/Q==\n-----END RSA PRIVATE KEY-----\n',
             cert: '-----BEGIN CERTIFICATE-----\nMIIDBjCCAe4CCQDvLNml6smHlTANBgkqhkiG9w0BAQUFADBFMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0\ncyBQdHkgTHRkMB4XDTE0MDEyNTIxMjIxOFoXDTE1MDEyNTIxMjIxOFowRTELMAkG\nA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0\nIFdpZGdpdHMgUHR5IEx0ZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nANFKslwwqlgyqaDUECv33a9DpBuIFug1Gn8Xbnx/RppF/86Cs4P0hS6z4qc0hiDS\nlrcjL6O5j416qlYBNdCwyN1RVfCEen5wEU/gBfAluRzATxrf7H0FuFuKbrwR5AcV\nkltRL23nIDRCEvYUxrx15Bc5uMSdnvQx6dsaFQI0RAu9weyWxYXOWRhnISsPghZg\nIjcrFNA5gYEHGnNHoNqVqE/mBpk3kI+rEVzuu59scv4QNQ7jegOFgSt8DNzuAZ0x\ntHTW1lBG3u8gG1eYBMquexoSSHmMUb73lQ2l/dC6AKjOHFB9Ouq3IjjdFGwx1diz\n/yWh+Y8wY1Mgpyiy6ObJ5W8CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAoSc6Skb4\ng1e0ZqPKXBV2qbx7hlqIyYpubCl1rDiEdVzqYYZEwmst36fJRRrVaFuAM/1DYAmT\nWMhU+yTfA+vCS4tql9b9zUhPw/IDHpBDWyR01spoZFBF/hE1MGNpCSXXsAbmCiVf\naxrIgR2DNketbDxkQx671KwF1+1JOMo9ffXp+OhuRo5NaGIxhTsZ+f/MA4y084Aj\nDI39av50sTRTWWShlN+J7PtdQVA5SZD97oYbeUeL7gI18kAJww9eUdmT0nEjcwKs\nxsQT1fyKbo7AlZBY4KSlUMuGnn0VnAsB9b+LxtXlDfnjyM8bVQx1uAfRo0DO8p/5\n3J5DTjAU55deBQ==\n-----END CERTIFICATE-----\n'
         };
 
-        var server = Https.createServer(httpsOptions, function (req, res) {
+        const server = Https.createServer(httpsOptions, (req, res) => {
 
             res.writeHead(200);
             res.end();
         });
 
-        server.listen(0, function (err) {
+        server.listen(0, (err) => {
 
             expect(err).to.not.exist();
 
-            Wreck.request('get', 'https://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'https://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.exist();
                 done();
@@ -255,24 +251,24 @@ describe('request()', function () {
         });
     });
 
-    it('succeeds when an https resource has unauthorized certs and rejectUnauthorized is false', function (done) {
+    it('succeeds when an https resource has unauthorized certs and rejectUnauthorized is false', (done) => {
 
-        var httpsOptions = {
+        const httpsOptions = {
             key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0UqyXDCqWDKpoNQQK/fdr0OkG4gW6DUafxdufH9GmkX/zoKz\ng/SFLrPipzSGINKWtyMvo7mPjXqqVgE10LDI3VFV8IR6fnART+AF8CW5HMBPGt/s\nfQW4W4puvBHkBxWSW1EvbecgNEIS9hTGvHXkFzm4xJ2e9DHp2xoVAjREC73B7JbF\nhc5ZGGchKw+CFmAiNysU0DmBgQcac0eg2pWoT+YGmTeQj6sRXO67n2xy/hA1DuN6\nA4WBK3wM3O4BnTG0dNbWUEbe7yAbV5gEyq57GhJIeYxRvveVDaX90LoAqM4cUH06\n6rciON0UbDHV2LP/JaH5jzBjUyCnKLLo5snlbwIDAQABAoIBAQDJm7YC3pJJUcxb\nc8x8PlHbUkJUjxzZ5MW4Zb71yLkfRYzsxrTcyQA+g+QzA4KtPY8XrZpnkgm51M8e\n+B16AcIMiBxMC6HgCF503i16LyyJiKrrDYfGy2rTK6AOJQHO3TXWJ3eT3BAGpxuS\n12K2Cq6EvQLCy79iJm7Ks+5G6EggMZPfCVdEhffRm2Epl4T7LpIAqWiUDcDfS05n\nNNfAGxxvALPn+D+kzcSF6hpmCVrFVTf9ouhvnr+0DpIIVPwSK/REAF3Ux5SQvFuL\njPmh3bGwfRtcC5d21QNrHdoBVSN2UBLmbHUpBUcOBI8FyivAWJhRfKnhTvXMFG8L\nwaXB51IZAoGBAP/E3uz6zCyN7l2j09wmbyNOi1AKvr1WSmuBJveITouwblnRSdvc\nsYm4YYE0Vb94AG4n7JIfZLKtTN0xvnCo8tYjrdwMJyGfEfMGCQQ9MpOBXAkVVZvP\ne2k4zHNNsfvSc38UNSt7K0HkVuH5BkRBQeskcsyMeu0qK4wQwdtiCoBDAoGBANF7\nFMppYxSW4ir7Jvkh0P8bP/Z7AtaSmkX7iMmUYT+gMFB5EKqFTQjNQgSJxS/uHVDE\nSC5co8WGHnRk7YH2Pp+Ty1fHfXNWyoOOzNEWvg6CFeMHW2o+/qZd4Z5Fep6qCLaa\nFvzWWC2S5YslEaaP8DQ74aAX4o+/TECrxi0z2lllAoGAdRB6qCSyRsI/k4Rkd6Lv\nw00z3lLMsoRIU6QtXaZ5rN335Awyrfr5F3vYxPZbOOOH7uM/GDJeOJmxUJxv+cia\nPQDflpPJZU4VPRJKFjKcb38JzO6C3Gm+po5kpXGuQQA19LgfDeO2DNaiHZOJFrx3\nm1R3Zr/1k491lwokcHETNVkCgYBPLjrZl6Q/8BhlLrG4kbOx+dbfj/euq5NsyHsX\n1uI7bo1Una5TBjfsD8nYdUr3pwWltcui2pl83Ak+7bdo3G8nWnIOJ/WfVzsNJzj7\n/6CvUzR6sBk5u739nJbfgFutBZBtlSkDQPHrqA7j3Ysibl3ZIJlULjMRKrnj6Ans\npCDwkQKBgQCM7gu3p7veYwCZaxqDMz5/GGFUB1My7sK0hcT7/oH61yw3O8pOekee\nuctI1R3NOudn1cs5TAy/aypgLDYTUGQTiBRILeMiZnOrvQQB9cEf7TFgDoRNCcDs\nV/ZWiegVB/WY7H0BkCekuq5bHwjgtJTpvHGqQ9YD7RhE8RSYOhdQ/Q==\n-----END RSA PRIVATE KEY-----\n',
             cert: '-----BEGIN CERTIFICATE-----\nMIIDBjCCAe4CCQDvLNml6smHlTANBgkqhkiG9w0BAQUFADBFMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0\ncyBQdHkgTHRkMB4XDTE0MDEyNTIxMjIxOFoXDTE1MDEyNTIxMjIxOFowRTELMAkG\nA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0\nIFdpZGdpdHMgUHR5IEx0ZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nANFKslwwqlgyqaDUECv33a9DpBuIFug1Gn8Xbnx/RppF/86Cs4P0hS6z4qc0hiDS\nlrcjL6O5j416qlYBNdCwyN1RVfCEen5wEU/gBfAluRzATxrf7H0FuFuKbrwR5AcV\nkltRL23nIDRCEvYUxrx15Bc5uMSdnvQx6dsaFQI0RAu9weyWxYXOWRhnISsPghZg\nIjcrFNA5gYEHGnNHoNqVqE/mBpk3kI+rEVzuu59scv4QNQ7jegOFgSt8DNzuAZ0x\ntHTW1lBG3u8gG1eYBMquexoSSHmMUb73lQ2l/dC6AKjOHFB9Ouq3IjjdFGwx1diz\n/yWh+Y8wY1Mgpyiy6ObJ5W8CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAoSc6Skb4\ng1e0ZqPKXBV2qbx7hlqIyYpubCl1rDiEdVzqYYZEwmst36fJRRrVaFuAM/1DYAmT\nWMhU+yTfA+vCS4tql9b9zUhPw/IDHpBDWyR01spoZFBF/hE1MGNpCSXXsAbmCiVf\naxrIgR2DNketbDxkQx671KwF1+1JOMo9ffXp+OhuRo5NaGIxhTsZ+f/MA4y084Aj\nDI39av50sTRTWWShlN+J7PtdQVA5SZD97oYbeUeL7gI18kAJww9eUdmT0nEjcwKs\nxsQT1fyKbo7AlZBY4KSlUMuGnn0VnAsB9b+LxtXlDfnjyM8bVQx1uAfRo0DO8p/5\n3J5DTjAU55deBQ==\n-----END CERTIFICATE-----\n'
         };
 
-        var server = Https.createServer(httpsOptions, function (req, res) {
+        const server = Https.createServer(httpsOptions, (req, res) => {
 
             res.writeHead(200);
             res.end();
         });
 
-        server.listen(0, function (err) {
+        server.listen(0, (err) => {
 
             expect(err).to.not.exist();
 
-            Wreck.request('get', 'https://localhost:' + server.address().port, { rejectUnauthorized: false }, function (err, res) {
+            Wreck.request('get', 'https://localhost:' + server.address().port, { rejectUnauthorized: false }, (err, res) => {
 
                 expect(err).to.not.exist();
                 done();
@@ -280,15 +276,15 @@ describe('request()', function () {
         });
     });
 
-    it('applies rejectUnauthorized when redirected', function (done) {
+    it('applies rejectUnauthorized when redirected', (done) => {
 
-        var httpsOptions = {
+        const httpsOptions = {
             key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0UqyXDCqWDKpoNQQK/fdr0OkG4gW6DUafxdufH9GmkX/zoKz\ng/SFLrPipzSGINKWtyMvo7mPjXqqVgE10LDI3VFV8IR6fnART+AF8CW5HMBPGt/s\nfQW4W4puvBHkBxWSW1EvbecgNEIS9hTGvHXkFzm4xJ2e9DHp2xoVAjREC73B7JbF\nhc5ZGGchKw+CFmAiNysU0DmBgQcac0eg2pWoT+YGmTeQj6sRXO67n2xy/hA1DuN6\nA4WBK3wM3O4BnTG0dNbWUEbe7yAbV5gEyq57GhJIeYxRvveVDaX90LoAqM4cUH06\n6rciON0UbDHV2LP/JaH5jzBjUyCnKLLo5snlbwIDAQABAoIBAQDJm7YC3pJJUcxb\nc8x8PlHbUkJUjxzZ5MW4Zb71yLkfRYzsxrTcyQA+g+QzA4KtPY8XrZpnkgm51M8e\n+B16AcIMiBxMC6HgCF503i16LyyJiKrrDYfGy2rTK6AOJQHO3TXWJ3eT3BAGpxuS\n12K2Cq6EvQLCy79iJm7Ks+5G6EggMZPfCVdEhffRm2Epl4T7LpIAqWiUDcDfS05n\nNNfAGxxvALPn+D+kzcSF6hpmCVrFVTf9ouhvnr+0DpIIVPwSK/REAF3Ux5SQvFuL\njPmh3bGwfRtcC5d21QNrHdoBVSN2UBLmbHUpBUcOBI8FyivAWJhRfKnhTvXMFG8L\nwaXB51IZAoGBAP/E3uz6zCyN7l2j09wmbyNOi1AKvr1WSmuBJveITouwblnRSdvc\nsYm4YYE0Vb94AG4n7JIfZLKtTN0xvnCo8tYjrdwMJyGfEfMGCQQ9MpOBXAkVVZvP\ne2k4zHNNsfvSc38UNSt7K0HkVuH5BkRBQeskcsyMeu0qK4wQwdtiCoBDAoGBANF7\nFMppYxSW4ir7Jvkh0P8bP/Z7AtaSmkX7iMmUYT+gMFB5EKqFTQjNQgSJxS/uHVDE\nSC5co8WGHnRk7YH2Pp+Ty1fHfXNWyoOOzNEWvg6CFeMHW2o+/qZd4Z5Fep6qCLaa\nFvzWWC2S5YslEaaP8DQ74aAX4o+/TECrxi0z2lllAoGAdRB6qCSyRsI/k4Rkd6Lv\nw00z3lLMsoRIU6QtXaZ5rN335Awyrfr5F3vYxPZbOOOH7uM/GDJeOJmxUJxv+cia\nPQDflpPJZU4VPRJKFjKcb38JzO6C3Gm+po5kpXGuQQA19LgfDeO2DNaiHZOJFrx3\nm1R3Zr/1k491lwokcHETNVkCgYBPLjrZl6Q/8BhlLrG4kbOx+dbfj/euq5NsyHsX\n1uI7bo1Una5TBjfsD8nYdUr3pwWltcui2pl83Ak+7bdo3G8nWnIOJ/WfVzsNJzj7\n/6CvUzR6sBk5u739nJbfgFutBZBtlSkDQPHrqA7j3Ysibl3ZIJlULjMRKrnj6Ans\npCDwkQKBgQCM7gu3p7veYwCZaxqDMz5/GGFUB1My7sK0hcT7/oH61yw3O8pOekee\nuctI1R3NOudn1cs5TAy/aypgLDYTUGQTiBRILeMiZnOrvQQB9cEf7TFgDoRNCcDs\nV/ZWiegVB/WY7H0BkCekuq5bHwjgtJTpvHGqQ9YD7RhE8RSYOhdQ/Q==\n-----END RSA PRIVATE KEY-----\n',
             cert: '-----BEGIN CERTIFICATE-----\nMIIDBjCCAe4CCQDvLNml6smHlTANBgkqhkiG9w0BAQUFADBFMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0\ncyBQdHkgTHRkMB4XDTE0MDEyNTIxMjIxOFoXDTE1MDEyNTIxMjIxOFowRTELMAkG\nA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0\nIFdpZGdpdHMgUHR5IEx0ZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nANFKslwwqlgyqaDUECv33a9DpBuIFug1Gn8Xbnx/RppF/86Cs4P0hS6z4qc0hiDS\nlrcjL6O5j416qlYBNdCwyN1RVfCEen5wEU/gBfAluRzATxrf7H0FuFuKbrwR5AcV\nkltRL23nIDRCEvYUxrx15Bc5uMSdnvQx6dsaFQI0RAu9weyWxYXOWRhnISsPghZg\nIjcrFNA5gYEHGnNHoNqVqE/mBpk3kI+rEVzuu59scv4QNQ7jegOFgSt8DNzuAZ0x\ntHTW1lBG3u8gG1eYBMquexoSSHmMUb73lQ2l/dC6AKjOHFB9Ouq3IjjdFGwx1diz\n/yWh+Y8wY1Mgpyiy6ObJ5W8CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAoSc6Skb4\ng1e0ZqPKXBV2qbx7hlqIyYpubCl1rDiEdVzqYYZEwmst36fJRRrVaFuAM/1DYAmT\nWMhU+yTfA+vCS4tql9b9zUhPw/IDHpBDWyR01spoZFBF/hE1MGNpCSXXsAbmCiVf\naxrIgR2DNketbDxkQx671KwF1+1JOMo9ffXp+OhuRo5NaGIxhTsZ+f/MA4y084Aj\nDI39av50sTRTWWShlN+J7PtdQVA5SZD97oYbeUeL7gI18kAJww9eUdmT0nEjcwKs\nxsQT1fyKbo7AlZBY4KSlUMuGnn0VnAsB9b+LxtXlDfnjyM8bVQx1uAfRo0DO8p/5\n3J5DTjAU55deBQ==\n-----END CERTIFICATE-----\n'
         };
 
-        var gen = 0;
-        var server = Https.createServer(httpsOptions, function (req, res) {
+        let gen = 0;
+        const server = Https.createServer(httpsOptions, (req, res) => {
 
             if (!gen++) {
                 res.writeHead(301, { 'Location': '/' });
@@ -300,11 +296,11 @@ describe('request()', function () {
             }
         });
 
-        server.listen(0, function (err) {
+        server.listen(0, (err) => {
 
             expect(err).to.not.exist();
 
-            Wreck.request('get', 'https://localhost:' + server.address().port, { redirects: 1, rejectUnauthorized: false }, function (err, res) {
+            Wreck.request('get', 'https://localhost:' + server.address().port, { redirects: 1, rejectUnauthorized: false }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -314,32 +310,32 @@ describe('request()', function () {
         });
     });
 
-    it('requests a resource with downstream dependency', function (done) {
+    it('requests a resource with downstream dependency', (done) => {
 
-        var up = Http.createServer(function (req, res) {
+        const up = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end(internals.payload);
         });
 
-        up.listen(0, function () {
+        up.listen(0, () => {
 
-            var down = Http.createServer(function (req, res1) {
+            const down = Http.createServer((req, res1) => {
 
                 res1.writeHead(200, { 'Content-Type': 'text/plain' });
-                Wreck.request('get', 'http://localhost:' + up.address().port, { downstreamRes: res1 }, function (err, res2) {
+                Wreck.request('get', 'http://localhost:' + up.address().port, { downstreamRes: res1 }, (err, res2) => {
 
                     expect(err).to.not.exist();
                     res2.pipe(res1);
                 });
             });
 
-            down.listen(0, function () {
+            down.listen(0, () => {
 
-                Wreck.request('get', 'http://localhost:' + down.address().port, {}, function (err, res) {
+                Wreck.request('get', 'http://localhost:' + down.address().port, {}, (err, res) => {
 
                     expect(err).to.not.exist();
-                    Wreck.read(res, null, function (err, body) {
+                    Wreck.read(res, null, (err, body) => {
 
                         expect(err).to.not.exist();
                         expect(body.toString()).to.equal(internals.payload);
@@ -352,10 +348,10 @@ describe('request()', function () {
         });
     });
 
-    it('does not follow redirections by default', function (done) {
+    it('does not follow redirections by default', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (!gen++) {
                 res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
@@ -367,12 +363,12 @@ describe('request()', function () {
             }
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(res.statusCode).to.equal(301);
@@ -383,10 +379,10 @@ describe('request()', function () {
         });
     });
 
-    it('handles redirections', function (done) {
+    it('handles redirections', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (!gen++) {
                 res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
@@ -398,12 +394,12 @@ describe('request()', function () {
             }
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -414,34 +410,34 @@ describe('request()', function () {
         });
     });
 
-    it('handles redirections from http to https', function (done) {
+    it('handles redirections from http to https', (done) => {
 
-        var httpsOptions = {
+        const httpsOptions = {
             key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0UqyXDCqWDKpoNQQK/fdr0OkG4gW6DUafxdufH9GmkX/zoKz\ng/SFLrPipzSGINKWtyMvo7mPjXqqVgE10LDI3VFV8IR6fnART+AF8CW5HMBPGt/s\nfQW4W4puvBHkBxWSW1EvbecgNEIS9hTGvHXkFzm4xJ2e9DHp2xoVAjREC73B7JbF\nhc5ZGGchKw+CFmAiNysU0DmBgQcac0eg2pWoT+YGmTeQj6sRXO67n2xy/hA1DuN6\nA4WBK3wM3O4BnTG0dNbWUEbe7yAbV5gEyq57GhJIeYxRvveVDaX90LoAqM4cUH06\n6rciON0UbDHV2LP/JaH5jzBjUyCnKLLo5snlbwIDAQABAoIBAQDJm7YC3pJJUcxb\nc8x8PlHbUkJUjxzZ5MW4Zb71yLkfRYzsxrTcyQA+g+QzA4KtPY8XrZpnkgm51M8e\n+B16AcIMiBxMC6HgCF503i16LyyJiKrrDYfGy2rTK6AOJQHO3TXWJ3eT3BAGpxuS\n12K2Cq6EvQLCy79iJm7Ks+5G6EggMZPfCVdEhffRm2Epl4T7LpIAqWiUDcDfS05n\nNNfAGxxvALPn+D+kzcSF6hpmCVrFVTf9ouhvnr+0DpIIVPwSK/REAF3Ux5SQvFuL\njPmh3bGwfRtcC5d21QNrHdoBVSN2UBLmbHUpBUcOBI8FyivAWJhRfKnhTvXMFG8L\nwaXB51IZAoGBAP/E3uz6zCyN7l2j09wmbyNOi1AKvr1WSmuBJveITouwblnRSdvc\nsYm4YYE0Vb94AG4n7JIfZLKtTN0xvnCo8tYjrdwMJyGfEfMGCQQ9MpOBXAkVVZvP\ne2k4zHNNsfvSc38UNSt7K0HkVuH5BkRBQeskcsyMeu0qK4wQwdtiCoBDAoGBANF7\nFMppYxSW4ir7Jvkh0P8bP/Z7AtaSmkX7iMmUYT+gMFB5EKqFTQjNQgSJxS/uHVDE\nSC5co8WGHnRk7YH2Pp+Ty1fHfXNWyoOOzNEWvg6CFeMHW2o+/qZd4Z5Fep6qCLaa\nFvzWWC2S5YslEaaP8DQ74aAX4o+/TECrxi0z2lllAoGAdRB6qCSyRsI/k4Rkd6Lv\nw00z3lLMsoRIU6QtXaZ5rN335Awyrfr5F3vYxPZbOOOH7uM/GDJeOJmxUJxv+cia\nPQDflpPJZU4VPRJKFjKcb38JzO6C3Gm+po5kpXGuQQA19LgfDeO2DNaiHZOJFrx3\nm1R3Zr/1k491lwokcHETNVkCgYBPLjrZl6Q/8BhlLrG4kbOx+dbfj/euq5NsyHsX\n1uI7bo1Una5TBjfsD8nYdUr3pwWltcui2pl83Ak+7bdo3G8nWnIOJ/WfVzsNJzj7\n/6CvUzR6sBk5u739nJbfgFutBZBtlSkDQPHrqA7j3Ysibl3ZIJlULjMRKrnj6Ans\npCDwkQKBgQCM7gu3p7veYwCZaxqDMz5/GGFUB1My7sK0hcT7/oH61yw3O8pOekee\nuctI1R3NOudn1cs5TAy/aypgLDYTUGQTiBRILeMiZnOrvQQB9cEf7TFgDoRNCcDs\nV/ZWiegVB/WY7H0BkCekuq5bHwjgtJTpvHGqQ9YD7RhE8RSYOhdQ/Q==\n-----END RSA PRIVATE KEY-----\n',
             cert: '-----BEGIN CERTIFICATE-----\nMIIDBjCCAe4CCQDvLNml6smHlTANBgkqhkiG9w0BAQUFADBFMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0\ncyBQdHkgTHRkMB4XDTE0MDEyNTIxMjIxOFoXDTE1MDEyNTIxMjIxOFowRTELMAkG\nA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0\nIFdpZGdpdHMgUHR5IEx0ZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nANFKslwwqlgyqaDUECv33a9DpBuIFug1Gn8Xbnx/RppF/86Cs4P0hS6z4qc0hiDS\nlrcjL6O5j416qlYBNdCwyN1RVfCEen5wEU/gBfAluRzATxrf7H0FuFuKbrwR5AcV\nkltRL23nIDRCEvYUxrx15Bc5uMSdnvQx6dsaFQI0RAu9weyWxYXOWRhnISsPghZg\nIjcrFNA5gYEHGnNHoNqVqE/mBpk3kI+rEVzuu59scv4QNQ7jegOFgSt8DNzuAZ0x\ntHTW1lBG3u8gG1eYBMquexoSSHmMUb73lQ2l/dC6AKjOHFB9Ouq3IjjdFGwx1diz\n/yWh+Y8wY1Mgpyiy6ObJ5W8CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAoSc6Skb4\ng1e0ZqPKXBV2qbx7hlqIyYpubCl1rDiEdVzqYYZEwmst36fJRRrVaFuAM/1DYAmT\nWMhU+yTfA+vCS4tql9b9zUhPw/IDHpBDWyR01spoZFBF/hE1MGNpCSXXsAbmCiVf\naxrIgR2DNketbDxkQx671KwF1+1JOMo9ffXp+OhuRo5NaGIxhTsZ+f/MA4y084Aj\nDI39av50sTRTWWShlN+J7PtdQVA5SZD97oYbeUeL7gI18kAJww9eUdmT0nEjcwKs\nxsQT1fyKbo7AlZBY4KSlUMuGnn0VnAsB9b+LxtXlDfnjyM8bVQx1uAfRo0DO8p/5\n3J5DTjAU55deBQ==\n-----END CERTIFICATE-----\n'
         };
 
-        var httpsServer = Https.createServer(httpsOptions, function (req, res) {
+        const httpsServer = Https.createServer(httpsOptions, (req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end();
         });
 
-        httpsServer.listen(0, function (err) {
+        httpsServer.listen(0, (err) => {
 
             expect(err).to.not.exist();
 
-            var httpServer = Http.createServer(function (req, res) {
+            const httpServer = Http.createServer((req, res) => {
 
                 res.writeHead(302, { 'Location': 'https://127.0.0.1:' + httpsServer.address().port });
                 res.end();
             });
 
-            httpServer.listen(0, function (err) {
+            httpServer.listen(0, (err) => {
 
                 expect(err).to.not.exist();
 
-                Wreck.request('get', 'http://localhost:' + httpServer.address().port, { redirects: 1, rejectUnauthorized: false }, function (err, res) {
+                Wreck.request('get', 'http://localhost:' + httpServer.address().port, { redirects: 1, rejectUnauthorized: false }, (err, res) => {
 
                     expect(err).to.not.exist();
                     expect(res.statusCode).to.equal(200);
@@ -453,10 +449,10 @@ describe('request()', function () {
         });
     });
 
-    it('handles redirections with relative location', function (done) {
+    it('handles redirections with relative location', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (!gen++) {
                 res.writeHead(301, { 'Location': '/' });
@@ -469,12 +465,12 @@ describe('request()', function () {
             }
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -485,10 +481,10 @@ describe('request()', function () {
         });
     });
 
-    it('reaches max redirections count', function (done) {
+    it('reaches max redirections count', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (gen++ < 2) {
                 res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
@@ -500,9 +496,9 @@ describe('request()', function () {
             }
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, (err, res) => {
 
                 expect(err.message).to.equal('Maximum redirections reached');
                 server.close();
@@ -511,17 +507,17 @@ describe('request()', function () {
         });
     });
 
-    it('handles malformed redirection response', function (done) {
+    it('handles malformed redirection response', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(301);
             res.end();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 }, (err, res) => {
 
                 expect(err.message).to.equal('Received redirection without location');
                 server.close();
@@ -530,10 +526,10 @@ describe('request()', function () {
         });
     });
 
-    it('handles redirections with POST stream payload', function (done) {
+    it('handles redirections with POST stream payload', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (!gen++) {
                 res.writeHead(307, { 'Location': '/' });
@@ -541,21 +537,21 @@ describe('request()', function () {
             }
             else {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
-                Wreck.read(req, null, function (err, res2) {
+                Wreck.read(req, null, (err, res2) => {
 
                     res.end(res2);
                 });
             }
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var payload = new Array(1639).join('0123456789');
-            var stream = Wreck.toReadableStream(payload);
-            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: stream }, function (err, res) {
+            const payload = new Array(1639).join('0123456789');
+            const stream = Wreck.toReadableStream(payload);
+            Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: stream }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(payload);
@@ -566,10 +562,10 @@ describe('request()', function () {
         });
     });
 
-    it('calls beforeRedirect option callback before redirections', function (done) {
+    it('calls beforeRedirect option callback before redirections', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (gen++ < 2) {
                 res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
@@ -584,7 +580,7 @@ describe('request()', function () {
             }
         });
 
-        var beforeRedirectCallback = function (redirectMethod, statusCode, location, redirectOptions) {
+        const beforeRedirectCallback = function (redirectMethod, statusCode, location, redirectOptions) {
 
             expect(redirectMethod).to.equal('GET');
             expect(statusCode).to.equal(301);
@@ -596,12 +592,12 @@ describe('request()', function () {
             };
         };
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -612,10 +608,10 @@ describe('request()', function () {
         });
     });
 
-    it('calls redirected option callback on redirections', function (done) {
+    it('calls redirected option callback on redirections', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (gen++ < 2) {
                 res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
@@ -628,8 +624,8 @@ describe('request()', function () {
             }
         });
 
-        var redirects = 0;
-        var redirectedCallback = function (statusCode, location, req) {
+        let redirects = 0;
+        const redirectedCallback = function (statusCode, location, req) {
 
             expect(statusCode).to.equal(301);
             expect(location).to.equal('http://localhost:' + server.address().port + '/redirected/');
@@ -637,12 +633,12 @@ describe('request()', function () {
             redirects++;
         };
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, redirected: redirectedCallback }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, redirected: redirectedCallback }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -654,28 +650,26 @@ describe('request()', function () {
         });
     });
 
-    it('rejects non-function value for redirected option', function (done) {
+    it('rejects non-function value for redirected option', (done) => {
 
-        var fn = function () {
+        expect(() => {
 
-            Wreck.request('get', 'https://google.com', { redirects: 1, redirected: true }, function (err, res) { });
-        };
-
-        expect(fn).to.throw();
+            Wreck.request('get', 'https://google.com', { redirects: 1, redirected: true }, (err, res) => { });
+        }).to.throw();
         done();
     });
 
-    it('handles request errors with a boom response', function (done) {
+    it('handles request errors with a boom response', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             req.destroy();
             res.end();
         });
 
-        server.once('listening', function () {
+        server.once('listening', () => {
 
-            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, function (err) {
+            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, (err) => {
 
                 expect(err.code).to.equal('ECONNRESET');
                 done();
@@ -685,17 +679,17 @@ describe('request()', function () {
         server.listen(0);
     });
 
-    it('handles request errors with a boom response when payload is being sent', function (done) {
+    it('handles request errors with a boom response when payload is being sent', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             req.destroy();
             res.end();
         });
 
-        server.once('listening', function () {
+        server.once('listening', () => {
 
-            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, function (err) {
+            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, (err) => {
 
                 expect(err.code).to.equal('ECONNRESET');
                 done();
@@ -705,16 +699,16 @@ describe('request()', function () {
         server.listen(0);
     });
 
-    it('handles response errors with a boom response', function (done) {
+    it('handles response errors with a boom response', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.destroy();
         });
 
-        server.once('listening', function () {
+        server.once('listening', () => {
 
-            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, function (err) {
+            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, (err) => {
 
                 expect(err.code).to.equal('ECONNRESET');
                 done();
@@ -724,33 +718,33 @@ describe('request()', function () {
         server.listen(0);
     });
 
-    it('handles errors when remote server is unavailable', function (done) {
+    it('handles errors when remote server is unavailable', (done) => {
 
-        Wreck.request('get', 'http://127.0.0.1:10', { payload: '' }, function (err) {
+        Wreck.request('get', 'http://127.0.0.1:10', { payload: '' }, (err) => {
 
             expect(err).to.exist();
             done();
         });
     });
 
-    it('handles a timeout during a socket close', function (done) {
+    it('handles a timeout during a socket close', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
-            req.once('error', function () { });
-            res.once('error', function () { });
+            req.once('error', () => { });
+            res.once('error', () => { });
 
-            setTimeout(function () {
+            setTimeout(() => {
 
                 req.destroy();
             }, 5);
         });
 
-        server.once('error', function () { });
+        server.once('error', () => { });
 
-        server.once('listening', function () {
+        server.once('listening', () => {
 
-            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '', timeout: 5 }, function (err) {
+            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '', timeout: 5 }, (err) => {
 
                 expect(err).to.exist();
                 server.close();
@@ -762,24 +756,24 @@ describe('request()', function () {
         server.listen(0);
     });
 
-    it('handles an error after a timeout', function (done) {
+    it('handles an error after a timeout', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
-            req.once('error', function () { });
-            res.once('error', function () { });
+            req.once('error', () => { });
+            res.once('error', () => { });
 
-            setTimeout(function () {
+            setTimeout(() => {
 
                 res.socket.write('ERROR');
             }, 5);
         });
 
-        server.once('error', function () { });
+        server.once('error', () => { });
 
-        server.once('listening', function () {
+        server.once('listening', () => {
 
-            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '', timeout: 5 }, function (err) {
+            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '', timeout: 5 }, (err) => {
 
                 expect(err).to.exist();
                 server.close();
@@ -791,14 +785,14 @@ describe('request()', function () {
         server.listen(0);
     });
 
-    it('allows request without a callback', function (done) {
+    it('allows request without a callback', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.end('ok');
         });
 
-        server.once('listening', function () {
+        server.once('listening', () => {
 
             Wreck.request('get', 'http://127.0.0.1:' + server.address().port);
             done();
@@ -807,17 +801,17 @@ describe('request()', function () {
         server.listen(0);
     });
 
-    it('requests can be aborted', function (done) {
+    it('requests can be aborted', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var req = Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err) {
+            const req = Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err) => {
 
                 expect(err).to.exist();
                 expect(err.code).to.equal('ECONNRESET');
@@ -828,17 +822,17 @@ describe('request()', function () {
         });
     });
 
-    it('request shortcuts can be aborted', function (done) {
+    it('request shortcuts can be aborted', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var req = Wreck.get('http://localhost:' + server.address().port, function (err) {
+            const req = Wreck.get('http://localhost:' + server.address().port, (err) => {
 
                 expect(err).to.exist();
                 expect(err.code).to.equal('ECONNRESET');
@@ -849,10 +843,10 @@ describe('request()', function () {
         });
     });
 
-    it('in-progress requests can be aborted', function (done) {
+    it('in-progress requests can be aborted', (done) => {
 
-        var wreck;
-        var server = Http.createServer(function (req, res) {
+        let wreck;
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end();
@@ -860,9 +854,9 @@ describe('request()', function () {
             wreck.abort();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            wreck = Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err) {
+            wreck = Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err) => {
 
                 expect(err).to.exist();
                 expect(err.code).to.equal('ECONNRESET');
@@ -871,22 +865,22 @@ describe('request()', function () {
         });
     });
 
-    it('uses agent option', function (done) {
+    it('uses agent option', (done) => {
 
-        var agent = new Http.Agent();
+        const agent = new Http.Agent();
         expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        Wreck.request('get', 'http://localhost/', { agent: agent }, function (err, res) {
+        Wreck.request('get', 'http://localhost/', { agent: agent }, (err, res) => {
 
             expect(Object.keys(agent.sockets).length).to.equal(1);
             done();
         });
     });
 
-    it('applies agent option when redirected', function (done) {
+    it('applies agent option when redirected', (done) => {
 
-        var gen = 0;
-        var server = Http.createServer(function (req, res) {
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
 
             if (!gen++) {
                 res.writeHead(301, { 'Location': '/' });
@@ -898,18 +892,18 @@ describe('request()', function () {
             }
         });
 
-        var agent = new Http.Agent();
-        var requestCount = 0;
-        var addRequest = agent.addRequest;
+        const agent = new Http.Agent();
+        let requestCount = 0;
+        const addRequest = agent.addRequest;
         agent.addRequest = function () {
 
             requestCount++;
             addRequest.apply(agent, arguments);
         };
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, agent: agent }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, agent: agent }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -920,11 +914,11 @@ describe('request()', function () {
         });
     });
 
-    it('pooling can be disabled by setting agent to false', function (done) {
+    it('pooling can be disabled by setting agent to false', (done) => {
 
-        var complete;
+        let complete;
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.write('foo');
@@ -935,15 +929,15 @@ describe('request()', function () {
             };
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
                 expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
 
-                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 }, function (err, innerRes) {
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 }, (err, innerRes) => {
 
                     expect(err).to.not.exist();
 
@@ -952,9 +946,9 @@ describe('request()', function () {
 
                     complete();
 
-                    Wreck.read(res, null, function () {
+                    Wreck.read(res, null, () => {
 
-                        setTimeout(function () {
+                        setTimeout(() => {
 
                             expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
                             expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
@@ -967,22 +961,22 @@ describe('request()', function () {
         });
     });
 
-    it('requests payload in buffer', function (done) {
+    it('requests payload in buffer', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             req.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var buf = new Buffer(internals.payload, 'ascii');
+            const buf = new Buffer(internals.payload, 'ascii');
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal(internals.payload);
@@ -993,22 +987,20 @@ describe('request()', function () {
         });
     });
 
-    it('requests head method', function (done) {
+    it('requests head method', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             req.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var buf = new Buffer(internals.payload, 'ascii');
-
-            Wreck.request('head', 'http://localhost:' + server.address().port, { payload: null }, function (err, res) {
+            Wreck.request('head', 'http://localhost:' + server.address().port, { payload: null }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal('');
@@ -1019,20 +1011,20 @@ describe('request()', function () {
         });
     });
 
-    it('post null payload', function (done) {
+    it('post null payload', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.statusCode = 500;
             res.end();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null }, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
                     expect(body.toString()).to.equal('');
@@ -1043,11 +1035,11 @@ describe('request()', function () {
         });
     });
 
-    it('handles read timeout', function (done) {
+    it('handles read timeout', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
-            setTimeout(function () {
+            setTimeout(() => {
 
                 res.writeHead(200);
                 res.write(internals.payload);
@@ -1055,9 +1047,9 @@ describe('request()', function () {
             }, 2000);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, (err, res) => {
 
                 expect(err).to.exist();
                 expect(err.output.statusCode).to.equal(504);
@@ -1066,11 +1058,11 @@ describe('request()', function () {
         });
     });
 
-    it('cleans socket on agent deferred read timeout', function (done) {
+    it('cleans socket on agent deferred read timeout', (done) => {
 
-        var complete;
+        let complete;
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.write('foo');
@@ -1081,18 +1073,18 @@ describe('request()', function () {
             };
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var agent = new Http.Agent({ maxSockets: 1 });
+            const agent = new Http.Agent({ maxSockets: 1 });
             expect(Object.keys(agent.sockets).length).to.equal(0);
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(Object.keys(agent.sockets).length).to.equal(1);
                 expect(Object.keys(agent.requests).length).to.equal(0);
 
-                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, function (err, innerRes) {
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, (err, innerRes) => {
 
                     expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(504);
@@ -1102,9 +1094,9 @@ describe('request()', function () {
 
                     complete();
 
-                    Wreck.read(res, null, function () {
+                    Wreck.read(res, null, () => {
 
-                        setTimeout(function () {
+                        setTimeout(() => {
 
                             expect(Object.keys(agent.sockets).length).to.equal(0);
                             expect(Object.keys(agent.requests).length).to.equal(0);
@@ -1117,18 +1109,18 @@ describe('request()', function () {
         });
     });
 
-    it('defaults maxSockets to Infinity', function (done) {
+    it('defaults maxSockets to Infinity', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.write(internals.payload);
             res.end();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1138,11 +1130,11 @@ describe('request()', function () {
         });
     });
 
-    it('maxSockets on default agents can be changed', function (done) {
+    it('maxSockets on default agents can be changed', (done) => {
 
-        var complete;
+        let complete;
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.write('foo');
@@ -1153,22 +1145,22 @@ describe('request()', function () {
             };
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
             Wreck.agents.http.maxSockets = 1;
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 }, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 }, (err, res) => {
 
                 expect(err).to.not.exist();
 
-                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 }, function (err, innerRes) {
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 }, (err, innerRes) => {
 
                     expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(504);
 
                     complete();
 
-                    Wreck.read(res, null, function () {
+                    Wreck.read(res, null, () => {
 
                         Wreck.agents.http.maxSockets = Infinity;
                         done();
@@ -1179,74 +1171,74 @@ describe('request()', function () {
     });
 });
 
-describe('options.baseUrl', function () {
+describe('options.baseUrl', () => {
 
-    it('uses baseUrl option with trailing slash and uri is prefixed with a slash', function (done) {
+    it('uses baseUrl option with trailing slash and uri is prefixed with a slash', (done) => {
 
-        var r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost/' }, function (err, res) {
+        const r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost/' }, (err, res) => {
 
             expect(r._headers.host).to.equal('localhost');
             done();
         });
     });
 
-    it('uses baseUrl option without trailing slash and uri is prefixed with a slash', function (done) {
+    it('uses baseUrl option without trailing slash and uri is prefixed with a slash', (done) => {
 
-        var request = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
-
-        expect(request._headers.host).to.equal('localhost');
-        expect(request.path).to.equal('/foo');
-        done();
-    });
-
-    it('uses baseUrl option with trailing slash and uri is prefixed without a slash', function (done) {
-
-        var request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' }, Hoek.ignore);
+        const request = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
         expect(request._headers.host).to.equal('localhost');
         expect(request.path).to.equal('/foo');
         done();
     });
 
-    it('uses baseUrl option without trailing slash and uri is prefixed without a slash', function (done) {
+    it('uses baseUrl option with trailing slash and uri is prefixed without a slash', (done) => {
 
-        var request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
+        const request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' }, Hoek.ignore);
 
         expect(request._headers.host).to.equal('localhost');
         expect(request.path).to.equal('/foo');
         done();
     });
 
-    it('uses baseUrl option when uri is an empty string', function (done) {
+    it('uses baseUrl option without trailing slash and uri is prefixed without a slash', (done) => {
 
-        var request = Wreck.request('get', '', { baseUrl: 'http://localhost' }, Hoek.ignore);
+        const request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
+
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo');
+        done();
+    });
+
+    it('uses baseUrl option when uri is an empty string', (done) => {
+
+        const request = Wreck.request('get', '', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
         expect(request._headers.host).to.equal('localhost');
         expect(request.path).to.equal('/');
         done();
     });
 
-    it('uses baseUrl option with a path', function (done) {
+    it('uses baseUrl option with a path', (done) => {
 
-        var request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
-
-        expect(request._headers.host).to.equal('localhost');
-        expect(request.path).to.equal('/foo/bar');
-        done();
-    });
-
-    it('uses baseUrl option with a path and removes extra slashes', function (done) {
-
-        var request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo/' }, Hoek.ignore);
+        const request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
 
         expect(request._headers.host).to.equal('localhost');
         expect(request.path).to.equal('/foo/bar');
         done();
     });
 
-    it('uses baseUrl option with a url that has a querystring', function (done) {
+    it('uses baseUrl option with a path and removes extra slashes', (done) => {
 
-        var request = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
+        const request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo/' }, Hoek.ignore);
+
+        expect(request._headers.host).to.equal('localhost');
+        expect(request.path).to.equal('/foo/bar');
+        done();
+    });
+
+    it('uses baseUrl option with a url that has a querystring', (done) => {
+
+        const request = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
 
         expect(request._headers.host).to.equal('localhost');
         expect(request.path).to.equal('/foo/bar?test=hello');
@@ -1254,14 +1246,14 @@ describe('options.baseUrl', function () {
     });
 });
 
-describe('read()', function () {
+describe('read()', () => {
 
-    it('handles errors with a boom response', function (done) {
+    it('handles errors with a boom response', (done) => {
 
-        var res = new Events.EventEmitter();
+        const res = new Events.EventEmitter();
         res.pipe = function () { };
 
-        Wreck.read(res, null, function (err) {
+        Wreck.read(res, null, (err) => {
 
             expect(err.isBoom).to.equal(true);
             done();
@@ -1270,12 +1262,12 @@ describe('read()', function () {
         res.emit('error', new Error('my error'));
     });
 
-    it('handles responses that close early', function (done) {
+    it('handles responses that close early', (done) => {
 
-        var res = new Events.EventEmitter();
+        const res = new Events.EventEmitter();
         res.pipe = function () { };
 
-        Wreck.read(res, null, function (err) {
+        Wreck.read(res, null, (err) => {
 
             expect(err.isBoom).to.equal(true);
             done();
@@ -1284,20 +1276,20 @@ describe('read()', function () {
         res.emit('close');
     });
 
-    it('times out when stream read takes too long', function (done) {
+    it('times out when stream read takes too long', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.write(internals.payload);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, { timeout: 100 }, function (err, body) {
+                Wreck.read(res, { timeout: 100 }, (err, body) => {
 
                     expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(408);
@@ -1309,21 +1301,21 @@ describe('read()', function () {
         });
     });
 
-    it('errors when stream is too big', function (done) {
+    it('errors when stream is too big', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.write(internals.payload);
             res.end(internals.payload);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
-                Wreck.read(res, { maxBytes: 120 }, function (err, body) {
+                Wreck.read(res, { maxBytes: 120 }, (err, body) => {
 
                     expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(400);
@@ -1335,26 +1327,26 @@ describe('read()', function () {
         });
     });
 
-    it('reads a file streamed via HTTP', function (done) {
+    it('reads a file streamed via HTTP', (done) => {
 
-        var path = Path.join(__dirname, '../images/wreck.png');
-        var stats = Fs.statSync(path);
-        var fileStream = Fs.createReadStream(path);
+        const path = Path.join(__dirname, '../images/wreck.png');
+        const stats = Fs.statSync(path);
+        const fileStream = Fs.createReadStream(path);
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             fileStream.pipe(res);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
 
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(body.length).to.equal(stats.size);
                     server.close();
@@ -1364,31 +1356,31 @@ describe('read()', function () {
         });
     });
 
-    it('reads a multiple buffers response', function (done) {
+    it('reads a multiple buffers response', (done) => {
 
-        var path = Path.join(__dirname, '../images/wreck.png');
-        var stats = Fs.statSync(path);
-        var file = Fs.readFileSync(path);
+        const path = Path.join(__dirname, '../images/wreck.png');
+        const stats = Fs.statSync(path);
+        const file = Fs.readFileSync(path);
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.write(file);
-            setTimeout(function () {
+            setTimeout(() => {
 
                 res.write(file);
                 res.end();
             }, 100);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
 
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(body.length).to.equal(stats.size * 2);
                     server.close();
@@ -1398,30 +1390,30 @@ describe('read()', function () {
         });
     });
 
-    it('writes a file streamed via HTTP', function (done) {
+    it('writes a file streamed via HTTP', (done) => {
 
-        var path = Path.join(__dirname, '../images/wreck.png');
-        var stats = Fs.statSync(path);
-        var fileStream = Fs.createReadStream(path);
+        const path = Path.join(__dirname, '../images/wreck.png');
+        const stats = Fs.statSync(path);
+        const fileStream = Fs.createReadStream(path);
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
 
-            Wreck.read(req, null, function (err, body) {
+            Wreck.read(req, null, (err, body) => {
 
                 res.end(body);
             });
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: fileStream }, function (err, res) {
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload: fileStream }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
 
-                Wreck.read(res, null, function (err, body) {
+                Wreck.read(res, null, (err, body) => {
 
                     expect(body.length).to.equal(stats.size);
                     server.close();
@@ -1431,33 +1423,33 @@ describe('read()', function () {
         });
     });
 
-    it('handles responses with no headers', function (done) {
+    it('handles responses with no headers', (done) => {
 
-        var res = Wreck.toReadableStream(internals.payload);
-        Wreck.read(res, { json: true }, function (err) {
+        const res = Wreck.toReadableStream(internals.payload);
+        Wreck.read(res, { json: true }, (err) => {
 
             expect(err).to.equal(null);
             done();
         });
     });
 
-    it('skips destroy when not available', function (done) {
+    it('skips destroy when not available', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.write(internals.payload);
             res.end(internals.payload);
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, {}, function (err, res) {
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
 
                 expect(err).to.not.exist();
 
                 res.destroy = null;
-                Wreck.read(res, { maxBytes: 120 }, function (err, body) {
+                Wreck.read(res, { maxBytes: 120 }, (err, body) => {
 
                     expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(400);
@@ -1470,54 +1462,54 @@ describe('read()', function () {
     });
 });
 
-describe('parseCacheControl()', function () {
+describe('parseCacheControl()', () => {
 
-    it('parses valid header', function (done) {
+    it('parses valid header', (done) => {
 
-        var header = Wreck.parseCacheControl('must-revalidate, max-age=3600');
+        const header = Wreck.parseCacheControl('must-revalidate, max-age=3600');
         expect(header).to.exist();
         expect(header['must-revalidate']).to.equal(true);
         expect(header['max-age']).to.equal(3600);
         done();
     });
 
-    it('parses valid header with quoted string', function (done) {
+    it('parses valid header with quoted string', (done) => {
 
-        var header = Wreck.parseCacheControl('must-revalidate, max-age="3600"');
+        const header = Wreck.parseCacheControl('must-revalidate, max-age="3600"');
         expect(header).to.exist();
         expect(header['must-revalidate']).to.equal(true);
         expect(header['max-age']).to.equal(3600);
         done();
     });
 
-    it('errors on invalid header', function (done) {
+    it('errors on invalid header', (done) => {
 
-        var header = Wreck.parseCacheControl('must-revalidate, b =3600');
+        const header = Wreck.parseCacheControl('must-revalidate, b =3600');
         expect(header).to.not.exist();
         done();
     });
 
-    it('errors on invalid max-age', function (done) {
+    it('errors on invalid max-age', (done) => {
 
-        var header = Wreck.parseCacheControl('must-revalidate, max-age=a3600');
+        const header = Wreck.parseCacheControl('must-revalidate, max-age=a3600');
         expect(header).to.not.exist();
         done();
     });
 });
 
-describe('Shortcut', function () {
+describe('Shortcut', () => {
 
-    it('get request', function (done) {
+    it('get request', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.get('http://localhost:' + server.address().port, function (err, res, payload) {
+            Wreck.get('http://localhost:' + server.address().port, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1528,17 +1520,17 @@ describe('Shortcut', function () {
         });
     });
 
-    it('post request', function (done) {
+    it('post request', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.post('http://localhost:' + server.address().port, { payload: '123' }, function (err, res, payload) {
+            Wreck.post('http://localhost:' + server.address().port, { payload: '123' }, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1549,17 +1541,17 @@ describe('Shortcut', function () {
         });
     });
 
-    it('patch request', function (done) {
+    it('patch request', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.patch('http://localhost:' + server.address().port, { payload: '123' }, function (err, res, payload) {
+            Wreck.patch('http://localhost:' + server.address().port, { payload: '123' }, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1570,17 +1562,17 @@ describe('Shortcut', function () {
         });
     });
 
-    it('put request', function (done) {
+    it('put request', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.put('http://localhost:' + server.address().port, function (err, res, payload) {
+            Wreck.put('http://localhost:' + server.address().port, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1591,17 +1583,17 @@ describe('Shortcut', function () {
         });
     });
 
-    it('delete request', function (done) {
+    it('delete request', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.delete('http://localhost:' + server.address().port, function (err, res, payload) {
+            Wreck.delete('http://localhost:' + server.address().port, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1612,20 +1604,20 @@ describe('Shortcut', function () {
         });
     });
 
-    it('errors on bad request', function (done) {
+    it('errors on bad request', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
+            const port = server.address().port;
             server.close();
 
-            Wreck.get('http://localhost:' + port, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, (err, res, payload) => {
 
                 expect(err).to.exist();
                 done();
@@ -1634,24 +1626,24 @@ describe('Shortcut', function () {
     });
 });
 
-describe('json', function () {
+describe('json', () => {
 
-    it('json requested and received', function (done) {
+    it('json requested and received', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ foo: 'bar' }));
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: true
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1663,22 +1655,22 @@ describe('json', function () {
         });
     });
 
-    it('json-based type requested and received', function (done) {
+    it('json-based type requested and received', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'application/vnd.api+json' });
             res.end(JSON.stringify({ foo: 'bar' }));
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: true
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1690,22 +1682,22 @@ describe('json', function () {
         });
     });
 
-    it('json requested but not received - flag is ignored', function (done) {
+    it('json requested but not received - flag is ignored', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: true
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1716,22 +1708,22 @@ describe('json', function () {
         });
     });
 
-    it('invalid json received', function (done) {
+    it('invalid json received', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: true
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.exist();
                 server.close();
@@ -1740,22 +1732,22 @@ describe('json', function () {
         });
     });
 
-    it('json not requested but received as string', function (done) {
+    it('json not requested but received as string', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ foo: 'bar' }));
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: false
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1766,22 +1758,22 @@ describe('json', function () {
         });
     });
 
-    it('should not be parsed on empty buffer', function (done) {
+    it('should not be parsed on empty buffer', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(204, { 'Content-Type': 'application/json' });
             res.end();
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: 'SMART'
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(204);
@@ -1792,22 +1784,22 @@ describe('json', function () {
         });
     });
 
-    it('will try to parse json in "force" mode, regardless of the header', function (done) {
+    it('will try to parse json in "force" mode, regardless of the header', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end(JSON.stringify({ foo: 'bar' }));
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: 'force'
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1821,22 +1813,22 @@ describe('json', function () {
         });
     });
 
-    it('will error on invalid json received in "force" mode', function (done) {
+    it('will error on invalid json received in "force" mode', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end('ok');
         });
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            var port = server.address().port;
-            var options = {
+            const port = server.address().port;
+            const options = {
                 json: 'force'
             };
 
-            Wreck.get('http://localhost:' + port, options, function (err, res, payload) {
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
 
                 expect(err).to.exist();
                 server.close();
@@ -1846,33 +1838,32 @@ describe('json', function () {
     });
 });
 
-describe('toReadableStream()', function () {
+describe('toReadableStream()', () => {
 
-    it('handle empty payload', function (done) {
+    it('handle empty payload', (done) => {
 
-        var stream = Wreck.toReadableStream();
+        const stream = Wreck.toReadableStream();
         expect(stream instanceof Stream).to.be.true();
-        var read = stream.read();                           // Make sure read has no problems
+        const read = stream.read();                           // Make sure read has no problems
         expect(read).to.be.null();
         done();
     });
 
-    it('handle explicit encoding', function (done) {
+    it('handle explicit encoding', (done) => {
 
-        var data = 'Hello';
-        var buf = new Buffer(data, 'ascii');
-        var stream = Wreck.toReadableStream(data, 'ascii');
+        const data = 'Hello';
+        const stream = Wreck.toReadableStream(data, 'ascii');
         expect(stream instanceof Stream).to.be.true();
-        var read = stream.read();
+        const read = stream.read();
         expect(read.toString()).to.equal(data);
         done();
     });
 
-    it('chunks to requested size', function (done) {
+    it('chunks to requested size', (done) => {
 
-        var buf;
-        var data = new Array(101).join('0123456789');
-        var stream = Wreck.toReadableStream(data);
+        let buf;
+        const data = new Array(101).join('0123456789');
+        const stream = Wreck.toReadableStream(data);
 
         buf = stream.read(100);
         expect(buf.length).to.equal(100);
@@ -1890,17 +1881,17 @@ describe('toReadableStream()', function () {
     });
 });
 
-describe('Events', function () {
+describe('Events', () => {
 
-    it('emits response event when wreck is finished', function (done) {
+    it('emits response event when wreck is finished', (done) => {
 
-        var server = Http.createServer(function (req, res) {
+        const server = Http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end('ok');
         });
 
-        Wreck.once('response', function (err, req, res, start, uri) {
+        Wreck.once('response', (err, req, res, start, uri) => {
 
             expect(err).to.not.exist();
             expect(req).to.exist();
@@ -1911,9 +1902,9 @@ describe('Events', function () {
         });
 
 
-        server.listen(0, function () {
+        server.listen(0, () => {
 
-            Wreck.put('http://localhost:' + server.address().port, function (err, res, payload) {
+            Wreck.put('http://localhost:' + server.address().port, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1923,9 +1914,9 @@ describe('Events', function () {
         });
     });
 
-    it('response event includes error when it occurs', { timeout: 2500 }, function (done) {
+    it('response event includes error when it occurs', { timeout: 2500 }, (done) => {
 
-        Wreck.once('response', function (err, req, res) {
+        Wreck.once('response', (err, req, res) => {
 
             expect(err).to.exist();
             expect(req).to.exist();
@@ -1933,17 +1924,17 @@ describe('Events', function () {
             done();
         });
 
-        Wreck.get('http://0', function (err) {
+        Wreck.get('http://no_such_domain_name_ever', (err) => {
 
             expect(err).to.exist();
         });
 
     });
 
-    it('multiple requests execute the same response handler', { timeout: 5000 }, function (done) {
+    it('multiple requests execute the same response handler', { timeout: 5000 }, (done) => {
 
-        var count = 0;
-        var handler = function (err, req, res) {
+        let count = 0;
+        const handler = (err, req, res) => {
 
             expect(err).to.exist();
             expect(req).to.exist();
@@ -1953,11 +1944,11 @@ describe('Events', function () {
 
         Wreck.on('response', handler);
 
-        Wreck.get('http://0', function (err) {
+        Wreck.get('http://no_such_domain_name_ever', (err) => {
 
             expect(err).to.exist();
 
-            Wreck.get('http://0', function (err) {
+            Wreck.get('http://no_such_domain_name_ever', (err) => {
 
                 expect(err).to.exist();
                 expect(count).to.equal(2);
@@ -1967,42 +1958,40 @@ describe('Events', function () {
         });
     });
 
-    it('rejects attempts to use defaults without an options hash', function (done) {
+    it('rejects attempts to use defaults without an options hash', (done) => {
 
-        var fn = function () {
+        expect(() => {
 
             Wreck.defaults();
-        };
-
-        expect(fn).to.throw();
+        }).to.throw();
         done();
     });
 
-    it('respects defaults without bleeding across instances', function (done) {
+    it('respects defaults without bleeding across instances', (done) => {
 
-        var optionsA = { headers: { foo: 123 } };
-        var optionsB = { headers: { bar: 321 } };
+        const optionsA = { headers: { foo: 123 } };
+        const optionsB = { headers: { bar: 321 } };
 
-        var wreckA = Wreck.defaults(optionsA);
-        var wreckB = Wreck.defaults(optionsB);
-        var wreckAB = wreckA.defaults(optionsB);
+        const wreckA = Wreck.defaults(optionsA);
+        const wreckB = Wreck.defaults(optionsB);
+        const wreckAB = wreckA.defaults(optionsB);
 
-        // var agent = new Http.Agent();
+        // const agent = new Http.Agent();
         // expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        var req1 = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
+        const req1 = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, (err) => {
 
             expect(req1._headers.banana).to.exist();
             expect(req1._headers.foo).to.exist();
             expect(req1._headers.bar).to.not.exist();
 
-            var req2 = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
+            const req2 = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, (err) => {
 
                 expect(req2._headers.banana).to.exist();
                 expect(req2._headers.foo).to.not.exist();
                 expect(req2._headers.bar).to.exist();
 
-                var req3 = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, function (err) {
+                const req3 = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, (err) => {
 
                     expect(req3._headers.banana).to.exist();
                     expect(req3._headers.foo).to.exist();
