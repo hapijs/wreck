@@ -175,7 +175,10 @@ describe('request()', () => {
 
         expect(() => {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, (err, res) => { });
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() }, (err, res) => {
+
+                expect(err).to.not.exist();
+            });
         }).to.throw();
         done();
     });
@@ -184,7 +187,10 @@ describe('request()', () => {
 
         expect(() => {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, (err, res) => { });
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false }, (err, res) => {
+
+                expect(err).to.not.exist();
+            });
         }).to.throw();
         done();
     });
@@ -193,7 +199,10 @@ describe('request()', () => {
 
         expect(() => {
 
-            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, (err, res) => { });
+            Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null }, (err, res) => {
+
+                expect(err).to.not.exist();
+            });
         }).to.not.throw();
         done();
     });
@@ -539,6 +548,7 @@ describe('request()', () => {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 Wreck.read(req, null, (err, res2) => {
 
+                    expect(err).to.not.exist();
                     res.end(res2);
                 });
             }
@@ -654,7 +664,10 @@ describe('request()', () => {
 
         expect(() => {
 
-            Wreck.request('get', 'https://google.com', { redirects: 1, redirected: true }, (err, res) => { });
+            Wreck.request('get', 'https://google.com', { redirects: 1, redirected: true }, (err, res) => {
+
+                expect(err).to.not.exist();
+            });
         }).to.throw();
         done();
     });
@@ -870,8 +883,9 @@ describe('request()', () => {
         const agent = new Http.Agent();
         expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        Wreck.request('get', 'http://localhost/', { agent: agent }, (err, res) => {
+        Wreck.request('get', 'http://localhost:0/', { agent: agent }, (err, res) => {
 
+            expect(err).to.exist();
             expect(Object.keys(agent.sockets).length).to.equal(1);
             done();
         });
@@ -1175,9 +1189,10 @@ describe('options.baseUrl', () => {
 
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', (done) => {
 
-        const r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost/' }, (err, res) => {
+        const r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/' }, (err, res) => {
 
-            expect(r._headers.host).to.equal('localhost');
+            expect(err).to.exist();         // Can't connect
+            expect(r._headers.host).to.equal('localhost:0');
             done();
         });
     });
@@ -1348,6 +1363,7 @@ describe('read()', () => {
 
                 Wreck.read(res, null, (err, body) => {
 
+                    expect(err).to.not.exist();
                     expect(body.length).to.equal(stats.size);
                     server.close();
                     done();
@@ -1382,6 +1398,7 @@ describe('read()', () => {
 
                 Wreck.read(res, null, (err, body) => {
 
+                    expect(err).to.not.exist();
                     expect(body.length).to.equal(stats.size * 2);
                     server.close();
                     done();
@@ -1402,6 +1419,7 @@ describe('read()', () => {
 
             Wreck.read(req, null, (err, body) => {
 
+                expect(err).to.not.exist();
                 res.end(body);
             });
         });
@@ -1415,6 +1433,7 @@ describe('read()', () => {
 
                 Wreck.read(res, null, (err, body) => {
 
+                    expect(err).to.not.exist();
                     expect(body.length).to.equal(stats.size);
                     server.close();
                     done();
@@ -1982,20 +2001,23 @@ describe('Defaults', () => {
         // const agent = new Http.Agent();
         // expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        const req1 = wreckA.request('get', 'http://localhost/', { headers: { banana: 911 } }, (err) => {
+        const req1 = wreckA.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
+            expect(err).to.exist();
             expect(req1._headers.banana).to.exist();
             expect(req1._headers.foo).to.exist();
             expect(req1._headers.bar).to.not.exist();
 
-            const req2 = wreckB.request('get', 'http://localhost/', { headers: { banana: 911 } }, (err) => {
+            const req2 = wreckB.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
+                expect(err).to.exist();
                 expect(req2._headers.banana).to.exist();
                 expect(req2._headers.foo).to.not.exist();
                 expect(req2._headers.bar).to.exist();
 
-                const req3 = wreckAB.request('get', 'http://localhost/', { headers: { banana: 911 } }, (err) => {
+                const req3 = wreckAB.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
+                    expect(err).to.exist();
                     expect(req3._headers.banana).to.exist();
                     expect(req3._headers.foo).to.exist();
                     expect(req3._headers.bar).to.exist();
@@ -2013,8 +2035,9 @@ describe('Defaults', () => {
 
         const wreckA = Wreck.defaults(optionsA);
 
-        const req1 = wreckA.request('get', 'http://localhost/', optionsB, (err) => {
+        const req1 = wreckA.request('get', 'http://localhost:0/', optionsB, (err) => {
 
+            expect(err).to.exist();
             expect(req1._headers.accept).to.equal('bar');
             expect(req1._headers.test).to.equal(123);
 
