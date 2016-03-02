@@ -1957,6 +1957,9 @@ describe('Events', () => {
             });
         });
     });
+});
+
+describe('Defaults', () => {
 
     it('rejects attempts to use defaults without an options hash', (done) => {
 
@@ -2000,6 +2003,22 @@ describe('Events', () => {
                     done();
                 });
             });
+        });
+    });
+
+    it('applies defaults correctly to requests', (done) => {
+
+        const optionsA = { headers: { Accept: 'foo', 'Test': 123 } };
+        const optionsB = { headers: { Accept: 'bar' } };
+
+        const wreckA = Wreck.defaults(optionsA);
+
+        const req1 = wreckA.request('get', 'http://localhost/', optionsB, (err) => {
+
+            expect(req1._headers.accept).to.equal('bar');
+            expect(req1._headers.test).to.equal(123);
+
+            done();
         });
     });
 });
