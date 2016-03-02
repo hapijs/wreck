@@ -1957,6 +1957,9 @@ describe('Events', () => {
             });
         });
     });
+});
+
+describe('Defaults', () => {
 
     it('rejects attempts to use defaults without an options hash', (done) => {
 
