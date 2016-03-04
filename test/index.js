@@ -107,6 +107,32 @@ describe('request()', () => {
         });
     });
 
+    it('should not overwrite content-length if it is already in the headers', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            expect(req.headers['content-length']).to.equal('16390');
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            req.pipe(res);
+        });
+
+        server.listen(0, () => {
+
+            const options = { payload: internals.payload, headers: { 'content-length': '16390' } };
+            Wreck.request('post', 'http://localhost:' + server.address().port, options, (err, res) => {
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, (err, body) => {
+
+                    expect(err).to.not.exist();
+                    expect(body.toString()).to.equal(internals.payload);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
     it('requests a POST resource with headers', (done) => {
 
         const server = Http.createServer((req, res) => {
