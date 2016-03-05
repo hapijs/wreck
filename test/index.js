@@ -118,7 +118,7 @@ describe('request()', () => {
 
         server.listen(0, () => {
 
-            const options = { payload: internals.payload, headers: { 'content-length': '16390' } };
+            const options = { payload: internals.payload, headers: { 'Content-Length': '16390' } };
             Wreck.request('post', 'http://localhost:' + server.address().port, options, (err, res) => {
 
                 expect(err).to.not.exist();
@@ -247,7 +247,7 @@ describe('request()', () => {
         });
     });
 
-    it('requests an https resource with secure protocol set', (done) => {
+    it('requests an https resource with secure protocol set', { timeout: 5000 }, (done) => {
 
         Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv23_method' }, (err, res) => {
 
