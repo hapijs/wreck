@@ -13,8 +13,8 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "boom": "3.1.x",
-    "hoek": "3.0.x"
+    "boom": "3.x.x",
+    "hoek": "3.x.x"
   },
   "devDependencies": {
     "code": "2.x.x",
