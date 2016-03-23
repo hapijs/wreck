@@ -23,7 +23,7 @@ Wreck.get('https://google.com/', function (err, res, payload) {
 var Wreck = require('wreck');
 
 var method = 'GET'; // GET, POST, PUT, DELETE
-var uri    = 'https://google.com/';
+var uri    = '/';
 var readableStream = Wreck.toReadableStream('foo=bar');
 
 var wreck = Wreck.defaults({
@@ -37,9 +37,7 @@ var wreckWithTimeout = wreck.defaults({
 
 // all attributes are optional
 var options = {
-    baseUrl:   fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
-               If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
-               querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
+    baseUrl:   "https://www.example.com",
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
     redirects: 3,
@@ -79,11 +77,12 @@ Initiate an HTTP request.
 - `options` - An optional configuration object. To omit this argument but still
   use a callback, pass `null` in this position. The options object supports the
   following optional keys:
+    - `baseUrl` - fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
+                  If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
+                  querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
+    - `socketPath` - `/path/to/unix/socket` for Server.
     - `payload` - The request body as string, Buffer, or Readable Stream.
     - `headers` - An object containing request headers.
-    - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
-      whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
-      same time as the `agent` option is set.
     - `redirects` - The maximum number of redirects to follow.
     - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature function (redirectMethod, statusCode, location, redirectOptions) where:
       - `redirectMethod` - A string specifying the redirect method.
@@ -94,10 +93,15 @@ Initiate an HTTP request.
       - `statusCode` - HTTP status code of the response that triggered the redirect.
       - `location` - The redirected location string.
       - `req` - The new [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object which replaces the one initially returned.
-    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
-      Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
+    - `maxBytes` - maximum size for response payload. Defaults to unlimited.
+    - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
+      whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
+      same time as the `agent` option is set.
+    - `downstreamRes`: downstream Resource dependency.
+    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
+      Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
     - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method`
       to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
       for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).

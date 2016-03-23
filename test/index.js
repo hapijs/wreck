@@ -17,7 +17,8 @@ const Wreck = require('../');
 // Declare internals
 
 const internals = {
-    payload: new Array(1640).join('0123456789') // make sure we have a payload larger than 16384 bytes for chunking coverage
+    payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
+    socket: __dirname + '/server.sock'
 };
 
 
@@ -194,6 +195,175 @@ describe('request()', () => {
         server.listen(0, () => {
 
             Wreck.request('get', 'http://localhost:' + server.address().port, {});
+        });
+    });
+
+    describe('unix socket', () => {
+
+        it('requests a resource with callback', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+            });
+
+            server.listen(internals.socket, () => {
+
+                Wreck.request('get', '/', { socketPath: internals.socket }, (err, res) => {
+
+                    expect(err).to.not.exist();
+                    Wreck.read(res, null, (err, body) => {
+
+                        expect(err).to.not.exist();
+                        expect(Buffer.isBuffer(body)).to.equal(true);
+                        expect(body.toString()).to.equal(internals.payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['content-length']).to.equal('16390');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(internals.socket, () => {
+
+                Wreck.request('post', '/', { socketPath: internals.socket, payload: internals.payload }, (err, res) => {
+
+                    expect(err).to.not.exist();
+                    Wreck.read(res, null, (err, body) => {
+
+                        expect(err).to.not.exist();
+                        expect(body.toString()).to.equal(internals.payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource with unicode characters in payload', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['content-length']).to.equal('14');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(internals.socket, () => {
+
+                const unicodePayload = JSON.stringify({ field: 'ć' });
+                Wreck.request('post', '/', { socketPath: internals.socket, payload: unicodePayload }, (err, res) => {
+
+                    expect(err).to.not.exist();
+                    Wreck.read(res, null, (err, body) => {
+
+                        expect(err).to.not.exist();
+                        expect(body.toString()).to.equal(unicodePayload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should not overwrite content-length if it is already in the headers', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['content-length']).to.equal('16390');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(internals.socket, () => {
+
+                const options = { socketPath: internals.socket, payload: internals.payload, headers: { 'Content-Length': '16390' } };
+                Wreck.request('post', '/', options, (err, res) => {
+
+                    expect(err).to.not.exist();
+                    Wreck.read(res, null, (err, body) => {
+
+                        expect(err).to.not.exist();
+                        expect(body.toString()).to.equal(internals.payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource with headers', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(internals.socket, () => {
+
+                Wreck.request('post', '/', { socketPath: internals.socket, headers: { 'user-agent': 'wreck' }, payload: internals.payload }, (err, res) => {
+
+                    expect(err).to.not.exist();
+                    Wreck.read(res, null, (err, body) => {
+
+                        expect(err).to.not.exist();
+                        expect(body.toString()).to.equal(internals.payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a POST resource with stream payload', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                req.pipe(res);
+            });
+
+            server.listen(internals.socket, () => {
+
+                Wreck.request('post', '/', { socketPath: internals.socket, payload: Wreck.toReadableStream(internals.payload) }, (err, res) => {
+
+                    expect(err).to.not.exist();
+                    Wreck.read(res, null, (err, body) => {
+
+                        expect(err).to.not.exist();
+                        expect(body.toString()).to.equal(internals.payload);
+                        server.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('requests a resource without callback', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+                server.close();
+                done();
+            });
+
+            server.listen(internals.socket, () => {
+
+                Wreck.request('get', '/', { socketPath: internals.socket });
+            });
         });
     });
 
