@@ -2194,6 +2194,7 @@ describe('Events', () => {
 
         const server = Http.createServer((req, res) => {
 
+            expect(req.headers.foo).to.equal('bar');
             res.writeHead(200);
             res.end('ok');
         });
@@ -2202,7 +2203,8 @@ describe('Events', () => {
 
             expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
             expect(options).to.exist();
-            done();
+
+            uri.headers.foo = 'bar';
         });
 
         server.listen(0, () => {
@@ -2213,6 +2215,7 @@ describe('Events', () => {
                 expect(res.statusCode).to.equal(200);
                 expect(payload.toString()).to.equal('ok');
                 server.close();
+                done();
             });
         });
     });
