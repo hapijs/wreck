@@ -11,14 +11,17 @@ const Stream = require('stream');
 const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
+const Reload = require('require-reload');
 const Wreck = require('../');
 
 
 // Declare internals
 
 const internals = {
+    reload: Reload(require),
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
-    socket: __dirname + '/server.sock'
+    socket: __dirname + '/server.sock',
+    emitSymbol: Symbol.for('wreck')
 };
 
 
@@ -403,7 +406,7 @@ describe('request()', () => {
         done();
     });
 
-    it('requests an https resource', (done) => {
+    it('requests an https resource', { timeout: 5000 }, (done) => {
 
         Wreck.request('get', 'https://google.com', { rejectUnauthorized: true }, (err, res) => {
 
@@ -2106,7 +2109,7 @@ describe('Events', () => {
             res.end('ok');
         });
 
-        Wreck.once('response', (err, req, res, start, uri) => {
+        process[internals.emitSymbol].once('response', (err, req, res, start, uri) => {
 
             expect(err).to.not.exist();
             expect(req).to.exist();
@@ -2171,6 +2174,20 @@ describe('Events', () => {
                 done();
             });
         });
+    });
+
+    it('won\'t overwrite existing emitter', (done) => {
+
+        internals.reload('../');
+        expect(process[internals.emitSymbol]).to.exist();
+        process[internals.emitSymbol] = true;
+
+        internals.reload('../');
+        expect(process[internals.emitSymbol]).to.equal(true);
+        delete process[internals.emitSymbol];
+        internals.reload('../');
+
+        done();
     });
 });
 
