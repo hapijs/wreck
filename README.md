@@ -246,6 +246,19 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 
 ### Events
 
+#### `request`
+
+The request event is emitted just before *wreck* makes a request.  The
+handler should accept the following arguments `(uri, options)` where:
+
+  - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes the headers and method.
+  - `options` - the options passed into the request function.  This will include
+  a payload if there is one.
+
+Since the `request` event executes on a global event handler, you can intercept
+and decorate a request before its sent.
+
+
 #### `response`
 
 The response event is always emitted for any request that *wreck* makes.  The

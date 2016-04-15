@@ -2189,6 +2189,36 @@ describe('Events', () => {
 
         done();
     });
+
+    it('emits request event before wreck sends a request', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            expect(req.headers.foo).to.equal('bar');
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        Wreck.once('request', (uri, options) => {
+
+            expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            expect(options).to.exist();
+
+            uri.headers.foo = 'bar';
+        });
+
+        server.listen(0, () => {
+
+            Wreck.put('http://localhost:' + server.address().port, (err, res, payload) => {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload.toString()).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
 });
 
 describe('Defaults', () => {
