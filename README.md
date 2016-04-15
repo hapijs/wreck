@@ -248,8 +248,10 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 
 #### `response`
 
-The response event is always emitted for any request that *wreck* makes.  The handler should accept the following
-arguments `(error, request, response, start, uri)` where:
+The response event is always emitted for any request that *wreck* makes.  The
+handler should accept the following arguments `(error, request, response, start,
+uri)` where:
+
   - `error` - a Boom error
   - `request` - the raw `ClientHttp` request object
   - `response` - the raw `IncomingMessage` response object
@@ -257,8 +259,25 @@ arguments `(error, request, response, start, uri)` where:
   - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes
     the headers and method.
 
-This event is useful for logging all requests that go through *wreck*.
-The error and response arguments can be undefined depending on if an error occurs.  Please be aware that if multiple
-modules are depending on the same cached *wreck* module that this event can fire for each request made across all
-modules.  The start argument is the timestamp when the request was started.  This can be useful for determining how long
-it takes *wreck* to get a response back and processed.
+This event is useful for logging all requests that go through *wreck*. The error
+and response arguments can be undefined depending on if an error occurs.  Please
+be aware that if multiple modules are depending on the same cached *wreck*
+module that this event can fire for each request made across all modules.  The
+start argument is the timestamp when the request was started.  This can be
+useful for determining how long it takes *wreck* to get a response back and
+processed.
+
+The `EventEmitter` is attached to the `process` object under a `Symbol` with the
+value of `'wreck'`.  Therefore, if you want to capture a wreck event, after wreck
+has been loaded, but in a module that doesn't require wreck, you can handle
+events in the following way:
+
+```js
+const symbol = Symbol.for('wreck');
+process[symbol].on('response', (err) => {
+
+    if (err) {
+      console.error(err);
+    }
+});
+```
