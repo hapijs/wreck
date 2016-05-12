@@ -1678,6 +1678,41 @@ describe('read()', () => {
             });
         });
     });
+
+    it('allows custom handling of response event and read works', (done) => {
+
+        const path = Path.join(__dirname, '../images/wreck.png');
+        const stats = Fs.statSync(path);
+        const fileStream = Fs.createReadStream(path);
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200);
+            Wreck.read(req, null, (err, body) => {
+
+                expect(err).to.not.exist();
+                res.end(body);
+            });
+        });
+
+        server.listen(0, () => {
+
+            const req = Wreck.request('post', 'http://localhost:' + server.address().port, { payload: fileStream });
+
+            req.once('response', (res) => {
+
+                expect(res.statusCode).to.equal(200);
+
+                Wreck.read(res, null, (err, body) => {
+
+                    expect(err).to.not.exist();
+                    expect(body.length).to.equal(stats.size);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
 });
 
 describe('parseCacheControl()', () => {
