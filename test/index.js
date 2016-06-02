@@ -840,7 +840,7 @@ describe('request()', () => {
             }
         });
 
-        const beforeRedirectCallback = function (redirectMethod, statusCode, location, redirectOptions, headers) {
+        const beforeRedirectCallback = function (redirectMethod, statusCode, location, headers, redirectOptions, next) {
 
             const dest = `http://localhost:${server.address().port}/redirected/`;
             expect(redirectMethod).to.equal('GET');
@@ -852,6 +852,8 @@ describe('request()', () => {
             redirectOptions.headers = {
                 'x-test': 'Modified'
             };
+
+            return next();
         };
 
         server.listen(0, () => {

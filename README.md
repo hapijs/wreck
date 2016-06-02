@@ -41,7 +41,7 @@ var options = {
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
     redirects: 3,
-    beforeRedirect: function (redirectMethod, statusCode, location, redirectOptions, resHeaders) {},
+    beforeRedirect: function (redirectMethod, statusCode, location, resHeaders, redirectOptions, next) { return next() },
     redirected: function (statusCode, location, req) {},
     timeout:   1000,    // 1 second, default: unlimited
     maxBytes:  1048576, // 1 MB, default: unlimited
@@ -86,12 +86,13 @@ Initiate an HTTP request.
     - `redirects` - The maximum number of redirects to follow.
     - `redirect303` - if `true`, treats HTTP 303 status code the same way as a 301/302. Defaults to no redirection on 303.
     - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature
-      `function(redirectMethod, statusCode, location, redirectOptions, resHeaders)` where:
+      `function(redirectMethod, statusCode, location, resHeaders, redirectOptions, next)` where:
           - `redirectMethod` - A string specifying the redirect method.
           - `statusCode` - HTTP status code of the response that triggered the redirect.
           - `location` - The redirect location string.
-          - `redirectOptions` - Options that will be applied to the redirect request. Changes to this object are applied to the redirection request.
           - `resHeaders` - An object with the headers received as part of the redirection response.
+          - `redirectOptions` - Options that will be applied to the redirect request. Changes to this object are applied to the redirection request.
+          - `next` - the callback function called to perform the redirection using signature `function()`.
     - `redirected` - A callback function that is called when a redirect was triggered, using the signature `function(statusCode, location, req)` where:
       - `statusCode` - HTTP status code of the response that triggered the redirect.
       - `location` - The redirected location string.
