@@ -840,12 +840,14 @@ describe('request()', () => {
             }
         });
 
-        const beforeRedirectCallback = function (redirectMethod, statusCode, location, redirectOptions) {
+        const beforeRedirectCallback = function (redirectMethod, statusCode, location, redirectOptions, headers) {
 
+            const dest = `http://localhost:${server.address().port}/redirected/`;
             expect(redirectMethod).to.equal('GET');
             expect(statusCode).to.equal(301);
-            expect(location).to.equal('http://localhost:' + server.address().port + '/redirected/');
+            expect(location).to.equal(dest);
             expect(redirectOptions).to.exist();
+            expect(headers.location).to.equal(dest);
 
             redirectOptions.headers = {
                 'x-test': 'Modified'
