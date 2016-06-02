@@ -689,6 +689,57 @@ describe('request()', () => {
         });
     });
 
+    it('ignores 303 redirections by default', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(303, { 'Location': 'http://localhost:' + server.address().port });
+            res.end();
+        });
+
+        server.listen(0, () => {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null }, (err, res) => {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(303);
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('handles 303 redirections when allowed', (done) => {
+
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
+
+            if (!gen++) {
+                res.writeHead(303, { 'Location': 'http://localhost:' + server.address().port });
+                res.end();
+            }
+            else {
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+            }
+        });
+
+        server.listen(0, () => {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null, redirect303: true }, (err, res) => {
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, (err, body) => {
+
+                    expect(err).to.not.exist();
+                    expect(body.toString()).to.equal(internals.payload);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
     it('reaches max redirections count', (done) => {
 
         let gen = 0;
@@ -2167,7 +2218,7 @@ describe('Events', () => {
         });
     });
 
-    it('response event includes error when it occurs', { timeout: 2500 }, (done) => {
+    it('response event includes error when it occurs', { timeout: 10000 }, (done) => {
 
         Wreck.once('response', (err, req, res) => {
 
@@ -2184,7 +2235,7 @@ describe('Events', () => {
 
     });
 
-    it('multiple requests execute the same response handler', { timeout: 5000 }, (done) => {
+    it('multiple requests execute the same response handler', { timeout: 10000 }, (done) => {
 
         let count = 0;
         const handler = (err, req, res) => {
