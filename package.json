@@ -17,7 +17,7 @@
     "hoek": "4.x.x"
   },
   "devDependencies": {
-    "code": "2.x.x",
+    "code": "3.x.x",
     "lab": "10.x.x",
     "require-reload": "0.2.x"
   },
