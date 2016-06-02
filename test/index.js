@@ -2112,7 +2112,7 @@ describe('json', () => {
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload).to.not.equal(null);
-                expect(payload).to.deep.equal({
+                expect(payload).to.equal({
                     foo: 'bar'
                 });
                 server.close();
