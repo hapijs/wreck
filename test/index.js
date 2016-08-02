@@ -740,6 +740,28 @@ describe('request()', () => {
         });
     });
 
+    it('handles redirections with different host than baseUrl in defaults', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(301, { 'Location': 'http://hapijs.com' });
+            res.end();
+        });
+
+        server.listen(0, () => {
+
+            const wreckA = Wreck.defaults({ baseUrl: 'http://localhost:' + server.address().port });
+            wreckA.request('get', '/redirect', {
+                redirects: 1,
+                redirected: (statusCode, location, req) => {
+
+                    expect(location).to.equal('http://hapijs.com');
+                    expect(req.output[0]).to.include('hapijs.com');
+                }
+            }, done);
+        });
+    });
+
     it('reaches max redirections count', (done) => {
 
         let gen = 0;
