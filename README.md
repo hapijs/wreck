@@ -12,32 +12,40 @@ Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 
 ### Basic
 ```javascript
-var Wreck = require('wreck');
+const Wreck = require('wreck');
 
-Wreck.get('https://google.com/', function (err, res, payload) {
+Wreck.get('https://google.com/', (err, res, payload) => {
+    /* do stuff */
+});
+```
+
+```javascript
+const Wreck = require('wreck');
+
+Wreck.post('https://posttestserver.com/post.php', { payload: { hello: 'post' } }, (err, res, payload) => {
     /* do stuff */
 });
 ```
 
 ### Advanced
 ```javascript
-var Wreck = require('wreck');
+const Wreck = require('wreck');
 
-var method = 'GET'; // GET, POST, PUT, DELETE
-var uri    = '/';
-var readableStream = Wreck.toReadableStream('foo=bar');
+const method = 'GET'; // GET, POST, PUT, DELETE
+const uri    = '/';
+const readableStream = Wreck.toReadableStream('foo=bar');
 
-var wreck = Wreck.defaults({
+const wreck = Wreck.defaults({
     headers: { 'x-foo-bar': 123 }
 });
 
 // cascading example -- does not alter `wreck`
-var wreckWithTimeout = wreck.defaults({
+const wreckWithTimeout = wreck.defaults({
     timeout: 5
 });
 
 // all attributes are optional
-var options = {
+const options = {
     baseUrl:   "https://www.example.com",
     payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers:   { /* http headers */ },
@@ -52,17 +60,17 @@ var options = {
     secureProtocol: 'SSLv3_method' // The SSL method to use
 };
 
-var optionalCallback = function (err, res) {
+const optionalCallback = (err, res) => {
 
     /* handle err if it exists, in which case res will be undefined */
 
     // buffer the response stream
-    Wreck.read(res, null, function (err, body) {
+    Wreck.read(res, null, (err, body) => {
         /* do stuff */
     });
 };
 
-var req = wreck.request(method, uri, options, optionalCallback);
+const req = wreck.request(method, uri, options, optionalCallback);
 ```
 
 ### `defaults(options)`
@@ -82,7 +90,7 @@ Initiate an HTTP request.
                   If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
                   querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
     - `socketPath` - `/path/to/unix/socket` for Server.
-    - `payload` - The request body as string, Buffer, or Readable Stream.
+    - `payload` - The request body as string, Buffer, Readable Stream, or an object that can be executed by JSON.stringify.
     - `headers` - An object containing request headers.
     - `redirects` - The maximum number of redirects to follow.
     - `redirect303` - if `true`, treats HTTP 303 status code the same way as a 301/302. Defaults to no redirection on 303.
@@ -214,8 +222,8 @@ for the provided payload and encoding.
 - `encoding` - The encoding to use. Must be a valid Buffer encoding, such as 'utf8' or 'ascii'.
 
 ```javascript
-var stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
-var read = stream.read();
+const stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
+const read = stream.read();
 // read -> 'Hello'
 ```
 
@@ -227,7 +235,7 @@ or "no-cache" will be set to the boolean `true`.
 - `field` - The header cache control value to be parsed.
 
 ```javascript
-var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
+const  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 // result.private -> true
 // result['max-age'] -> 0
 // result['no-cache'] -> true
@@ -235,15 +243,18 @@ var  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 ### `agents`
 
-Object that contains the agents for pooling connections for `http` and `https`.  The properties are `http`, `https`, and
-`httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to true.  All agents have `maxSockets`
-configured to `Infinity`.  They are each instances of the node.js
-[Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the standard properties.
+Object that contains the agents for pooling connections for `http` and `https`.
+The properties are `http`, `https`, and `httpsAllowUnauthorized` which is an
+`https` agent with `rejectUnauthorized` set to true.  All agents have
+`maxSockets` configured to `Infinity`.  They are each instances of the node.js
+[Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the
+standard properties.
 
-For example, the following code demonstrates changing `maxSockets` on the `http` agent.
+For example, the following code demonstrates changing `maxSockets` on the `http`
+agent.
 
  ```js
- var Wreck = require('wreck');
+ const Wreck = require('wreck');
 
  Wreck.agents.http.maxSockets = 20;
  ```
@@ -256,7 +267,8 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 The request event is emitted just before *wreck* makes a request.  The
 handler should accept the following arguments `(uri, options)` where:
 
-  - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes the headers and method.
+  - `uri` - the result of `Url.parse(uri)`. This will provide information about
+  the resource requested.  Also includes the headers and method.
   - `options` - the options passed into the request function.  This will include
   a payload if there is one.
 
@@ -274,8 +286,8 @@ uri)` where:
   - `request` - the raw `ClientHttp` request object
   - `response` - the raw `IncomingMessage` response object
   - `start` - the time that the request was initiated
-  - `uri` - the result of `Url.parse(uri)`. This will provide information about the resource requested.  Also includes
-    the headers and method.
+  - `uri` - the result of `Url.parse(uri)`. This will provide information about
+  the resource requested.  Also includes the headers and method.
 
 This event is useful for logging all requests that go through *wreck*. The error
 and response arguments can be undefined depending on if an error occurs.  Please
@@ -286,9 +298,9 @@ useful for determining how long it takes *wreck* to get a response back and
 processed.
 
 The `EventEmitter` is attached to the `process` object under a `Symbol` with the
-value of `'wreck'`.  Therefore, if you want to capture a wreck event, after wreck
-has been loaded, but in a module that doesn't require wreck, you can handle
-events in the following way:
+value of `'wreck'`.  Therefore, if you want to capture a wreck event, after
+wreck has been loaded, but in a module that doesn't require wreck, you can
+handle events in the following way:
 
 ```js
 const symbol = Symbol.for('wreck');
