@@ -32,7 +32,7 @@ Wreck.post('https://posttestserver.com/post.php', { payload: { hello: 'post' } }
 const Wreck = require('wreck');
 
 const method = 'GET'; // GET, POST, PUT, DELETE
-const uri    = '/';
+const uri = '/';
 const readableStream = Wreck.toReadableStream('foo=bar');
 
 const wreck = Wreck.defaults({
@@ -46,14 +46,14 @@ const wreckWithTimeout = wreck.defaults({
 
 // all attributes are optional
 const options = {
-    baseUrl:   "https://www.example.com",
-    payload:   readableStream || 'foo=bar' || new Buffer('foo=bar'),
-    headers:   { /* http headers */ },
+    baseUrl: 'https://www.example.com',
+    payload: readableStream || 'foo=bar' || new Buffer('foo=bar'),
+    headers: { /* http headers */ },
     redirects: 3,
     beforeRedirect: function (redirectMethod, statusCode, location, resHeaders, redirectOptions, next) { return next() },
     redirected: function (statusCode, location, req) {},
-    timeout:   1000,    // 1 second, default: unlimited
-    maxBytes:  1048576, // 1 MB, default: unlimited
+    timeout: 1000,    // 1 second, default: unlimited
+    maxBytes: 1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
     downstreamRes: null,
     agent: null,         // Node Core http.Agent
@@ -235,7 +235,7 @@ or "no-cache" will be set to the boolean `true`.
 - `field` - The header cache control value to be parsed.
 
 ```javascript
-const  result = Wreck.parseCacheControl('private, max-age=0, no-cache');
+const result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 // result.private -> true
 // result['max-age'] -> 0
 // result['no-cache'] -> true
