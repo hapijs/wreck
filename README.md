@@ -90,7 +90,7 @@ Initiate an HTTP request.
                   If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
                   querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
     - `socketPath` - `/path/to/unix/socket` for Server.
-    - `payload` - The request body as string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
+    - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
     - `headers` - An object containing request headers.
     - `redirects` - The maximum number of redirects to follow.
     - `redirect303` - if `true`, treats HTTP 303 status code the same way as a 301/302. Defaults to no redirection on 303.
