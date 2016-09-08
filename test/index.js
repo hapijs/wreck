@@ -2386,6 +2386,38 @@ describe('Events', () => {
             });
         });
     });
+
+    it('clears once handlers from global emitter', (done) => {
+
+        const wreckEvents = process[Symbol.for('wreck')];
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        let onceHandlerFired = false;
+        wreckEvents.once('request', () => {
+
+            onceHandlerFired = true;
+        });
+
+
+        server.listen(0, () => {
+
+            expect(wreckEvents.listeners('request').length).to.equal(1);
+            Wreck.get('http://localhost:' + server.address().port, (err, res, payload) => {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload.toString()).to.equal('ok');
+                expect(onceHandlerFired).to.equal(true);
+                expect(wreckEvents.listeners('request').length).to.equal(0);
+                server.close();
+                done();
+            });
+        });
+    });
 });
 
 describe('Defaults', () => {
