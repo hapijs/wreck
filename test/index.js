@@ -1214,7 +1214,7 @@ describe('request()', () => {
         const agent = new Http.Agent();
         expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        Wreck.request('get', 'http://localhost:0/', { agent: agent }, (err, res) => {
+        Wreck.request('get', 'http://localhost:0/', { agent }, (err, res) => {
 
             expect(err).to.exist();
             expect(Object.keys(agent.sockets).length).to.equal(1);
@@ -1248,7 +1248,7 @@ describe('request()', () => {
 
         server.listen(0, () => {
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, agent: agent }, (err, res) => {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, agent }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -1423,13 +1423,13 @@ describe('request()', () => {
             const agent = new Http.Agent({ maxSockets: 1 });
             expect(Object.keys(agent.sockets).length).to.equal(0);
 
-            Wreck.request('get', 'http://localhost:' + server.address().port, { agent: agent, timeout: 15 }, (err, res) => {
+            Wreck.request('get', 'http://localhost:' + server.address().port, { agent, timeout: 15 }, (err, res) => {
 
                 expect(err).to.not.exist();
                 expect(Object.keys(agent.sockets).length).to.equal(1);
                 expect(Object.keys(agent.requests).length).to.equal(0);
 
-                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: agent, timeout: 15 }, (err, innerRes) => {
+                Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent, timeout: 15 }, (err, innerRes) => {
 
                     expect(err).to.exist();
                     expect(err.output.statusCode).to.equal(504);
