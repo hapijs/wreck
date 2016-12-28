@@ -149,7 +149,7 @@ Convenience method for GET operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
-       object, which is also a readable stream.
+       object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
@@ -164,7 +164,7 @@ Convenience method for POST operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
-       object, which is also a readable stream.
+       object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
@@ -178,7 +178,7 @@ Convenience method for PATCH operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
-       object, which is also a readable stream.
+       object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
@@ -193,7 +193,7 @@ Convenience method for PUT operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
-       object, which is also a readable stream.
+       object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
@@ -208,7 +208,7 @@ Convenience method for DELETE operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
-       object, which is also a readable stream.
+       object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
