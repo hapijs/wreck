@@ -799,7 +799,7 @@ describe('request()', () => {
 
         const server = Http.createServer((req, res) => {
 
-            res.writeHead(301, { 'Location': 'http://hapijs.com' });
+            res.writeHead(301, { 'Location': 'https://hapijs.com' });
             res.end();
         });
 
@@ -810,7 +810,7 @@ describe('request()', () => {
                 redirects: 1,
                 redirected: (statusCode, location, req) => {
 
-                    expect(location).to.equal('http://hapijs.com');
+                    expect(location).to.equal('https://hapijs.com');
                     expect(req.output[0]).to.include('hapijs.com');
                 }
             }, done);
