@@ -36,10 +36,16 @@ const uri = '/';
 const readableStream = Wreck.toReadableStream('foo=bar');
 
 const wreck = Wreck.defaults({
-    headers: { 'x-foo-bar': 123 }
+    headers: { 'x-foo-bar': 123 },
+    agents: {
+        https: new Https.Agent({ maxSockets: 100 }),
+        http: new Http.Agent({ maxSockets: 1000 }),
+        httpsAllowUnauthorized: new Https.Agent({ maxSockets: 100, rejectUnauthorized: false })
+    }
 });
 
 // cascading example -- does not alter `wreck`
+// inherits `headers` and `agents` specified above
 const wreckWithTimeout = wreck.defaults({
     timeout: 5
 });
@@ -150,7 +156,7 @@ Convenience method for GET operations.
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
-        - `data.payload` - the payload in the form of a Buffer or as a parsed object 
+        - `data.payload` - the payload in the form of a Buffer or as a parsed object
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
