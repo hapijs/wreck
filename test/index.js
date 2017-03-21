@@ -675,15 +675,22 @@ describe('request()', () => {
 
     it('handles 301 redirections without overriding the HTTP method', (done) => {
 
+        const payload = 'HELLO POST';
         let gen = 0;
         const server = Http.createServer((req, res) => {
+
+            expect(req.method).to.equal('POST');
+            Wreck.read(req, null, (err, res2) => {
+
+                expect(err).to.not.exist();
+                expect(res2.toString()).to.equal(payload);
+            });
 
             if (!gen++) {
                 res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
                 res.end();
             }
             else {
-                expect(req.method).to.equal('POST');
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 res.end(internals.payload);
             }
@@ -691,7 +698,7 @@ describe('request()', () => {
 
         server.listen(0, () => {
 
-            Wreck.request('POST', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null }, (err, res) => {
+            Wreck.request('POST', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null, payload }, (err, res) => {
 
                 expect(err).to.not.exist();
                 Wreck.read(res, null, (err, body) => {
