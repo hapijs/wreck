@@ -119,7 +119,7 @@ Initiate an HTTP request.
       to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
       for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).
 - `callback` - The optional callback function using the signature `function (err, response)` where:
-    - `err` - Any error that may have occurred during the handling of the request.
+    - `err` - Any error that may have occurred during the handling of the request or a Boom error object if the response has an error status code.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
 
@@ -147,7 +147,7 @@ Convenience method for GET operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -162,7 +162,7 @@ Convenience method for POST operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -176,7 +176,7 @@ Convenience method for PATCH operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -191,7 +191,7 @@ Convenience method for PUT operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -206,7 +206,7 @@ Convenience method for DELETE operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
