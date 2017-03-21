@@ -246,7 +246,7 @@ const result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 Object that contains the agents for pooling connections for `http` and `https`.
 The properties are `http`, `https`, and `httpsAllowUnauthorized` which is an
 `https` agent with `rejectUnauthorized` set to true.  All agents have
-`maxSockets` configured to `Infinity`.  They are each instances of the node.js
+`maxSockets` configured to `Infinity`.  They are each instances of the Node.js
 [Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the
 standard properties.
 
@@ -259,6 +259,18 @@ agent.
  Wreck.agents.http.maxSockets = 20;
  ```
 
+Below is another example that sets the certificate details for all HTTPS requests.
+
+```js
+const HTTPS = require('https');
+const Wreck = require('wreck');
+
+Wreck.agents.https = new HTTPS.Agent({
+    cert,
+    key,
+    ca
+});
+```
 
 ### Events
 
