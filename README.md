@@ -279,21 +279,21 @@ and decorate a request before its sent.
 #### `response`
 
 The response event is always emitted for any request that *wreck* makes.  The
-handler should accept the following arguments `(error, request, response, start,
-uri)` where:
+handler should accept the following arguments `(err, details)` where:
 
-  - `error` - a Boom error
-  - `request` - the raw `ClientHttp` request object
-  - `response` - the raw `IncomingMessage` response object
-  - `start` - the time that the request was initiated
-  - `uri` - the result of `Url.parse(uri)`. This will provide information about
-  the resource requested.  Also includes the headers and method.
+  - `err` - a Boom error
+  - `details` - object with the following properties
+    - `req` - the raw `ClientHttp` request object
+    - `res` - the raw `IncomingMessage` response object
+    - `start` - the time that the request was initiated
+    - `uri` - the result of `Url.parse(uri)`. This will provide information about
+    the resource requested.  Also includes the headers and method.
 
-This event is useful for logging all requests that go through *wreck*. The error
-and response arguments can be undefined depending on if an error occurs.  Please
+This event is useful for logging all requests that go through *wreck*. The `err`
+and `res` arguments can be undefined depending on if an error occurs.  Please
 be aware that if multiple modules are depending on the same cached *wreck*
 module that this event can fire for each request made across all modules.  The
-start argument is the timestamp when the request was started.  This can be
+`start` property is the timestamp when the request was started.  This can be
 useful for determining how long it takes *wreck* to get a response back and
 processed.
 
@@ -304,7 +304,7 @@ handle events in the following way:
 
 ```js
 const symbol = Symbol.for('wreck');
-process[symbol].on('response', (err) => {
+process[symbol].on('response', (err, details) => {
 
     if (err) {
       console.error(err);
