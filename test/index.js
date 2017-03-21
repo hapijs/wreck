@@ -2298,13 +2298,13 @@ describe('Events', () => {
             res.end('ok');
         });
 
-        process[internals.emitSymbol].once('response', (err, req, res, start, uri) => {
+        process[internals.emitSymbol].once('response', (err, details) => {
 
             expect(err).to.not.exist();
-            expect(req).to.exist();
-            expect(res).to.exist();
-            expect(typeof start).to.equal('number');
-            expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            expect(details.req).to.exist();
+            expect(details.res).to.exist();
+            expect(typeof details.start).to.equal('number');
+            expect(details.uri.href).to.equal('http://localhost:' + server.address().port + '/');
             done();
         });
 
@@ -2323,11 +2323,12 @@ describe('Events', () => {
 
     it('response event includes error when it occurs', { timeout: 10000 }, (done) => {
 
-        Wreck.once('response', (err, req, res) => {
+        Wreck.once('response', (err, details) => {
 
             expect(err).to.exist();
-            expect(req).to.exist();
-            expect(res).to.not.exist();
+            expect(details).to.exist();
+            expect(details.req).to.exist();
+            expect(details.res).to.not.exist();
             done();
         });
 
@@ -2341,11 +2342,11 @@ describe('Events', () => {
     it('multiple requests execute the same response handler', { timeout: 10000 }, (done) => {
 
         let count = 0;
-        const handler = (err, req, res) => {
+        const handler = (err, details) => {
 
             expect(err).to.exist();
-            expect(req).to.exist();
-            expect(res).to.not.exist();
+            expect(details.req).to.exist();
+            expect(details.res).to.not.exist();
             count++;
         };
 
