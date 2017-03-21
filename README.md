@@ -93,7 +93,7 @@ Initiate an HTTP request.
     - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
     - `headers` - An object containing request headers.
     - `redirects` - The maximum number of redirects to follow.
-    - `redirect303` - if `true`, treats HTTP 303 status code the same way as a 301/302. Defaults to no redirection on 303.
+    - `redirect303` - if `true`, a HTTP 303 status code will redirect using a GET method. Defaults to no redirection on 303.
     - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature
       `function(redirectMethod, statusCode, location, resHeaders, redirectOptions, next)` where:
           - `redirectMethod` - A string specifying the redirect method.
