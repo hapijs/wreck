@@ -673,6 +673,38 @@ describe('request()', () => {
         });
     });
 
+    it('handles 301 redirections without overriding the HTTP method', (done) => {
+
+        let gen = 0;
+        const server = Http.createServer((req, res) => {
+
+            if (!gen++) {
+                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.end();
+            }
+            else {
+                expect(req.method).to.equal('POST');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+            }
+        });
+
+        server.listen(0, () => {
+
+            Wreck.request('POST', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null }, (err, res) => {
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, (err, body) => {
+
+                    expect(err).to.not.exist();
+                    expect(body.toString()).to.equal(internals.payload);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
     it('handles redirections from http to https', (done) => {
 
         const httpsOptions = {
