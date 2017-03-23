@@ -119,7 +119,7 @@ Initiate an HTTP request.
       to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
       for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).
 - `callback` - The optional callback function using the signature `function (err, response)` where:
-    - `err` - Any error that may have occurred during the handling of the request or a Boom error object if the response has an error status code.
+    - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is also a readable stream.
 
