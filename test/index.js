@@ -2053,16 +2053,21 @@ describe('Shortcut', () => {
 
         const server = Http.createServer((req, res) => {
 
+            res.setHeader('content-type', 'application/json');
+            res.setHeader('x-custom', 'yes');
             res.writeHead(400);
-            res.end();
+            res.end(JSON.stringify({ details: 'failed' }));
         });
 
         server.once('listening', () => {
 
-            Wreck.get('http://127.0.0.1:' + server.address().port, (err) => {
+            Wreck.get('http://127.0.0.1:' + server.address().port, { json: true }, (err) => {
 
                 expect(err.isBoom).to.be.true();
-                expect(err.message).to.equal('Bad Request');
+                expect(err.message).to.equal('Response Error: Bad Request');
+                expect(err.data.isResponseError).to.be.true();
+                expect(err.data.headers).to.include({ 'x-custom': 'yes' });
+                expect(err.data.payload).to.equal({ details: 'failed' });
                 done();
             });
         });
