@@ -1062,27 +1062,6 @@ describe('request()', () => {
         server.listen(0);
     });
 
-    it('handles error responses with a boom error object', (done) => {
-
-        const server = Http.createServer((req, res) => {
-
-            res.writeHead(400);
-            res.end();
-        });
-
-        server.once('listening', () => {
-
-            Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: '' }, (err) => {
-
-                expect(err.isBoom).to.be.true();
-                expect(err.message).to.equal('Bad Request');
-                done();
-            });
-        });
-
-        server.listen(0);
-    });
-
     it('handles request errors with a boom response when payload is being sent', (done) => {
 
         const server = Http.createServer((req, res) => {
@@ -1428,8 +1407,7 @@ describe('request()', () => {
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null }, (err, res) => {
 
-                expect(err).exist();
-                expect(err.isBoom).to.be.true();
+                expect(err).to.not.exist();
                 Wreck.read(res, null, (err, body) => {
 
                     expect(err).to.not.exist();
@@ -2070,6 +2048,28 @@ describe('Shortcut', () => {
             });
         });
     });
+
+    it('handles error responses with a boom error object', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(400);
+            res.end();
+        });
+
+        server.once('listening', () => {
+
+            Wreck.get('http://127.0.0.1:' + server.address().port, (err) => {
+
+                expect(err.isBoom).to.be.true();
+                expect(err.message).to.equal('Bad Request');
+                done();
+            });
+        });
+
+        server.listen(0);
+    });
+
 });
 
 describe('json', () => {
