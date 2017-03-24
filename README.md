@@ -148,9 +148,9 @@ Convenience method for GET operations.
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `headers` - object containing the response headers
-        - `payload` - the payload in the form of a Buffer or as a parsed object 
+        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+        - `data.headers` - object containing the response headers
+        - `data.payload` - the payload in the form of a Buffer or as a parsed object 
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -166,9 +166,9 @@ Convenience method for POST operations.
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `headers` - object containing the response headers
-        - `payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+        - `data.headers` - object containing the response headers
+        - `data.payload` - the payload in the form of a Buffer or as a parsed object
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -183,9 +183,9 @@ Convenience method for PATCH operations.
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `headers` - object containing the response headers
-        - `payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+        - `data.headers` - object containing the response headers
+        - `data.payload` - the payload in the form of a Buffer or as a parsed object
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -201,9 +201,9 @@ Convenience method for PUT operations.
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `headers` - object containing the response headers
-        - `payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+        - `data.headers` - object containing the response headers
+        - `data.payload` - the payload in the form of a Buffer or as a parsed object
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -219,9 +219,9 @@ Convenience method for DELETE operations.
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `headers` - object containing the response headers
-        - `payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+        - `data.headers` - object containing the response headers
+        - `data.payload` - the payload in the form of a Buffer or as a parsed object
     - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
