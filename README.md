@@ -120,7 +120,7 @@ Initiate an HTTP request.
       for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
-    - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
+    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is also a readable stream.
 
 Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
@@ -151,7 +151,7 @@ Convenience method for GET operations.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object 
-    - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
+    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
@@ -169,7 +169,7 @@ Convenience method for POST operations.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
+    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
@@ -186,7 +186,7 @@ Convenience method for PATCH operations.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
+    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
@@ -204,7 +204,7 @@ Convenience method for PUT operations.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
+    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
@@ -222,7 +222,7 @@ Convenience method for DELETE operations.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `response` - The [HTTP Incoming Message](http://nodejs.org/api/http.html#http_http_incomingmessage)
+    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
