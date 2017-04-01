@@ -2074,7 +2074,6 @@ describe('Shortcut', () => {
 
         server.listen(0);
     });
-
 });
 
 describe('json', () => {
