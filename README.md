@@ -260,7 +260,7 @@ const result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 Object that contains the agents for pooling connections for `http` and `https`.
 The properties are `http`, `https`, and `httpsAllowUnauthorized` which is an
-`https` agent with `rejectUnauthorized` set to true.  All agents have
+`https` agent with `rejectUnauthorized` set to false.  All agents have
 `maxSockets` configured to `Infinity`.  They are each instances of the Node.js
 [Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the
 standard properties.
