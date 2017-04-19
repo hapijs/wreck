@@ -2506,9 +2506,6 @@ describe('Defaults', () => {
         const wreckB = Wreck.defaults(optionsB);
         const wreckAB = wreckA.defaults(optionsB);
 
-        // const agent = new Http.Agent();
-        // expect(Object.keys(agent.sockets).length).to.equal(0);
-
         const req1 = wreckA.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
             expect(err).to.exist();
@@ -2551,5 +2548,94 @@ describe('Defaults', () => {
 
             done();
         });
+    });
+
+    it('defaults inherits agents properly', (done) => {
+
+        const wreck0 = Wreck.defaults({});
+        const wreck1 = Wreck.defaults({
+            agents: {
+                https: new Https.Agent({ maxSockets: 1 }),
+                http: new Http.Agent({ maxSockets: 1 }),
+                httpsAllowUnauthorized: new Https.Agent({ maxSockets: 1, rejectUnauthorized: false })
+            }
+        });
+        const wreck2 = wreck1.defaults({});
+        const wreck3 = wreck2.defaults({
+            agents: {
+                https: new Https.Agent({ maxSockets: 7 }),
+                http: new Http.Agent({ maxSockets: 7 }),
+                httpsAllowUnauthorized: new Https.Agent({ maxSockets: 7, rejectUnauthorized: false })
+            }
+        });
+
+        expect(Wreck.agents).to.shallow.equal(wreck0.agents);
+        expect(wreck1.agents).to.not.shallow.equal(wreck0.agents);
+        expect(wreck1.agents).to.shallow.equal(wreck2.agents);
+        expect(wreck3.agents).to.not.shallow.equal(wreck2.agents);
+
+        done();
+    });
+
+    it('defaults disallows agents without all 3 types', (done) => {
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {
+                    'http': new Http.Agent({ maxSockets: Infinity })
+                }
+            });
+        }).to.throw();
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {
+                    'https': new Https.Agent({ maxSockets: 1 })
+                }
+            });
+        }).to.throw();
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {
+                    'httpsAllowUnauthorized': new Https.Agent({ maxSockets: Infinity, rejectUnauthorized: false })
+                }
+            });
+        }).to.throw();
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {
+                    'http': new Http.Agent({ maxSockets: Infinity }),
+                    'https': new Https.Agent({ maxSockets: 1 })
+                }
+            });
+        }).to.throw();
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {
+                    'http': new Http.Agent({ maxSockets: Infinity }),
+                    'httpsAllowUnauthorized': new Https.Agent({ maxSockets: Infinity, rejectUnauthorized: false })
+                }
+            });
+        }).to.throw();
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {
+                    'https': new Https.Agent({ maxSockets: 1 }),
+                    'httpsAllowUnauthorized': new Https.Agent({ maxSockets: Infinity, rejectUnauthorized: false })
+                }
+            });
+        }).to.throw();
+
+        done();
     });
 });
