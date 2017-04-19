@@ -2552,27 +2552,20 @@ describe('Defaults', () => {
 
     it('defaults inherits agents properly', (done) => {
 
-        const wreck0 = Wreck.defaults({});
-        const wreck1 = Wreck.defaults({
+        const wreckNoDefaults = Wreck.defaults({});
+        const wreckDefaults = Wreck.defaults({
             agents: {
                 https: new Https.Agent({ maxSockets: 1 }),
                 http: new Http.Agent({ maxSockets: 1 }),
                 httpsAllowUnauthorized: new Https.Agent({ maxSockets: 1, rejectUnauthorized: false })
             }
         });
-        const wreck2 = wreck1.defaults({});
-        const wreck3 = wreck2.defaults({
-            agents: {
-                https: new Https.Agent({ maxSockets: 7 }),
-                http: new Http.Agent({ maxSockets: 7 }),
-                httpsAllowUnauthorized: new Https.Agent({ maxSockets: 7, rejectUnauthorized: false })
-            }
-        });
 
-        expect(Wreck.agents).to.shallow.equal(wreck0.agents);
-        expect(wreck1.agents).to.not.shallow.equal(wreck0.agents);
-        expect(wreck1.agents).to.shallow.equal(wreck2.agents);
-        expect(wreck3.agents).to.not.shallow.equal(wreck2.agents);
+        expect(Wreck.agents.http.maxSockets).to.equal(wreckNoDefaults.agents.http.maxSockets);
+        expect(wreckDefaults.agents.http.maxSockets).to.not.equal(wreckNoDefaults.agents.http.maxSockets);
+        expect(wreckDefaults.agents.http.maxSockets).to.equal(1);
+        expect(wreckDefaults.agents.https.maxSockets).to.equal(1);
+        expect(wreckDefaults.agents.httpsAllowUnauthorized.maxSockets).to.equal(1);
 
         done();
     });
@@ -2635,6 +2628,35 @@ describe('Defaults', () => {
                 }
             });
         }).to.throw();
+
+        expect(() => {
+
+            Wreck.defaults({
+                agents: {}
+            });
+        }).to.throw();
+
+        done();
+    });
+
+    it('default agents can be overrode in request()', (done) => {
+
+        const wreck = Wreck.defaults({
+            agents: {
+                https: new Https.Agent({ maxSockets: 1 }),
+                http: new Http.Agent({ maxSockets: 1 }),
+                httpsAllowUnauthorized: new Https.Agent({ maxSockets: 1, rejectUnauthorized: false })
+            }
+        });
+
+        expect(wreck.agents.http.maxSockets).to.equal(1);
+        const agent = new Http.Agent({ maxSockets: 2 });
+        const req = wreck.request('get', 'http://localhost:0/', { agent }, (err, res) => {
+
+            expect(err).to.exist();
+        });
+
+        expect(req.agent.maxSockets).to.equal(2);
 
         done();
     });
