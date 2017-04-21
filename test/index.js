@@ -2068,6 +2068,7 @@ describe('Shortcut', () => {
                 expect(err.data.isResponseError).to.be.true();
                 expect(err.data.headers).to.include({ 'x-custom': 'yes' });
                 expect(err.data.payload).to.equal({ details: 'failed' });
+                expect(err.data.response.statusCode).to.equal(400);
                 done();
             });
         });
