@@ -153,10 +153,11 @@ Convenience method for GET operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -171,10 +172,11 @@ Convenience method for POST operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -188,10 +190,11 @@ Convenience method for PATCH operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -206,10 +209,11 @@ Convenience method for PUT operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
@@ -224,10 +228,11 @@ Convenience method for DELETE operations.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
 - `callback` - The callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code. If the error is a boom error object it will have the following properties in addition to the standard boom properties.
+    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
         - `data.payload` - the payload in the form of a Buffer or as a parsed object
+        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
