@@ -2064,10 +2064,11 @@ describe('Shortcut', () => {
             Wreck.get('http://127.0.0.1:' + server.address().port, { json: true }, (err) => {
 
                 expect(err.isBoom).to.be.true();
-                expect(err.message).to.equal('Response Error: Bad Request');
+                expect(err.message).to.equal('Response Error: 400 Bad Request');
                 expect(err.data.isResponseError).to.be.true();
                 expect(err.data.headers).to.include({ 'x-custom': 'yes' });
                 expect(err.data.payload).to.equal({ details: 'failed' });
+                expect(err.data.response.statusCode).to.equal(400);
                 done();
             });
         });
