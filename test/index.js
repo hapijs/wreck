@@ -2376,7 +2376,7 @@ describe('Events', () => {
             done();
         });
 
-        Wreck.get('http://127.0.0.0', { timeout: 10 }, (err) => {
+        Wreck.get('http://127.0.0.1', { timeout: 10 }, (err) => {
 
             expect(err).to.exist();
         });
@@ -2396,11 +2396,11 @@ describe('Events', () => {
 
         Wreck.on('response', handler);
 
-        Wreck.get('http://127.0.0.0', { timeout: 10 }, (err) => {
+        Wreck.get('http://127.0.0.1', { timeout: 10 }, (err) => {
 
             expect(err).to.exist();
 
-            Wreck.get('http://127.0.0.0', { timeout: 10 }, (err) => {
+            Wreck.get('http://127.0.0.1', { timeout: 10 }, (err) => {
 
                 expect(err).to.exist();
                 expect(count).to.equal(2);
