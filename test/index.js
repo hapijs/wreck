@@ -8,7 +8,6 @@ const Path = require('path');
 const Fs = require('fs');
 const Events = require('events');
 const Stream = require('stream');
-const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
 const Reload = require('require-reload');
@@ -30,7 +29,7 @@ const internals = {
 const lab = exports.lab = Lab.script();
 const describe = lab.describe;
 const it = lab.it;
-const expect = Code.expect;
+const expect = Lab.expect;
 
 
 describe('request()', () => {
