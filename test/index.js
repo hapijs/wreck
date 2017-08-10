@@ -191,6 +191,35 @@ describe('request()', () => {
         });
     });
 
+    it('should not add content-type if it is already in the headers but not lower cased', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            expect(req.headers['content-type']).to.equal('application/json-patch+json');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            req.pipe(res);
+        });
+
+        server.listen(0, () => {
+
+            const payload = [{ op: 'remove', path: '/test' }];
+            const headers = {};
+            headers['Content-Type'] = 'application/json-patch+json';
+
+            Wreck.request('post', 'http://localhost:' + server.address().port, { payload, headers }, (err, res) => {
+
+                expect(err).to.not.exist();
+                Wreck.read(res, null, (err, body) => {
+
+                    expect(err).to.not.exist();
+                    expect(body.toString()).to.equal(JSON.stringify(payload));
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
     it('requests a POST resource with headers', (done) => {
 
         const server = Http.createServer((req, res) => {
