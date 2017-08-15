@@ -1985,6 +1985,47 @@ describe('Shortcut', () => {
         });
     });
 
+    it('get request without callback returns a promise', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, () => {
+
+            Wreck.get(`http://localhost:${server.address().port}`).then((result) => {
+
+                expect(result.res.statusCode).to.equal(200);
+                expect(result.payload.toString()).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('get request without callback rejects errors on bad request', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, () => {
+
+            const port = server.address().port;
+            server.close();
+
+            Wreck.get(`http://localhost:${port}`).catch((err) => {
+
+                expect(err).to.exist();
+                done();
+            });
+        });
+    });
+
     it('post request', (done) => {
 
         const server = Http.createServer((req, res) => {
@@ -1995,7 +2036,7 @@ describe('Shortcut', () => {
 
         server.listen(0, () => {
 
-            Wreck.post('http://localhost:' + server.address().port, { payload: '123' }, (err, res, payload) => {
+            Wreck.post(`http://localhost:${server.address().port}`, { payload: '123' }, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
@@ -2016,7 +2057,7 @@ describe('Shortcut', () => {
 
         server.listen(0, () => {
 
-            Wreck.patch('http://localhost:' + server.address().port, { payload: '123' }, (err, res, payload) => {
+            Wreck.patch(`http://localhost:${server.address().port}`, { payload: '123' }, (err, res, payload) => {
 
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);

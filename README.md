@@ -27,6 +27,23 @@ Wreck.post('https://posttestserver.com/post.php', { payload: { hello: 'post' } }
 });
 ```
 
+### With Async/Await
+
+```javascript
+const Wreck = require('wreck');
+
+async function example () {
+  const { req, res, payload } = await Wreck.get('http://example.com');
+  console.log(payload.toString());
+}
+
+try {
+  example();
+} catch (ex) {
+  console.error(ex);
+}
+```
+
 ### Advanced
 ```javascript
 const Wreck = require('wreck');
@@ -156,13 +173,13 @@ When using gunzip, HTTP headers `Content-Encoding`, `Content-Length`, `Content-R
 
 Node v4 does not detect premature ending of gzipped content, if the payload is partial, you will not get an error on this specific version of node.js.
 
-### `get(uri, [options], callback)`
+### `get(uri, [options, [callback]])`
 
 Convenience method for GET operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - The callback function using the signature `function (err, response, payload)` where:
+- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
@@ -172,16 +189,17 @@ Convenience method for GET operations.
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
+If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
 
 
-### `post(uri, [options], callback)`
+### `post(uri, [options, [callback]])`
 
 Convenience method for POST operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - The callback function using the signature `function (err, response, payload)` where:
+- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
@@ -191,15 +209,17 @@ Convenience method for POST operations.
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
+If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
 
-### `patch(uri, [options], callback)`
+
+### `patch(uri, [options, [callback]])`
 
 Convenience method for PATCH operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - The callback function using the signature `function (err, response, payload)` where:
+- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
@@ -209,16 +229,17 @@ Convenience method for PATCH operations.
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
+If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
 
 
-### `put(uri, [options], callback)`
+### `put(uri, [options, [callback]])`
 
 Convenience method for PUT operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - The callback function using the signature `function (err, response, payload)` where:
+- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
@@ -228,16 +249,17 @@ Convenience method for PUT operations.
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
+If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
 
 
-### `delete(uri, [options], callback)`
+### `delete(uri, [options, [callback]])`
 
 Convenience method for DELETE operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - The callback function using the signature `function (err, response, payload)` where:
+- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
     - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
         - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
         - `data.headers` - object containing the response headers
@@ -247,7 +269,8 @@ Convenience method for DELETE operations.
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
+If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
 
 
 ### `toReadableStream(payload, [encoding])`
