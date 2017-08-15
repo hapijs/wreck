@@ -139,6 +139,7 @@ Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.ht
     aborting handling of the response. Defaults to unlimited.
     - `json` - A value indicating how to try to parse the payload as JSON. Defaults to `undefined` meaning no parse logic.
         - `true`, 'smart' - only try `JSON.parse` if the response indicates a JSON content-type.
+        - `strict` - as 'smart', except returns an error for non-JSON content-type.
         - `force` - try `JSON.parse` regardless of the content-type header.
     - `maxBytes` - The maximum allowed response payload size. Defaults to unlimited.
 - `callback` - The callback function using the signature `function (err, payload)` where:

@@ -2315,6 +2315,60 @@ describe('json', () => {
             });
         });
     });
+
+    it('will try to parse json in "strict" mode', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ foo: 'bar' }));
+        });
+
+        server.listen(0, () => {
+
+            const port = server.address().port;
+            const options = {
+                json: 'strict'
+            };
+
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                expect(err).to.not.exist();
+                expect(res.statusCode).to.equal(200);
+                expect(payload).to.not.equal(null);
+                expect(payload).to.equal({
+                    foo: 'bar'
+                });
+                server.close();
+                done();
+            });
+        });
+    });
+
+    it('will error on invalid content-type header in "strict" mode', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(JSON.stringify({ foo: 'bar' }));
+        });
+
+        server.listen(0, () => {
+
+            const port = server.address().port;
+            const options = {
+                json: 'strict'
+            };
+
+            Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                expect(err).to.exist();
+                expect(err.output.statusCode).to.equal(406);
+                server.close();
+                done();
+            });
+        });
+    });
 });
 
 describe('toReadableStream()', () => {
