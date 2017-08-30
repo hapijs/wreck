@@ -141,11 +141,20 @@ Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.ht
         - `true`, 'smart' - only try `JSON.parse` if the response indicates a JSON content-type.
         - `strict` - as 'smart', except returns an error for non-JSON content-type.
         - `force` - try `JSON.parse` regardless of the content-type header.
+    - `gunzip` - A value indicating the behavior to adopt when the payload is gzipped. Defaults to `undefined` meaning no gunzipping.
+        - `true` - only try to gunzip if the response indicates a gzip content-encoding.
+        - `false` - explicitly disable gunzipping.
+        - `force` - try to gunzip regardless of the content-encoding header.
     - `maxBytes` - The maximum allowed response payload size. Defaults to unlimited.
 - `callback` - The callback function using the signature `function (err, payload)` where:
     - `err` - Any error that may have occurred while reading the response.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
+#### Notes about gunzip
+
+When using gunzip, HTTP headers `Content-Encoding`, `Content-Length`, `Content-Range` and `ETag` won't reflect the reality as the payload has been uncompressed.
+
+Node v4 does not detect premature ending of gzipped content, if the payload is partial, you will not get an error on this specific version of node.js.
 
 ### `get(uri, [options], callback)`
 
