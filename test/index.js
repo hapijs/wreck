@@ -2416,6 +2416,34 @@ describe('gunzip', () => {
             });
         });
 
+        it('automatically handles gzip (with identity)', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip, identity' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.not.exist();
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    expect(payload.foo).to.exist();
+                    server.close();
+                    done();
+                });
+            });
+        });
+
         it('automatically handles gzip (without json)', (done) => {
 
             const server = Http.createServer((req, res) => {
