@@ -2392,6 +2392,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             });
@@ -2420,6 +2421,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip, identity' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             });
@@ -2448,6 +2450,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Encoding': 'gzip' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             });
@@ -2474,6 +2477,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ foo: 'bar' }));
             });
@@ -2502,6 +2506,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })).slice(0, 10));
             });
@@ -2531,6 +2536,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.not.exist();
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             });
@@ -2560,6 +2566,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             });
@@ -2588,6 +2595,7 @@ describe('gunzip', () => {
 
             const server = Http.createServer((req, res) => {
 
+                expect(req.headers['accept-encoding']).to.equal('gzip');
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
                 res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })).slice(0, 10));
             });
