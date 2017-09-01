@@ -115,6 +115,7 @@ Initiate an HTTP request.
     - `socketPath` - `/path/to/unix/socket` for Server.
     - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
     - `headers` - An object containing request headers.
+    - `onRequest` - A function that is called when a request is available using the signature `function(req)` where `req` is a [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest).
     - `redirects` - The maximum number of redirects to follow.
     - `redirect303` - if `true`, a HTTP 303 status code will redirect using a GET method. Defaults to no redirection on 303.
     - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature
