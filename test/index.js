@@ -2005,6 +2005,34 @@ describe('Shortcut', () => {
         });
     });
 
+    it('get request with a promise and onRequest function can abort the request', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, () => {
+
+            const onRequest = (req) => {
+
+                req.abort();
+            };
+
+            Wreck.get(`http://localhost:${server.address().port}`, { onRequest }).then((result) => {
+
+                expect(result).to.not.exist();
+            }).catch((err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.contain('hang up');
+                server.close();
+                done();
+            });
+        });
+    });
+
     it('get request without callback rejects errors on bad request', (done) => {
 
         const server = Http.createServer((req, res) => {
@@ -2041,6 +2069,35 @@ describe('Shortcut', () => {
                 expect(err).to.not.exist();
                 expect(res.statusCode).to.equal(200);
                 expect(payload.toString()).to.equal('ok');
+                server.close();
+                done();
+            });
+        });
+    });
+
+
+    it('post request with a promise and onRequest function can abort the request', (done) => {
+
+        const server = Http.createServer((req, res) => {
+
+            res.writeHead(200);
+            res.end('ok');
+        });
+
+        server.listen(0, () => {
+
+            const onRequest = (req) => {
+
+                req.abort();
+            };
+
+            Wreck.post(`http://localhost:${server.address().port}`, { onRequest, payload: Wreck.toReadableStream(internals.payload) }).then((result) => {
+
+                expect(result).to.not.exist();
+            }).catch((err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.contain('hang up');
                 server.close();
                 done();
             });
