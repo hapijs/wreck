@@ -8,6 +8,7 @@ const Path = require('path');
 const Fs = require('fs');
 const Events = require('events');
 const Stream = require('stream');
+const Zlib = require('zlib');
 const Hoek = require('hoek');
 const Lab = require('lab');
 const Reload = require('require-reload');
@@ -17,8 +18,10 @@ const Wreck = require('../');
 // Declare internals
 
 const internals = {
+    isv4: /^v4/.test(process.version),
     reload: Reload(require),
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
+    gzippedPayload: Zlib.gzipSync(new Array(1640).join('0123456789')),
     socket: __dirname + '/server.sock',
     emitSymbol: Symbol.for('wreck')
 };
@@ -1850,6 +1853,16 @@ describe('read()', () => {
         });
     });
 
+    it('handles responses with no headers (with gunzip)', (done) => {
+
+        const res = Wreck.toReadableStream(internals.gzippedPayload);
+        Wreck.read(res, { json: true, gunzip: true }, (err) => {
+
+            expect(err).to.equal(null);
+            done();
+        });
+    });
+
     it('skips destroy when not available', (done) => {
 
         const server = Http.createServer((req, res) => {
@@ -2366,6 +2379,242 @@ describe('json', () => {
                 expect(err.output.statusCode).to.equal(406);
                 server.close();
                 done();
+            });
+        });
+    });
+});
+
+describe('gunzip', () => {
+
+    describe('true', () => {
+
+        it('automatically handles gzip', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.not.exist();
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    expect(payload.foo).to.exist();
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('automatically handles gzip (with identity)', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip, identity' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.not.exist();
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    expect(payload.foo).to.exist();
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('automatically handles gzip (without json)', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    gunzip: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.not.exist();
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload.toString()).to.equal('{"foo":"bar"}');
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('automatically handles gzip (ignores when not gzipped)', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ foo: 'bar' }));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.not.exist();
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    expect(payload.foo).to.exist();
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('handles gzip errors', { skip: internals.isv4 }, (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })).slice(0, 10));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.be.an.error(internals.isv4 ? 'Unexpected end of input' : 'unexpected end of file');
+                    expect(res.statusCode).to.equal(200);
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('false/undefined', () => {
+
+        it('fails parsing gzipped content', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.not.exist();
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.be.an.error(internals.isv4 ? 'Unexpected token \u001f' : 'Unexpected token \u001f in JSON at position 0');
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.equal(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('force', () => {
+
+        it('forcefully handles gzip', (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: 'force'
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.not.exist();
+                    expect(res.statusCode).to.equal(200);
+                    expect(payload).to.not.equal(null);
+                    expect(payload.foo).to.exist();
+                    server.close();
+                    done();
+                });
+            });
+        });
+
+        it('handles gzip errors', { skip: internals.isv4 }, (done) => {
+
+            const server = Http.createServer((req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })).slice(0, 10));
+            });
+
+            server.listen(0, () => {
+
+                const port = server.address().port;
+                const options = {
+                    json: true,
+                    gunzip: 'force'
+                };
+
+                Wreck.get('http://localhost:' + port, options, (err, res, payload) => {
+
+                    expect(err).to.be.an.error(internals.isv4 ? 'Unexpected end of input' : 'unexpected end of file');
+                    expect(res.statusCode).to.equal(200);
+                    server.close();
+                    done();
+                });
             });
         });
     });
