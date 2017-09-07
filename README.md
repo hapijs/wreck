@@ -80,7 +80,8 @@ const options = {
     rejectUnauthorized: true || false,
     downstreamRes: null,
     agent: null,         // Node Core http.Agent
-    secureProtocol: 'SSLv3_method' // The SSL method to use
+    secureProtocol: 'SSLv3_method', // The SSL method to use
+    ciphers: 'DES-CBC3-SHA' // The TLS ciphers to support
 };
 
 const optionalCallback = (err, res) => {
@@ -142,6 +143,9 @@ Initiate an HTTP request.
     - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method`
       to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
       for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).
+    - `ciphers` - [TLS](https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite) list of TLS ciphers to override node's default.  
+      The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
+      for possible [TLS_CIPHERS](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT).
 - `callback` - The optional callback function using the signature `function (err, response)` where:
     - `err` - Any error that may have occurred during the handling of the request.
     - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)

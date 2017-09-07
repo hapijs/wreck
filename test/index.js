@@ -520,6 +520,20 @@ describe('request()', () => {
         });
     });
 
+    it('requests an https resource with TLS ciphers set', { timeout: 5000 }, (done) => {
+
+        Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, ciphers: 'HIGH' }, (err, res) => {
+
+            expect(err).to.not.exist();
+            Wreck.read(res, null, (err, body) => {
+
+                expect(err).to.not.exist();
+                expect(body.toString()).to.contain('<HTML>');
+                done();
+            });
+        });
+    });
+
     it('fails when an https resource has invalid certs and the default rejectUnauthorized', (done) => {
 
         const httpsOptions = {
