@@ -803,12 +803,8 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        try {
-            await Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 });
-        }
-        catch (err) {
-            expect(err.output.statusCode).to.equal(504);
-        }
+        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 })).to.reject();
+        expect(err.output.statusCode).to.equal(504);
     });
 
     it('cleans socket on agent deferred read timeout', async () => {
@@ -835,12 +831,8 @@ describe('request()', () => {
         expect(Object.keys(agent.sockets).length).to.equal(1);
         expect(Object.keys(agent.requests).length).to.equal(0);
 
-        try {
-            await Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent, timeout: 15 });
-        }
-        catch (err) {
-            expect(err.output.statusCode).to.equal(504);
-        }
+        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent, timeout: 15 })).to.reject();
+        expect(err.output.statusCode).to.equal(504);
 
         expect(Object.keys(agent.sockets).length).to.equal(1);
         expect(Object.keys(agent.requests).length).to.equal(1);
@@ -881,12 +873,8 @@ describe('request()', () => {
 
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 });
 
-        try {
-            Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 });
-        }
-        catch (err) {
-            expect(err.output.statusCode).to.equal(504);
-        }
+        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 })).to.reject();
+        expect(err.output.statusCode).to.equal(504);
 
         complete();
 
@@ -1031,12 +1019,8 @@ describe('read()', () => {
         const promise = Wreck.read(res);
         res.emit('error', new Error('my error'));
 
-        try {
-            await promise;
-        }
-        catch (err) {
-            expect(err.isBoom).to.equal(true);
-        }
+        const err = await expect(promise).to.reject();
+        expect(err.isBoom).to.equal(true);
     });
 
     it('handles responses that close early', async () => {
@@ -1047,12 +1031,8 @@ describe('read()', () => {
         const promise = Wreck.read(res);
         res.emit('close');
 
-        try {
-            await promise;
-        }
-        catch (err) {
-            expect(err.isBoom).to.equal(true);
-        }
+        const err = await expect(promise).to.reject();
+        expect(err.isBoom).to.equal(true);
     });
 
     it('times out when stream read takes too long', async () => {
@@ -1079,26 +1059,18 @@ describe('read()', () => {
             }, 200);
         };
 
-        try {
-            await Wreck.read(new TestStream(), { timeout: 100 });
-        }
-        catch (err) {
-            expect(err).to.exist();
-            expect(err.output.statusCode).to.equal(408);
-        }
+        const err = await expect(Wreck.read(new TestStream(), { timeout: 100 })).to.reject();
+        expect(err).to.exist();
+        expect(err.output.statusCode).to.equal(408);
     });
 
     it('errors when stream is too big', async () => {
 
         const server = await internals.server();
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
-        try {
-            await Wreck.read(res, { maxBytes: 120 });
-        }
-        catch (err) {
-            expect(err.output.statusCode).to.equal(400);
-            server.close();
-        }
+        const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
+        expect(err.output.statusCode).to.equal(400);
+        server.close();
     });
 
     it('reads a file streamed via HTTP', async () => {
@@ -1187,13 +1159,9 @@ describe('read()', () => {
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
 
         res.destroy = null;
-        try {
-            await Wreck.read(res, { maxBytes: 120 });
-        }
-        catch (err) {
-            expect(err.output.statusCode).to.equal(400);
-            server.close();
-        }
+        const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
+        expect(err.output.statusCode).to.equal(400);
+        server.close();
     });
 });
 
@@ -1295,17 +1263,13 @@ describe('Shortcut', () => {
 
         const server = await internals.server(handler);
 
-        try {
-            await Wreck.get('http://127.0.0.1:' + server.address().port, { json: true });
-        }
-        catch (err) {
-            expect(err.isBoom).to.be.true();
-            expect(err.message).to.equal('Response Error: 400 Bad Request');
-            expect(err.data.isResponseError).to.be.true();
-            expect(err.data.headers).to.include({ 'x-custom': 'yes' });
-            expect(err.data.payload).to.equal({ details: 'failed' });
-            expect(err.data.res.statusCode).to.equal(400);
-        };
+        const err = await expect(Wreck.get('http://127.0.0.1:' + server.address().port, { json: true })).to.reject();
+        expect(err.isBoom).to.be.true();
+        expect(err.message).to.equal('Response Error: 400 Bad Request');
+        expect(err.data.isResponseError).to.be.true();
+        expect(err.data.headers).to.include({ 'x-custom': 'yes' });
+        expect(err.data.payload).to.equal({ details: 'failed' });
+        expect(err.data.res.statusCode).to.equal(400);
     });
 });
 
@@ -1369,13 +1333,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: true };
 
-        try {
-            await Wreck.get('http://localhost:' + server.address().port, options);
-        }
-        catch (err) {
-            expect(err).to.exist();
-        }
-
+        await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
         server.close();
     });
 
@@ -1477,13 +1435,8 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'strict' };
 
-        try {
-            await Wreck.get('http://localhost:' + server.address().port, options);
-        }
-        catch (err) {
-            expect(err.output.statusCode).to.equal(406);
-        }
-
+        const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+        expect(err.output.statusCode).to.equal(406);
         server.close();
     });
 });
@@ -1575,14 +1528,9 @@ describe('gunzip', () => {
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true };
 
-            try {
-                await Wreck.get('http://localhost:' + server.address().port, options);
-            }
-            catch (err) {
-                expect(err).to.be.an.error('unexpected end of file');
-                expect(err.data.res.statusCode).to.equal(200);
-            }
-
+            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            expect(err).to.be.an.error('unexpected end of file');
+            expect(err.data.res.statusCode).to.equal(200);
             server.close();
         });
     });
@@ -1601,15 +1549,10 @@ describe('gunzip', () => {
             const server = await internals.server(handler);
             const options = { json: true };
 
-            try {
-                await Wreck.get('http://localhost:' + server.address().port, options);
-            }
-            catch (err) {
-                expect(err).to.be.an.error('Unexpected token \u001f in JSON at position 0');
-                expect(err.data.res.statusCode).to.equal(200);
-                expect(err.data.payload).to.equal(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
-            }
-
+            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            expect(err).to.be.an.error('Unexpected token \u001f in JSON at position 0');
+            expect(err.data.res.statusCode).to.equal(200);
+            expect(err.data.payload).to.equal(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             server.close();
         });
     });
@@ -1646,14 +1589,9 @@ describe('gunzip', () => {
             const server = await internals.server(handler);
             const options = { json: true, gunzip: 'force' };
 
-            try {
-                await Wreck.get('http://localhost:' + server.address().port, options);
-            }
-            catch (err) {
-                expect(err).to.be.an.error('unexpected end of file');
-                expect(err.data.res.statusCode).to.equal(200);
-            }
-
+            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            expect(err).to.be.an.error('unexpected end of file');
+            expect(err.data.res.statusCode).to.equal(200);
             server.close();
         });
     });
@@ -1754,12 +1692,8 @@ describe('Events', () => {
         wreck.events.on('response', handler);
 
         await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
-        try {
-            await wreck.get('http://127.0.0.1', { timeout: 10 });
-        }
-        catch (err) {
-            expect(count).to.equal(2);
-        }
+        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
+        expect(count).to.equal(2);
     });
 
     it('emits request event before wreck sends a request', async () => {
@@ -1808,34 +1742,22 @@ describe('Defaults', () => {
         const wreckAB = wreckA.defaults(optionsB);
 
         const promise1 = wreckA.request('get', 'http://localhost:0/', { headers: { banana: 911 } });
-        try {
-            await promise1;
-        }
-        catch (err) {
-            expect(promise1.req._headers.banana).to.exist();
-            expect(promise1.req._headers.foo).to.exist();
-            expect(promise1.req._headers.bar).to.not.exist();
-        }
+        await expect(promise1).to.reject();
+        expect(promise1.req._headers.banana).to.exist();
+        expect(promise1.req._headers.foo).to.exist();
+        expect(promise1.req._headers.bar).to.not.exist();
 
         const promise2 = wreckB.request('get', 'http://localhost:0/', { headers: { banana: 911 } });
-        try {
-            await promise2;
-        }
-        catch (err) {
-            expect(promise2.req._headers.banana).to.exist();
-            expect(promise2.req._headers.foo).to.not.exist();
-            expect(promise2.req._headers.bar).to.exist();
-        }
+        await expect(promise2).to.reject();
+        expect(promise2.req._headers.banana).to.exist();
+        expect(promise2.req._headers.foo).to.not.exist();
+        expect(promise2.req._headers.bar).to.exist();
 
         const promise3 = wreckAB.request('get', 'http://localhost:0/', { headers: { banana: 911 } });
-        try {
-            await promise3;
-        }
-        catch (err) {
-            expect(promise3.req._headers.banana).to.exist();
-            expect(promise3.req._headers.foo).to.exist();
-            expect(promise3.req._headers.bar).to.exist();
-        }
+        await expect(promise3).to.reject();
+        expect(promise3.req._headers.banana).to.exist();
+        expect(promise3.req._headers.foo).to.exist();
+        expect(promise3.req._headers.bar).to.exist();
     });
 
     it('applies defaults correctly to requests', async () => {
@@ -1846,13 +1768,9 @@ describe('Defaults', () => {
         const wreckA = Wreck.defaults(optionsA);
 
         const promise1 = wreckA.request('get', 'http://localhost:0/', optionsB);
-        try {
-            await promise1;
-        }
-        catch (err) {
-            expect(promise1.req._headers.accept).to.equal('bar');
-            expect(promise1.req._headers.test).to.equal(123);
-        }
+        await expect(promise1).to.reject();
+        expect(promise1.req._headers.accept).to.equal('bar');
+        expect(promise1.req._headers.test).to.equal(123);
     });
 
     it('defaults inherits agents properly', async () => {
@@ -1953,12 +1871,8 @@ describe('Defaults', () => {
         expect(wreck.agents.http.maxSockets).to.equal(1);
         const agent = new Http.Agent({ maxSockets: 2 });
         const promise = wreck.request('get', 'http://localhost:0/', { agent });
-        try {
-            await promise;
-        }
-        catch (err) {
-            expect(promise.req.agent.maxSockets).to.equal(2);
-        }
+        await expect(promise).to.reject();
+        expect(promise.req.agent.maxSockets).to.equal(2);
     });
 });
 

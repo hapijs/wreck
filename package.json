@@ -17,7 +17,7 @@
     "hoek": "4.x.x"
   },
   "devDependencies": {
-    "code": "5.0.0",
+    "code": "5.x.x",
     "lab": "14.x.x"
   },
   "scripts": {

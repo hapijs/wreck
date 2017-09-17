@@ -66,7 +66,6 @@ const options = {
 };
 
 const promise = wreck.request(method, uri, options);
-// Use promise.req.abort() to terminate the request early
 try {
 	const res = await promise;
 	const body = await Wreck.read(res);
@@ -75,6 +74,10 @@ catch (err) {
 	// Handle errors
 }
 ```
+
+Use `promise.req.abort()` to terminate the request early. Note that this is limited to the initial request only.
+If the was request already redirected, aborting the original request will not abort execution of pending redirections.
+
 
 ### `defaults(options)`
 
