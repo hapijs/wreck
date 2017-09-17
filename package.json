@@ -1,7 +1,7 @@
 {
   "name": "wreck",
   "description": "HTTP Client Utilities",
-  "version": "12.5.0",
+  "version": "13.0.0",
   "repository": "git://github.com/hapijs/wreck",
   "main": "lib/index",
   "keywords": [
@@ -10,15 +10,15 @@
     "client"
   ],
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=8.0.0"
   },
   "dependencies": {
     "boom": "5.x.x",
     "hoek": "4.x.x"
   },
   "devDependencies": {
-    "lab": "14.x.x",
-    "require-reload": "0.2.x"
+    "code": "5.0.0",
+    "lab": "14.x.x"
   },
   "scripts": {
     "test": "lab -t 100 -L -a code",
