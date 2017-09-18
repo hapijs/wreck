@@ -10,30 +10,11 @@ Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 
 ## Usage
 
-### Basic
-```javascript
-const Wreck = require('wreck');
-
-Wreck.get('https://google.com/', (err, res, payload) => {
-    /* do stuff */
-});
-```
-
-```javascript
-const Wreck = require('wreck');
-
-Wreck.post('https://posttestserver.com/post.php', { payload: { hello: 'post' } }, (err, res, payload) => {
-    /* do stuff */
-});
-```
-
-### With Async/Await
-
 ```javascript
 const Wreck = require('wreck');
 
 async function example () {
-  const { req, res, payload } = await Wreck.get('http://example.com');
+  const { res, payload } = await Wreck.get('http://example.com');
   console.log(payload.toString());
 }
 
@@ -84,25 +65,26 @@ const options = {
     ciphers: 'DES-CBC3-SHA' // The TLS ciphers to support
 };
 
-const optionalCallback = (err, res) => {
-
-    /* handle err if it exists, in which case res will be undefined */
-
-    // buffer the response stream
-    Wreck.read(res, null, (err, body) => {
-        /* do stuff */
-    });
-};
-
-const req = wreck.request(method, uri, options, optionalCallback);
+const promise = wreck.request(method, uri, options);
+try {
+	const res = await promise;
+	const body = await Wreck.read(res);
+}
+catch (err) {
+	// Handle errors
+}
 ```
+
+Use `promise.req.abort()` to terminate the request early. Note that this is limited to the initial request only.
+If the request was already redirected, aborting the original request will not abort execution of pending redirections.
+
 
 ### `defaults(options)`
 
 Returns a *new* instance of Wreck which merges the provided `options` with those provided on a per-request basis. You can call defaults repeatedly to build up multiple http clients.
 - `options` - Config object containing settings for both `request` and `read` operations.
 
-### `request(method, uri, [options, [callback]])`
+### `request(method, uri, [options])`
 
 Initiate an HTTP request.
 - `method` - A string specifying the HTTP request method, defaulting to 'GET'.
@@ -116,7 +98,6 @@ Initiate an HTTP request.
     - `socketPath` - `/path/to/unix/socket` for Server.
     - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
     - `headers` - An object containing request headers.
-    - `onRequest` - A function that is called when a request is available using the signature `function(req)` where `req` is a [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest).
     - `redirects` - The maximum number of redirects to follow.
     - `redirect303` - if `true`, a HTTP 303 status code will redirect using a GET method. Defaults to no redirection on 303.
     - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature
@@ -146,15 +127,11 @@ Initiate an HTTP request.
     - `ciphers` - [TLS](https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite) list of TLS ciphers to override node's default.  
       The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
       for possible [TLS_CIPHERS](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT).
-- `callback` - The optional callback function using the signature `function (err, response)` where:
-    - `err` - Any error that may have occurred during the handling of the request.
-    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-       object, which is also a readable stream.
 
-Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+Returns a promise that resolves into a node response object. The promise has a `req` property which is the instance of the node.js
+[ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
 
-
-### `read(response, options, callback)`
+### `read(response, options)`
 - `response` - An HTTP Incoming Message object.
 - `options` - `null` or a configuration object with the following optional keys:
     - `timeout` - The number of milliseconds to wait while reading data before
@@ -168,115 +145,112 @@ Returns an instance of the node.js [ClientRequest](http://nodejs.org/api/http.ht
         - `false` - explicitly disable gunzipping.
         - `force` - try to gunzip regardless of the content-encoding header.
     - `maxBytes` - The maximum allowed response payload size. Defaults to unlimited.
-- `callback` - The callback function using the signature `function (err, payload)` where:
-    - `err` - Any error that may have occurred while reading the response.
-    - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+
+Returns a promise that resolves into the payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 #### Notes about gunzip
 
 When using gunzip, HTTP headers `Content-Encoding`, `Content-Length`, `Content-Range` and `ETag` won't reflect the reality as the payload has been uncompressed.
 
-Node v4 does not detect premature ending of gzipped content, if the payload is partial, you will not get an error on this specific version of node.js.
-
-### `get(uri, [options, [callback]])`
+### `get(uri, [options])`
 
 Convenience method for GET operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `data.headers` - object containing the response headers
-        - `data.payload` - the payload in the form of a Buffer or as a parsed object
-        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
-    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+
+Returns a promise that resolves into an object with the following properties:
+    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
-If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
+properties:
+    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+    - `data.headers` - object containing the response headers
+    - `data.payload` - the payload in the form of a Buffer or as a parsed object
+    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
-
-### `post(uri, [options, [callback]])`
+### `post(uri, [options])`
 
 Convenience method for POST operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `data.headers` - object containing the response headers
-        - `data.payload` - the payload in the form of a Buffer or as a parsed object
-        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
-    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+
+Returns a promise that resolves into an object with the following properties:
+    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
-If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
+properties:
+    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+    - `data.headers` - object containing the response headers
+    - `data.payload` - the payload in the form of a Buffer or as a parsed object
+    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
-
-### `patch(uri, [options, [callback]])`
+### `patch(uri, [options])`
 
 Convenience method for PATCH operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `data.headers` - object containing the response headers
-        - `data.payload` - the payload in the form of a Buffer or as a parsed object
-        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
-    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+
+Returns a promise that resolves into an object with the following properties:
+    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
-If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
+properties:
+    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+    - `data.headers` - object containing the response headers
+    - `data.payload` - the payload in the form of a Buffer or as a parsed object
+    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
-
-### `put(uri, [options, [callback]])`
+### `put(uri, [options])`
 
 Convenience method for PUT operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `data.headers` - object containing the response headers
-        - `data.payload` - the payload in the form of a Buffer or as a parsed object
-        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
-    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+
+Returns a promise that resolves into an object with the following properties:
+    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
-If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
+properties:
+    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+    - `data.headers` - object containing the response headers
+    - `data.payload` - the payload in the form of a Buffer or as a parsed object
+    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
-
-### `delete(uri, [options, [callback]])`
+### `delete(uri, [options])`
 
 Convenience method for DELETE operations.
 - `uri` - The URI of the requested resource.
 - `options` - Optional config object containing settings for both `request` and
   `read` operations.
-- `callback` - Optional callback function using the signature `function (err, response, payload)` where:
-    - `err` - Any error that may have occurred during handling of the request or a Boom error object if the response has an error status code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom properties.
-        - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-        - `data.headers` - object containing the response headers
-        - `data.payload` - the payload in the form of a Buffer or as a parsed object
-        - `data.response` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
-    - `response` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+
+Returns a promise that resolves into an object with the following properties:
+    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-If a callback function is provided then an instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object is returned.
-If no callback function is provided then a Promise is returned that resolves an object with the following structure: `{ req, res, payload }`;
-
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
+properties:
+    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+    - `data.headers` - object containing the response headers
+    - `data.payload` - the payload in the form of a Buffer or as a parsed object
+    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
 ### `toReadableStream(payload, [encoding])`
 
@@ -338,6 +312,9 @@ Wreck.agents.https = new HTTPS.Agent({
 
 ### Events
 
+To enable events, use `Wreck.defaults({ events: true })`. Events are available via the
+`events` emitter attached to the client returned by `Wreck.defaults()`.
+
 #### `request`
 
 The request event is emitted just before *wreck* makes a request.  The
@@ -372,18 +349,3 @@ module that this event can fire for each request made across all modules.  The
 `start` property is the timestamp when the request was started.  This can be
 useful for determining how long it takes *wreck* to get a response back and
 processed.
-
-The `EventEmitter` is attached to the `process` object under a `Symbol` with the
-value of `'wreck'`.  Therefore, if you want to capture a wreck event, after
-wreck has been loaded, but in a module that doesn't require wreck, you can
-handle events in the following way:
-
-```js
-const symbol = Symbol.for('wreck');
-process[symbol].on('response', (err, details) => {
-
-    if (err) {
-      console.error(err);
-    }
-});
-```
