@@ -76,7 +76,7 @@ catch (err) {
 ```
 
 Use `promise.req.abort()` to terminate the request early. Note that this is limited to the initial request only.
-If the was request already redirected, aborting the original request will not abort execution of pending redirections.
+If the request was already redirected, aborting the original request will not abort execution of pending redirections.
 
 
 ### `defaults(options)`
@@ -164,7 +164,7 @@ Returns a promise that resolves into an object with the following properties:
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Thows any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
     - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
@@ -184,7 +184,7 @@ Returns a promise that resolves into an object with the following properties:
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Thows any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
     - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
@@ -204,7 +204,7 @@ Returns a promise that resolves into an object with the following properties:
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Thows any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
     - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
@@ -224,7 +224,7 @@ Returns a promise that resolves into an object with the following properties:
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Thows any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
     - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
@@ -244,7 +244,7 @@ Returns a promise that resolves into an object with the following properties:
        object, which is a readable stream that has "ended" and contains no more data to read.
     - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
-Thows any error that may have occurred during handling of the request or a Boom error object if the response has an error status
+Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
     - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code

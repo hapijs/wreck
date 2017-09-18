@@ -36,7 +36,7 @@ const expect = Code.expect;
 
 describe('request()', () => {
 
-    it('requests a resource with callback', async () => {
+    it('requests a resource', async () => {
 
         const server = await internals.server();
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
@@ -884,7 +884,7 @@ describe('request()', () => {
 
     describe('unix socket', () => {
 
-        it('requests a resource with callback', async () => {
+        it('requests a resource', async () => {
 
             const server = await internals.server(null, internals.socket);
             const res = await Wreck.request('get', '/', { socketPath: internals.socket });
