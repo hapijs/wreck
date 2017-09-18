@@ -10,6 +10,7 @@ const Events = require('events');
 const Stream = require('stream');
 const Zlib = require('zlib');
 
+const Boom = require('boom');
 const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -1019,8 +1020,22 @@ describe('read()', () => {
         const promise = Wreck.read(res);
         res.emit('error', new Error('my error'));
 
-        const err = await expect(promise).to.reject();
+        const err = await expect(promise).to.reject('Payload stream error: my error');
         expect(err.isBoom).to.equal(true);
+        expect(err.output.statusCode).to.equal(500);
+    });
+
+    it('retains boom response error', async () => {
+
+        const res = new Events.EventEmitter();
+        res.pipe = function () { };
+
+        const promise = Wreck.read(res);
+        res.emit('error', Boom.badRequest('You messed up'));
+
+        const err = await expect(promise).to.reject('You messed up');
+        expect(err.isBoom).to.equal(true);
+        expect(err.output.statusCode).to.equal(400);
     });
 
     it('handles responses that close early', async () => {
