@@ -1038,15 +1038,41 @@ describe('read()', () => {
         expect(err.output.statusCode).to.equal(400);
     });
 
-    it('handles responses that close early', async () => {
+    it('errors on partial payload transfers', async () => {
 
-        const res = new Events.EventEmitter();
-        res.pipe = function () { };
+        const handler = (req, res) => {
 
-        const promise = Wreck.read(res);
-        res.emit('close');
+            res.setHeader('content-length', 2000);
+            res.writeHead(200);
+            res.write(internals.payload.slice(0, 1000));
+            res.end();
+        };
 
-        const err = await expect(promise).to.reject();
+        const server = await internals.server(handler);
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        expect(res.statusCode).to.equal(200);
+        expect(res.headers['transfer-encoding']).to.not.exist();
+        const err = await expect(Wreck.read(res)).to.reject(Error, 'Payload stream closed prematurely');
+        expect(err.isBoom).to.equal(true);
+    });
+
+    it('errors on partial payload transfers (chunked)', async () => {
+
+        const handler = (req, res) => {
+
+            res.writeHead(200);
+            res.write(internals.payload);
+            setTimeout(() => {
+
+                res.destroy(new Error('go away'));
+            }, 10);
+        };
+
+        const server = await internals.server(handler);
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        expect(res.statusCode).to.equal(200);
+        expect(res.headers['transfer-encoding']).to.equal('chunked');
+        const err = await expect(Wreck.read(res)).to.reject(Error, 'Payload stream closed prematurely');
         expect(err.isBoom).to.equal(true);
     });
 
