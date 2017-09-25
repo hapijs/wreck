@@ -1692,7 +1692,7 @@ describe('read()', () => {
         res.emit('error', new Error('my error'));
     });
 
-    it('handles responses that close early', (done) => {
+    it('handles "close" emit', (done) => {
 
         const res = new Events.EventEmitter();
         res.pipe = function () { };
@@ -1704,6 +1704,109 @@ describe('read()', () => {
         });
 
         res.emit('close');
+    });
+
+    it('handles requests that close early', (done) => {
+
+        let clientReq;
+        const handler = (req, res) => {
+
+            Wreck.read(req, null, (err) => {
+
+                expect(err).to.be.an.error();
+                expect(err.message).to.equal('Payload stream closed prematurely');
+            });
+            clientReq.abort();
+        };
+
+        const payload = new Stream.Readable();
+        let written = 0;
+        payload._read = function () {
+
+            if (written < 1) {
+                this.push(Buffer.alloc(1));
+                ++written;
+            }
+        };
+
+        const headers = {
+            'content-length': '123'
+        };
+
+        const server = Http.createServer(handler);
+
+        server.listen(0, () => {
+
+            clientReq = Wreck.request('post', 'http://localhost:' + server.address().port, { payload, headers }, (err, res) => {
+
+                expect(err).to.be.an.error();
+                expect(err.isBoom).to.equal(true);
+                done();
+            });
+        });
+    });
+
+    it('errors on partial payload transfers', (done) => {
+
+        const handler = (req, res) => {
+
+            res.setHeader('content-length', 2000);
+            res.writeHead(200);
+            res.write(internals.payload.slice(0, 1000));
+            res.end();
+        };
+
+        const server = Http.createServer(handler);
+
+        server.listen(0, () => {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
+
+                expect(err).to.not.be.an.error();
+                expect(res.statusCode).to.equal(200);
+                expect(res.headers['transfer-encoding']).to.not.exist();
+                Wreck.read(res, null, (err) => {
+
+                    expect(err).to.be.an.error();
+                    expect(err.message).to.equal('Payload stream closed prematurely');
+                    expect(err.isBoom).to.equal(true);
+                    done();
+                });
+            });
+        });
+    });
+
+    it('errors on partial payload transfers (chunked)', (done) => {
+
+        const handler = (req, res) => {
+
+            res.writeHead(200);
+            res.write(internals.payload);
+            setTimeout(() => {
+
+                res.destroy(new Error('go away'));
+            }, 10);
+        };
+
+        const server = Http.createServer(handler);
+
+        server.listen(0, () => {
+
+            Wreck.request('get', 'http://localhost:' + server.address().port, {}, (err, res) => {
+
+                expect(err).to.not.be.an.error();
+                expect(res.statusCode).to.equal(200);
+                expect(res.headers['transfer-encoding']).to.equal('chunked');
+
+                Wreck.read(res, null, (err) => {
+
+                    expect(err).to.be.an.error();
+                    expect(err.message).to.equal('Payload stream closed prematurely');
+                    expect(err.isBoom).to.equal(true);
+                    done();
+                });
+            });
+        });
     });
 
     it('times out when stream read takes too long', (done) => {
