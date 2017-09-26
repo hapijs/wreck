@@ -1,7 +1,7 @@
 {
   "name": "wreck",
   "description": "HTTP Client Utilities",
-  "version": "13.0.1",
+  "version": "13.0.3",
   "repository": "git://github.com/hapijs/wreck",
   "main": "lib/index",
   "keywords": [
@@ -13,8 +13,8 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "boom": "5.x.x",
-    "hoek": "4.x.x"
+    "boom": "6.x.x",
+    "hoek": "5.x.x"
   },
   "devDependencies": {
     "code": "5.x.x",
