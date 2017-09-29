@@ -10,22 +10,28 @@ Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 
 ## Usage
 
+<!-- eslint-disable no-undef -->
+<!-- eslint-disable no-unused-vars -->
 ```javascript
 const Wreck = require('wreck');
 
-async function example () {
-  const { res, payload } = await Wreck.get('http://example.com');
-  console.log(payload.toString());
-}
+const example = async function () {
+
+    const { res, payload } = await Wreck.get('http://example.com');
+    console.log(payload.toString());
+};
 
 try {
-  example();
-} catch (ex) {
-  console.error(ex);
+    example();
+}
+catch (ex) {
+    console.error(ex);
 }
 ```
 
 ### Advanced
+<!-- eslint-disable no-undef -->
+<!-- eslint-disable no-unused-vars -->
 ```javascript
 const Wreck = require('wreck');
 
@@ -54,7 +60,7 @@ const options = {
     payload: readableStream || 'foo=bar' || new Buffer('foo=bar'),
     headers: { /* http headers */ },
     redirects: 3,
-    beforeRedirect: function (redirectMethod, statusCode, location, resHeaders, redirectOptions, next) { return next() },
+    beforeRedirect: (redirectMethod, statusCode, location, resHeaders, redirectOptions, next) => next(),
     redirected: function (statusCode, location, req) {},
     timeout: 1000,    // 1 second, default: unlimited
     maxBytes: 1048576, // 1 MB, default: unlimited
@@ -65,16 +71,16 @@ const options = {
     ciphers: 'DES-CBC3-SHA' // The TLS ciphers to support
 };
 
-async function example () {
+const example = async function () {
 
     const promise = wreck.request(method, uri, options);
     try {
-    	const res = await promise;
-    	const body = await Wreck.read(res);
+        const res = await promise;
+        const body = await Wreck.read(res);
         console.log(body.toString());
     }
     catch (err) {
-    	// Handle errors
+        // Handle errors
     }
 };
 ```
@@ -263,6 +269,8 @@ for the provided payload and encoding.
 - `payload` - The Buffer or string to be wrapped in a readable stream.
 - `encoding` - The encoding to use. Must be a valid Buffer encoding, such as 'utf8' or 'ascii'.
 
+<!-- eslint-disable no-unused-vars -->
+<!-- eslint-disable no-undef -->
 ```javascript
 const stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
 const read = stream.read();
@@ -276,6 +284,8 @@ a property for each directive and it's value. Boolean directives, such as "priva
 or "no-cache" will be set to the boolean `true`.
 - `field` - The header cache control value to be parsed.
 
+<!-- eslint-disable no-unused-vars -->
+<!-- eslint-disable no-undef -->
 ```javascript
 const result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 // result.private -> true
@@ -303,6 +313,7 @@ agent.
 
 Below is another example that sets the certificate details for all HTTPS requests.
 
+<!-- eslint-disable no-undef -->
 ```js
 const HTTPS = require('https');
 const Wreck = require('wreck');
