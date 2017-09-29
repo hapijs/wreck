@@ -66,13 +66,17 @@ const options = {
 };
 
 const promise = wreck.request(method, uri, options);
-try {
-	const res = await promise;
-	const body = await Wreck.read(res);
-}
-catch (err) {
-	// Handle errors
-}
+(async()=>{
+
+    try {
+    	const res = await promise;
+    	const body = await Wreck.read(res);
+        console.log(body.toString());
+    }
+    catch (err) {
+    	// Handle errors
+    }
+})();
 ```
 
 Use `promise.req.abort()` to terminate the request early. Note that this is limited to the initial request only.
