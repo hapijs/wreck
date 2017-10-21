@@ -1152,7 +1152,7 @@ describe('read()', () => {
         const server = await internals.server();
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
         const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
-        expect(err.output.statusCode).to.equal(400);
+        expect(err.output.statusCode).to.equal(413);
         server.close();
     });
 
@@ -1243,7 +1243,7 @@ describe('read()', () => {
 
         res.destroy = null;
         const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
-        expect(err.output.statusCode).to.equal(400);
+        expect(err.output.statusCode).to.equal(413);
         server.close();
     });
 });
