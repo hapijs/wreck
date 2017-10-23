@@ -1053,7 +1053,7 @@ describe('read()', () => {
     it('handles requests that close early', async () => {
 
         let readPromise;
-        const handler = async (req, res) => {
+        const handler = (req, res) => {
 
             readPromise = Wreck.read(req);
             promise.req.abort();
@@ -1250,7 +1250,7 @@ describe('read()', () => {
 
 describe('parseCacheControl()', () => {
 
-    it('parses valid header', async () => {
+    it('parses valid header', () => {
 
         const header = Wreck.parseCacheControl('must-revalidate, max-age=3600');
         expect(header).to.exist();
@@ -1258,7 +1258,7 @@ describe('parseCacheControl()', () => {
         expect(header['max-age']).to.equal(3600);
     });
 
-    it('parses valid header with quoted string', async () => {
+    it('parses valid header with quoted string', () => {
 
         const header = Wreck.parseCacheControl('must-revalidate, max-age="3600"');
         expect(header).to.exist();
@@ -1266,13 +1266,13 @@ describe('parseCacheControl()', () => {
         expect(header['max-age']).to.equal(3600);
     });
 
-    it('errors on invalid header', async () => {
+    it('errors on invalid header', () => {
 
         const header = Wreck.parseCacheControl('must-revalidate, b =3600');
         expect(header).to.not.exist();
     });
 
-    it('errors on invalid max-age', async () => {
+    it('errors on invalid max-age', () => {
 
         const header = Wreck.parseCacheControl('must-revalidate, max-age=a3600');
         expect(header).to.not.exist();
@@ -1682,7 +1682,7 @@ describe('gunzip', () => {
 
 describe('toReadableStream()', () => {
 
-    it('handle empty payload', async () => {
+    it('handle empty payload', () => {
 
         const stream = Wreck.toReadableStream();
         expect(stream instanceof Stream).to.be.true();
@@ -1690,7 +1690,7 @@ describe('toReadableStream()', () => {
         expect(read).to.be.null();
     });
 
-    it('handle explicit encoding', async () => {
+    it('handle explicit encoding', () => {
 
         const data = 'Hello';
         const stream = Wreck.toReadableStream(data, 'ascii');
@@ -1699,7 +1699,7 @@ describe('toReadableStream()', () => {
         expect(read.toString()).to.equal(data);
     });
 
-    it('chunks to requested size', async () => {
+    it('chunks to requested size', () => {
 
         let buf;
         const data = new Array(101).join('0123456789');
@@ -1807,7 +1807,7 @@ describe('Events', () => {
 
 describe('Defaults', () => {
 
-    it('rejects attempts to use defaults without an options hash', async () => {
+    it('rejects attempts to use defaults without an options hash', () => {
 
         expect(() => {
 
@@ -1856,7 +1856,7 @@ describe('Defaults', () => {
         expect(promise1.req._headers.test).to.equal(123);
     });
 
-    it('defaults inherits agents properly', async () => {
+    it('defaults inherits agents properly', () => {
 
         const wreckNoDefaults = Wreck.defaults({});
         const wreckDefaults = Wreck.defaults({
@@ -1874,7 +1874,7 @@ describe('Defaults', () => {
         expect(wreckDefaults.agents.httpsAllowUnauthorized.maxSockets).to.equal(1);
     });
 
-    it('defaults disallows agents without all 3 types', async () => {
+    it('defaults disallows agents without all 3 types', () => {
 
         expect(() => {
 
