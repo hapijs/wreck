@@ -19,7 +19,7 @@
   "devDependencies": {
     "code": "5.x.x",
     "eslint-plugin-markdown": "1.0.0-beta.6",
-    "lab": "14.x.x"
+    "lab": "15.x.x"
   },
   "scripts": {
     "lint-md": "eslint --config hapi --parser-options=ecmaVersion:8 --rule 'strict: 0, eol-last: 0' --plugin markdown --ext md .",
