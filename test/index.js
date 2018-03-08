@@ -593,7 +593,8 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        await expect(Wreck.request('get', 'http://127.0.0.1:' + server.address().port)).to.reject();
+        const err = await expect(Wreck.request('get', 'http://127.0.0.1:' + server.address().port)).to.reject();
+        expect(err.isBoom).to.equal(true);
     });
 
     it('handles request errors with a boom response when payload is being sent', async () => {
@@ -605,7 +606,8 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        await expect(Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: internals.payload })).to.reject();
+        const err = await expect(Wreck.request('get', 'http://127.0.0.1:' + server.address().port, { payload: internals.payload })).to.reject();
+        expect(err.isBoom).to.equal(true);
     });
 
     it('handles response errors with a boom response (res.destroy)', async () => {
@@ -616,7 +618,8 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        await expect(Wreck.request('get', 'http://127.0.0.1:' + server.address().port)).to.reject();
+        const err = await expect(Wreck.request('get', 'http://127.0.0.1:' + server.address().port)).to.reject();
+        expect(err.isBoom).to.equal(true);
     });
 
     it('handles errors when remote server is unavailable', async () => {
