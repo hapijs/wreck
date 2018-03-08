@@ -1284,15 +1284,6 @@ describe('parseCacheControl()', () => {
 
 describe('Shortcut', () => {
 
-    it('head request', async () => {
-
-        const server = await internals.server('ok');
-        const { res, payload } = await Wreck.head('http://localhost:' + server.address().port);
-        expect(res.statusCode).to.equal(200);
-        expect(payload.toString()).to.equal('');
-        server.close();
-    });
-
     it('get request', async () => {
 
         const server = await internals.server('ok');
