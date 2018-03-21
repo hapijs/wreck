@@ -57,7 +57,7 @@ const wreckWithTimeout = wreck.defaults({
 // all attributes are optional
 const options = {
     baseUrl: 'https://www.example.com',
-    payload: readableStream || 'foo=bar' || new Buffer('foo=bar'),
+    payload: readableStream || 'foo=bar' || Buffer.from('foo=bar'),
     headers: { /* http headers */ },
     redirects: 3,
     beforeRedirect: (redirectMethod, statusCode, location, resHeaders, redirectOptions, next) => next(),
@@ -272,7 +272,7 @@ for the provided payload and encoding.
 <!-- eslint-disable no-unused-vars -->
 <!-- eslint-disable no-undef -->
 ```javascript
-const stream = Wreck.toReadableStream(new Buffer('Hello', 'ascii'), 'ascii');
+const stream = Wreck.toReadableStream(Buffer.from('Hello', 'ascii'), 'ascii');
 const read = stream.read();
 // read -> 'Hello'
 ```
