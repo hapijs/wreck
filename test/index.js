@@ -762,7 +762,7 @@ describe('request()', () => {
     it('requests payload in buffer', async () => {
 
         const server = await internals.server('echo');
-        const buf = new Buffer(internals.payload, 'ascii');
+        const buf = Buffer.from(internals.payload, 'ascii');
 
         const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf });
         const body = await Wreck.read(res);
