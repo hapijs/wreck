@@ -958,57 +958,57 @@ describe('options.baseUrl', () => {
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' });
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed without a slash', async () => {
 
-        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' });
+        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed without a slash', async () => {
 
-        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' });
+        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
     it('uses baseUrl option when uri is an empty string', async () => {
 
-        const promise = Wreck.request('get', '', { baseUrl: 'http://localhost' });
+        const promise = Wreck.request('get', '', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/');
     });
 
     it('uses baseUrl option with a path', async () => {
 
-        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo' });
+        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
     it('uses baseUrl option with a path and removes extra slashes', async () => {
 
-        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo/' });
+        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
     it('uses baseUrl option with a url that has a querystring', async () => {
 
-        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost/foo' });
+        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost:0/foo' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
     });
 });
@@ -1800,7 +1800,7 @@ describe('Events', () => {
             once = true;
         });
 
-        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
+        await expect(wreck.get('http://localhost:0', { timeout: 10 })).to.reject();
         expect(once).to.be.true();
     });
 
@@ -1818,8 +1818,8 @@ describe('Events', () => {
         const wreck = Wreck.defaults({ events: true });
         wreck.events.on('response', handler);
 
-        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
-        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
+        await expect(wreck.get('http://localhost:0', { timeout: 10 })).to.reject();
+        await expect(wreck.get('http://localhost:0', { timeout: 10 })).to.reject();
         expect(count).to.equal(2);
     });
 
@@ -2012,6 +2012,12 @@ internals.server = function (handler, socket) {
 
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 req.pipe(res);
+            };
+        }
+        else if (handler === 'fail') {
+            handler = (req, res) => {
+
+                res.socket.destroy();
             };
         }
         else if (handler === 'ok') {
