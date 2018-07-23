@@ -1121,6 +1121,47 @@ describe('read()', () => {
         expect(err.isBoom).to.equal(true);
     });
 
+    it('will not pipe the stream if no socket can be established', async () => {
+
+        const agent = new internals.SlowAgent();
+        const stream = new Stream.Readable({
+            read() {
+
+                piped = true;
+                this.push(null);
+            }
+        });
+        const onPiped = () => {
+
+            piped = true;
+        };
+        let piped = false;
+
+        stream.on('pipe', onPiped);
+
+        const promiseA = Wreck.request('post', 'http://localhost:0', {
+            agent,
+            payload: stream
+        });
+
+        await expect(promiseA).to.reject(Error, /Unable to obtain socket/);
+        expect(piped).to.equal(false);
+
+        const handler = (req, res) => {
+
+            res.writeHead(200);
+            res.end(internals.payload);
+        };
+
+        const server = await internals.server(handler);
+        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, {
+            payload: stream
+        });
+        expect(res.statusCode).to.equal(200);
+        expect(piped).to.equal(true);
+        server.close();
+    });
+
     it('times out when stream read takes too long', async () => {
 
         const TestStream = function () {
@@ -2017,6 +2058,14 @@ internals.https = function (handler) {
 
         server.listen(0, () => resolve(server));
     });
+};
+
+
+internals.SlowAgent = class SlowAgent extends Http.Agent {
+    createConnection(options, cb) {
+
+        setTimeout(cb, 200, new Error('Unable to obtain socket'));
+    }
 };
 
 
