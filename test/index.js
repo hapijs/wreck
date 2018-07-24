@@ -1127,17 +1127,11 @@ describe('read()', () => {
         const stream = new Stream.Readable({
             read() {
 
-                piped = true;
+                read = true;
                 this.push(null);
             }
         });
-        const onPiped = () => {
-
-            piped = true;
-        };
-        let piped = false;
-
-        stream.on('pipe', onPiped);
+        let read = false;
 
         const promiseA = Wreck.request('post', 'http://localhost:0', {
             agent,
@@ -1145,7 +1139,7 @@ describe('read()', () => {
         });
 
         await expect(promiseA).to.reject(Error, /Unable to obtain socket/);
-        expect(piped).to.equal(false);
+        expect(read).to.equal(false);
 
         const handler = (req, res) => {
 
@@ -1158,7 +1152,7 @@ describe('read()', () => {
             payload: stream
         });
         expect(res.statusCode).to.equal(200);
-        expect(piped).to.equal(true);
+        expect(read).to.equal(true);
         server.close();
     });
 
