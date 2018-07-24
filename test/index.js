@@ -1162,6 +1162,23 @@ describe('read()', () => {
         server.close();
     });
 
+    it('will handle stream payload errors between request creation and connection establishment', async () => {
+
+        const agent = new internals.SlowAgent();
+        const stream = new Stream.Readable();
+        const promiseA = Wreck.request('post', 'http://localhost:0', {
+            agent,
+            payload: stream
+        });
+
+        process.nextTick(() => {
+
+            stream.emit('error', new Error('Asynchronous stream error'));
+        });
+
+        await expect(promiseA).to.reject(Error, /Asynchronous stream error/);
+    });
+
     it('times out when stream read takes too long', async () => {
 
         const TestStream = function () {
