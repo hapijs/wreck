@@ -958,57 +958,57 @@ describe('options.baseUrl', () => {
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' });
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed without a slash', async () => {
 
-        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' });
+        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed without a slash', async () => {
 
-        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' });
+        const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
     it('uses baseUrl option when uri is an empty string', async () => {
 
-        const promise = Wreck.request('get', '', { baseUrl: 'http://localhost' });
+        const promise = Wreck.request('get', '', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/');
     });
 
     it('uses baseUrl option with a path', async () => {
 
-        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo' });
+        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
     it('uses baseUrl option with a path and removes extra slashes', async () => {
 
-        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo/' });
+        const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
     it('uses baseUrl option with a url that has a querystring', async () => {
 
-        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost/foo' });
+        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost:0/foo' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost');
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
     });
 });
@@ -1119,6 +1119,47 @@ describe('read()', () => {
         expect(res.headers['transfer-encoding']).to.equal('chunked');
         const err = await expect(Wreck.read(res)).to.reject(Error, 'Payload stream closed prematurely');
         expect(err.isBoom).to.equal(true);
+    });
+
+    it('will not pipe the stream if no socket can be established', async () => {
+
+        const agent = new internals.SlowAgent();
+        const stream = new Stream.Readable({
+            read() {
+
+                piped = true;
+                this.push(null);
+            }
+        });
+        const onPiped = () => {
+
+            piped = true;
+        };
+        let piped = false;
+
+        stream.on('pipe', onPiped);
+
+        const promiseA = Wreck.request('post', 'http://localhost:0', {
+            agent,
+            payload: stream
+        });
+
+        await expect(promiseA).to.reject(Error, /Unable to obtain socket/);
+        expect(piped).to.equal(false);
+
+        const handler = (req, res) => {
+
+            res.writeHead(200);
+            res.end(internals.payload);
+        };
+
+        const server = await internals.server(handler);
+        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, {
+            payload: stream
+        });
+        expect(res.statusCode).to.equal(200);
+        expect(piped).to.equal(true);
+        server.close();
     });
 
     it('times out when stream read takes too long', async () => {
@@ -1759,7 +1800,7 @@ describe('Events', () => {
             once = true;
         });
 
-        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
+        await expect(wreck.get('http://localhost:0', { timeout: 10 })).to.reject();
         expect(once).to.be.true();
     });
 
@@ -1777,8 +1818,8 @@ describe('Events', () => {
         const wreck = Wreck.defaults({ events: true });
         wreck.events.on('response', handler);
 
-        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
-        await expect(wreck.get('http://127.0.0.1', { timeout: 10 })).to.reject();
+        await expect(wreck.get('http://localhost:0', { timeout: 10 })).to.reject();
+        await expect(wreck.get('http://localhost:0', { timeout: 10 })).to.reject();
         expect(count).to.equal(2);
     });
 
@@ -1973,6 +2014,12 @@ internals.server = function (handler, socket) {
                 req.pipe(res);
             };
         }
+        else if (handler === 'fail') {
+            handler = (req, res) => {
+
+                res.socket.destroy();
+            };
+        }
         else if (handler === 'ok') {
             handler = (req, res) => {
 
@@ -2017,6 +2064,14 @@ internals.https = function (handler) {
 
         server.listen(0, () => resolve(server));
     });
+};
+
+
+internals.SlowAgent = class SlowAgent extends Http.Agent {
+    createConnection(options, cb) {
+
+        setTimeout(cb, 200, new Error('Unable to obtain socket'));
+    }
 };
 
 
