@@ -1173,6 +1173,29 @@ describe('read()', () => {
         await expect(promiseA).to.reject(Error, /Asynchronous stream error/);
     });
 
+    it('will handle requests with payloads using re-used sockets', async () => {
+
+        const server = await internals.server('echo');
+        const agent = new Http.Agent({
+            keepAlive: true
+        });
+        const streamA = Wreck.toReadableStream('hello world', 'utf8');
+        const { payload: payloadA } = await Wreck.post('http://localhost:' + server.address().port, {
+            agent,
+            payload: streamA
+        });
+
+        expect(payloadA.toString('utf8')).to.equal('hello world');
+
+        const streamB = Wreck.toReadableStream('hello world', 'utf8');
+        const { payload: payloadB } = await Wreck.post('http://localhost:' + server.address().port, {
+            agent,
+            payload: streamB
+        });
+
+        expect(payloadB.toString('utf8')).to.equal('hello world');
+    });
+
     it('times out when stream read takes too long', async () => {
 
         const TestStream = function () {
