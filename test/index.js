@@ -714,10 +714,10 @@ describe('request()', () => {
         const agent = new Http.Agent();
         let requestCount = 0;
         const addRequest = agent.addRequest;
-        agent.addRequest = function () {
+        agent.addRequest = function (...args) {
 
             requestCount++;
-            addRequest.apply(agent, arguments);
+            addRequest.apply(agent, args);
         };
 
         const server = await internals.server(handler);
@@ -1210,6 +1210,7 @@ describe('read()', () => {
             if (this.isDone) {
                 return;
             }
+
             this.isDone = true;
 
             this.push('x');
