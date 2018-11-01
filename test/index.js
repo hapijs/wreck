@@ -12,7 +12,6 @@ const Zlib = require('zlib');
 
 const Boom = require('boom');
 const Code = require('code');
-const Hoek = require('hoek');
 const Lab = require('lab');
 const Wreck = require('../');
 
@@ -1198,27 +1197,23 @@ describe('read()', () => {
 
     it('times out when stream read takes too long', async () => {
 
-        const TestStream = function () {
+        const TestStream = class extends Stream.Readable {
 
-            Stream.Readable.call(this);
-        };
+            _read(size) {
 
-        Hoek.inherits(TestStream, Stream.Readable);
+                if (this.isDone) {
+                    return;
+                }
 
-        TestStream.prototype._read = function (size) {
+                this.isDone = true;
 
-            if (this.isDone) {
-                return;
+                this.push('x');
+                this.push('y');
+                setTimeout(() => {
+
+                    this.push(null);
+                }, 200);
             }
-
-            this.isDone = true;
-
-            this.push('x');
-            this.push('y');
-            setTimeout(() => {
-
-                this.push(null);
-            }, 200);
         };
 
         const err = await expect(Wreck.read(new TestStream(), { timeout: 100 })).to.reject();
