@@ -75,7 +75,7 @@ const example = async function () {
     const promise = wreck.request(method, uri, options);
     try {
         const res = await promise;
-        const body = await Wreck.read(res);
+        const body = await Wreck.read(res, options);
         console.log(body.toString());
     }
     catch (err) {
@@ -123,7 +123,6 @@ Initiate an HTTP request.
       - `req` - The new [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object which replaces the one initially returned.
     - `timeout` - The number of milliseconds to wait without receiving a response
       before aborting the request. Defaults to unlimited.
-    - `maxBytes` - maximum size for response payload. Defaults to unlimited.
     - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
       whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
       same time as the `agent` option is set.
