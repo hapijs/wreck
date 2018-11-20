@@ -328,9 +328,9 @@ Wreck.agents.https = new HTTPS.Agent({
 To enable events, use `Wreck.defaults({ events: true })`. Events are available via the
 `events` emitter attached to the client returned by `Wreck.defaults()`.
 
-#### `request`
+#### `preRequest`
 
-The request event is emitted just before *wreck* makes a request.  The
+The request event is emitted just before *wreck* creates a request.  The
 handler should accept the following arguments `(uri, options)` where:
 
   - `uri` - the result of `Url.parse(uri)`. This will provide information about
@@ -338,9 +338,19 @@ handler should accept the following arguments `(uri, options)` where:
   - `options` - the options passed into the request function.  This will include
   a payload if there is one.
 
-Since the `request` event executes on a global event handler, you can intercept
-and decorate a request before its sent.
+Since the `preRequest` event executes on a global event handler, you can intercept
+and decorate `uri` and `options` before a request is created.
 
+#### `request`
+
+The request event is emitted just after *wreck* creates a request and before it makes a request.  The
+handler should accept the following arguments `(req)` where:
+
+  - `req` - the raw `ClientHttp` request object created from the `uri` and `options`, 
+  before `end` has been called.
+
+Since the `request` event executes on a global event handler, you can intercept
+and add listeners to a request before its sent.
 
 #### `response`
 
