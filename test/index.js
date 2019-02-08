@@ -1887,7 +1887,7 @@ describe('Events', () => {
         const server = await internals.server(handler);
         const wreck = Wreck.defaults({ events: true });
         wreck.events.once('request', (req) => {
-            
+
             expect(req).to.exist();
         });
 
