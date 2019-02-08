@@ -1,7 +1,5 @@
 'use strict';
 
-// Load modules
-
 const Http = require('http');
 const Https = require('https');
 const Path = require('path');
@@ -12,11 +10,10 @@ const Zlib = require('zlib');
 
 const Boom = require('boom');
 const Code = require('code');
+const Hoek = require('hoek');
 const Lab = require('lab');
 const Wreck = require('../');
 
-
-// Declare internals
 
 const internals = {
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
@@ -26,11 +23,7 @@ const internals = {
 };
 
 
-// Test shortcuts
-
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
+const { it, describe } = exports.lab = Lab.script();
 const expect = Code.expect;
 
 
@@ -662,6 +655,17 @@ describe('request()', () => {
         server.close();
     });
 
+    it('ignores negative timeout', async () => {
+
+        const server = await internals.server();
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const body = await Wreck.read(res, { timeout: -1 });
+
+        expect(Buffer.isBuffer(body)).to.equal(true);
+        expect(body.toString()).to.equal(internals.payload);
+        server.close();
+    });
+
     it('requests can be aborted', async () => {
 
         const server = await internals.server();
@@ -843,7 +847,7 @@ describe('request()', () => {
         complete();
 
         await Wreck.read(res);
-        await internals.wait(100);
+        await Hoek.wait(100);
         expect(Object.keys(agent.sockets).length).to.equal(0);
         expect(Object.keys(agent.requests).length).to.equal(0);
     });
@@ -1230,6 +1234,14 @@ describe('read()', () => {
         server.close();
     });
 
+    it('ignores maxBytes when stream is not too big', async () => {
+
+        const server = await internals.server();
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        await Wreck.read(res, { maxBytes: 120000 });
+        server.close();
+    });
+
     it('reads a file streamed via HTTP', async () => {
 
         const path = Path.join(__dirname, '../images/wreck.png');
@@ -1613,6 +1625,24 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
+        it('automatically handles gzip (manual header)', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, gunzip: true, headers: { 'accept-encoding': 'gzip' } };
             const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
             expect(res.statusCode).to.equal(200);
             expect(payload).to.not.equal(null);
@@ -2102,10 +2132,4 @@ internals.SlowAgent = class SlowAgent extends Http.Agent {
 
         setTimeout(cb, 200, new Error('Unable to obtain socket'));
     }
-};
-
-
-internals.wait = function (timeout) {
-
-    return new Promise((resolve) => setTimeout(resolve, timeout));
 };
