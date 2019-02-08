@@ -10,6 +10,7 @@
     "client"
   ],
   "dependencies": {
+    "bourne": "1.x.x",
     "boom": "7.x.x",
     "hoek": "6.x.x"
   },
