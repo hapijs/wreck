@@ -437,6 +437,13 @@ describe('request()', () => {
         server.close();
     });
 
+    it('handles uri with WHATWG parsing', async() => {
+
+        const promise = Wreck.request('get', 'http://localhost%60malicious.org',);
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost`malicious.org');
+    });
+
     it('reaches max redirections count', async () => {
 
         let gen = 0;
@@ -889,12 +896,29 @@ describe('request()', () => {
         Wreck.agents.http.maxSockets = Infinity;
     });
 
+    /*
+    {
+     protocol: null,
+     slashes: null,
+     auth: null,
+     host: null,
+     port: null,
+     hostname: null,
+     hash: null,
+     search: null,
+     query: null,
+     pathname: '/',
+     path: '/',
+     href: '/',
+     socketPath: '/Users/wtyler/Code/OSS/wreck/test/server.sock',
+     method: 'POST',
+    */
     describe('unix socket', () => {
 
         it('requests a resource', async () => {
 
             const server = await internals.server(null, internals.socket);
-            const res = await Wreck.request('get', '/', { socketPath: internals.socket });
+            const res = await Wreck.request('get', '/', { agent: false, socketPath: internals.socket });
             const body = await Wreck.read(res);
             expect(Buffer.isBuffer(body)).to.equal(true);
             expect(body.toString()).to.equal(internals.payload);
