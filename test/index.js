@@ -419,7 +419,12 @@ describe('request()', () => {
             redirected: (statusCode, location, req) => {
 
                 expect(location).to.equal('https://hapijs.com');
-                expect(req.output[0]).to.include('hapijs.com');
+                if (req.output) {
+                    expect(req.output[0]).to.include('hapijs.com');
+                }
+                else {
+                    expect(req.outputData[0].data).to.include('hapijs.com');
+                }
             }
         };
 
