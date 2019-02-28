@@ -22,7 +22,7 @@
   "scripts": {
     "lint-md": "eslint --config hapi --parser-options=ecmaVersion:8 --rule 'strict: 0, eol-last: 0' --plugin markdown --ext md .",
     "posttest": "npm run lint-md",
-    "test": "lab -a code",
+    "test": "lab -t 100 -L -a code",
     "test-cov-html": "lab -r html -o coverage.html -a code"
   },
   "license": "BSD-3-Clause"
