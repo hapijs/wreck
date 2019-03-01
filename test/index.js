@@ -901,6 +901,22 @@ describe('request()', () => {
         Wreck.agents.http.maxSockets = Infinity;
     });
 
+    it('sets the auth value on the request', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://username:password@localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req._headers).to.include('authorization');
+    });
+
+    it('sets the auth value on the request with missing username', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://:password@localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req._headers).to.include('authorization');
+    });
+
     describe('unix socket', () => {
 
         it('requests a resource', async () => {
@@ -1908,13 +1924,14 @@ describe('Events', () => {
         const wreck = Wreck.defaults({ events: true });
         wreck.events.once('request', (uri, options) => {
 
-            expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            expect(uri.href).to.equal('http://user:pass@localhost:' + server.address().port + '/');
             expect(options).to.exist();
+            expect(uri.auth).to.equal('user:pass');
 
             uri.headers.foo = 'bar';
         });
 
-        const { res, payload } = await wreck.put('http://localhost:' + server.address().port);
+        const { res, payload } = await wreck.put('http://user:pass@localhost:' + server.address().port);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         server.close();
