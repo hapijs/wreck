@@ -419,7 +419,12 @@ describe('request()', () => {
             redirected: (statusCode, location, req) => {
 
                 expect(location).to.equal('https://hapijs.com');
-                expect(req.output[0]).to.include('hapijs.com');
+                if (req.output) {
+                    expect(req.output[0]).to.include('hapijs.com');
+                }
+                else {
+                    expect(req.outputData[0].data).to.include('hapijs.com');
+                }
             }
         };
 
@@ -435,6 +440,13 @@ describe('request()', () => {
         expect(Buffer.isBuffer(body)).to.equal(true);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
+    });
+
+    it('handles uri with WHATWG parsing', async () => {
+
+        const promise = Wreck.request('get', 'http://localhost%60malicious.org',);
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost`malicious.org');
     });
 
     it('reaches max redirections count', async () => {
@@ -887,6 +899,22 @@ describe('request()', () => {
 
         await Wreck.read(res);
         Wreck.agents.http.maxSockets = Infinity;
+    });
+
+    it('sets the auth value on the request', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://username:password@localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req._headers).to.include('authorization');
+    });
+
+    it('sets the auth value on the request with missing username', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://:password@localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req._headers).to.include('authorization');
     });
 
     describe('unix socket', () => {
@@ -1896,13 +1924,14 @@ describe('Events', () => {
         const wreck = Wreck.defaults({ events: true });
         wreck.events.once('request', (uri, options) => {
 
-            expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            expect(uri.href).to.equal('http://user:pass@localhost:' + server.address().port + '/');
             expect(options).to.exist();
+            expect(uri.auth).to.equal('user:pass');
 
             uri.headers.foo = 'bar';
         });
 
-        const { res, payload } = await wreck.put('http://localhost:' + server.address().port);
+        const { res, payload } = await wreck.put('http://user:pass@localhost:' + server.address().port);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         server.close();
