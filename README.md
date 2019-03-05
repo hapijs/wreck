@@ -343,14 +343,12 @@ and decorate `uri` and `options` before a request is created.
 
 #### `request`
 
-The request event is emitted just after *wreck* creates a request and before it makes a request.  The
-handler should accept the following arguments `(req)` where:
+The request event is emitted just after *wreck* creates a request.  The handler should accept the following arguments `(req)` where:
 
-  - `req` - the raw `ClientHttp` request object created from the `uri` and `options`, 
-  before `end` has been called.
+  - `req` - the raw [`ClientRequest`](https://nodejs.org/api/http.html#http_class_http_clientrequest) object created from the `uri`, before `end` has been called.
 
 Since the `request` event executes on a global event handler, you can intercept
-and add listeners to a request before its sent.
+and add listeners to a request.
 
 #### `response`
 
