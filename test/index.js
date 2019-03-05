@@ -1,7 +1,5 @@
 'use strict';
 
-// Load modules
-
 const Http = require('http');
 const Https = require('https');
 const Path = require('path');
@@ -12,11 +10,10 @@ const Zlib = require('zlib');
 
 const Boom = require('boom');
 const Code = require('code');
+const Hoek = require('hoek');
 const Lab = require('lab');
 const Wreck = require('../');
 
-
-// Declare internals
 
 const internals = {
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
@@ -26,11 +23,7 @@ const internals = {
 };
 
 
-// Test shortcuts
-
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
+const { it, describe } = exports.lab = Lab.script();
 const expect = Code.expect;
 
 
@@ -426,7 +419,12 @@ describe('request()', () => {
             redirected: (statusCode, location, req) => {
 
                 expect(location).to.equal('https://hapijs.com');
-                expect(req.output[0]).to.include('hapijs.com');
+                if (req.output) {
+                    expect(req.output[0]).to.include('hapijs.com');
+                }
+                else {
+                    expect(req.outputData[0].data).to.include('hapijs.com');
+                }
             }
         };
 
@@ -442,6 +440,13 @@ describe('request()', () => {
         expect(Buffer.isBuffer(body)).to.equal(true);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
+    });
+
+    it('handles uri with WHATWG parsing', async () => {
+
+        const promise = Wreck.request('get', 'http://localhost%60malicious.org',);
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost`malicious.org');
     });
 
     it('reaches max redirections count', async () => {
@@ -662,6 +667,17 @@ describe('request()', () => {
         server.close();
     });
 
+    it('ignores negative timeout', async () => {
+
+        const server = await internals.server();
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const body = await Wreck.read(res, { timeout: -1 });
+
+        expect(Buffer.isBuffer(body)).to.equal(true);
+        expect(body.toString()).to.equal(internals.payload);
+        server.close();
+    });
+
     it('requests can be aborted', async () => {
 
         const server = await internals.server();
@@ -843,7 +859,7 @@ describe('request()', () => {
         complete();
 
         await Wreck.read(res);
-        await internals.wait(100);
+        await Hoek.wait(100);
         expect(Object.keys(agent.sockets).length).to.equal(0);
         expect(Object.keys(agent.requests).length).to.equal(0);
     });
@@ -883,6 +899,22 @@ describe('request()', () => {
 
         await Wreck.read(res);
         Wreck.agents.http.maxSockets = Infinity;
+    });
+
+    it('sets the auth value on the request', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://username:password@localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req._headers).to.include('authorization');
+    });
+
+    it('sets the auth value on the request with missing username', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://:password@localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req._headers).to.include('authorization');
     });
 
     describe('unix socket', () => {
@@ -1227,6 +1259,14 @@ describe('read()', () => {
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
         const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
         expect(err.output.statusCode).to.equal(413);
+        server.close();
+    });
+
+    it('ignores maxBytes when stream is not too big', async () => {
+
+        const server = await internals.server();
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        await Wreck.read(res, { maxBytes: 120000 });
         server.close();
     });
 
@@ -1620,6 +1660,24 @@ describe('gunzip', () => {
             server.close();
         });
 
+        it('automatically handles gzip (manual header)', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('gzip');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' });
+                res.end(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, gunzip: true, headers: { 'accept-encoding': 'gzip' } };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
         it('automatically handles gzip (with identity)', async () => {
 
             const handler = (req, res) => {
@@ -1866,12 +1924,14 @@ describe('Events', () => {
         const wreck = Wreck.defaults({ events: true });
         wreck.events.once('preRequest', (uri, options) => {
 
-            expect(uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            expect(uri.href).to.equal('http://user:pass@localhost:' + server.address().port + '/');
             expect(options).to.exist();
+            expect(uri.auth).to.equal('user:pass');
+
             uri.headers.foo = 'bar';
         });
 
-        const { res, payload } = await wreck.put('http://localhost:' + server.address().port);
+        const { res, payload } = await wreck.put('http://user:pass@localhost:' + server.address().port);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
     });
@@ -2121,10 +2181,4 @@ internals.SlowAgent = class SlowAgent extends Http.Agent {
 
         setTimeout(cb, 200, new Error('Unable to obtain socket'));
     }
-};
-
-
-internals.wait = function (timeout) {
-
-    return new Promise((resolve) => setTimeout(resolve, timeout));
 };

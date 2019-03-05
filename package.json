@@ -1,7 +1,7 @@
 {
   "name": "wreck",
   "description": "HTTP Client Utilities",
-  "version": "14.1.3",
+  "version": "14.2.0",
   "repository": "git://github.com/hapijs/wreck",
   "main": "lib/index",
   "keywords": [
@@ -10,13 +10,14 @@
     "client"
   ],
   "dependencies": {
+    "bourne": "1.x.x",
     "boom": "7.x.x",
     "hoek": "6.x.x"
   },
   "devDependencies": {
     "code": "5.x.x",
-    "eslint-plugin-markdown": "1.0.0-beta.6",
-    "lab": "17.x.x"
+    "eslint-plugin-markdown": "1.0.0",
+    "lab": "18.x.x"
   },
   "scripts": {
     "lint-md": "eslint --config hapi --parser-options=ecmaVersion:8 --rule 'strict: 0, eol-last: 0' --plugin markdown --ext md .",
