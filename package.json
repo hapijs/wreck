@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "code": "5.x.x",
-    "eslint-plugin-markdown": "1.0.0-beta.6",
+    "eslint-plugin-markdown": "1.0.0",
     "lab": "18.x.x"
   },
   "scripts": {
