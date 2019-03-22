@@ -1,7 +1,5 @@
 'use strict';
 
-// Load modules
-
 const Http = require('http');
 const Https = require('https');
 const Path = require('path');
@@ -9,13 +7,13 @@ const Fs = require('fs');
 const Events = require('events');
 const Stream = require('stream');
 const Zlib = require('zlib');
-const Hoek = require('hoek');
+
+const Code = require('code');
+const Hoek = require('@commercial/hoek');
 const Lab = require('lab');
 const Reload = require('require-reload');
 const Wreck = require('../');
 
-
-// Declare internals
 
 const internals = {
     isv4: /^v4/.test(process.version),
@@ -27,12 +25,10 @@ const internals = {
 };
 
 
-// Test shortcuts
-
 const lab = exports.lab = Lab.script();
 const describe = lab.describe;
 const it = lab.it;
-const expect = Lab.expect;
+const expect = Code.expect;
 
 
 describe('request()', () => {
@@ -1400,7 +1396,7 @@ describe('request()', () => {
 
         server.listen(0, () => {
 
-            const buf = new Buffer(internals.payload, 'ascii');
+            const buf = Buffer.from(internals.payload, 'ascii');
 
             Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf }, (err, res) => {
 
@@ -1862,7 +1858,7 @@ describe('read()', () => {
 
     it('reads a file streamed via HTTP', (done) => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const fileStream = Fs.createReadStream(path);
 
@@ -1892,7 +1888,7 @@ describe('read()', () => {
 
     it('reads a multiple buffers response', (done) => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const file = Fs.readFileSync(path);
 
@@ -1927,7 +1923,7 @@ describe('read()', () => {
 
     it('writes a file streamed via HTTP', (done) => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const fileStream = Fs.createReadStream(path);
 
@@ -2010,7 +2006,7 @@ describe('read()', () => {
 
     it('allows custom handling of response event and read works', (done) => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const fileStream = Fs.createReadStream(path);
 

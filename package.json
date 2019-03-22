@@ -1,5 +1,5 @@
 {
-  "name": "wreck",
+  "name": "@commercial/wreck",
   "description": "HTTP Client Utilities",
   "version": "12.5.1",
   "repository": "git://github.com/hapijs/wreck",
@@ -9,20 +9,18 @@
     "http",
     "client"
   ],
-  "engines": {
-    "node": ">=4.0.0"
-  },
   "dependencies": {
-    "boom": "5.x.x",
-    "hoek": "4.x.x"
+    "@commercial/boom": "5.x.x",
+    "@commercial/hoek": "4.x.x"
   },
   "devDependencies": {
+    "code": "4.x.x",
     "lab": "14.x.x",
     "require-reload": "0.2.x"
   },
   "scripts": {
-    "test": "lab -t 100 -L -a code",
-    "test-cov-html": "lab -r html -o coverage.html -a code"
+    "test": "lab -t 100 -L -a code -l",
+    "test-cov-html": "lab -r html -o coverage.html -a code -l"
   },
-  "license": "BSD-3-Clause"
+  "license": "SEE LICENSE IN LICENSE.md"
 }
