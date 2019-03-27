@@ -104,7 +104,7 @@ Initiate an HTTP request.
     - `baseUrl` - fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
                   If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. Any
                   querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string.
-    - `socketPath` - `/path/to/unix/socket` for Server.
+    - `socketPath` - `/path/to/unix/socket` for Server. When using `socketPath` the `uri` parameter to `request` and the shortcut functions will be ignored.
     - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
     - `headers` - An object containing request headers.
     - `redirects` - The maximum number of redirects to follow.
@@ -333,7 +333,7 @@ To enable events, use `Wreck.defaults({ events: true })`. Events are available v
 The request event is emitted just before *wreck* creates a request.  The
 handler should accept the following arguments `(uri, options)` where:
 
-  - `uri` - the result of `Url.parse(uri)`. This will provide information about
+  - `uri` - the result of `new URL(uri)`. This will provide information about
   the resource requested.  Also includes the headers and method.
   - `options` - the options passed into the request function.  This will include
   a payload if there is one.
@@ -360,7 +360,7 @@ handler should accept the following arguments `(err, details)` where:
     - `req` - the raw `ClientHttp` request object
     - `res` - the raw `IncomingMessage` response object
     - `start` - the time that the request was initiated
-    - `uri` - the result of `Url.parse(uri)`. This will provide information about
+    - `uri` - the result of `new URL(uri)`. This will provide information about
     the resource requested.  Also includes the headers and method.
 
 This event is useful for logging all requests that go through *wreck*. The `err`

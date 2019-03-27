@@ -975,6 +975,14 @@ describe('request()', () => {
             expect(body.toString()).to.equal(internals.payload);
             server.close();
         });
+
+        it('requests a POST resource with headers using post shortcut', async () => {
+
+            const server = await internals.server('echo', internals.socket);
+            const { payload } = await Wreck.post('/', { socketPath: internals.socket, headers: { 'user-agent': 'wreck' }, payload: internals.payload });
+            expect(payload.toString()).to.equal(internals.payload);
+            server.close();
+        });
     });
 });
 
@@ -1035,9 +1043,17 @@ describe('options.baseUrl', () => {
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
+    it('includes the full path regardless of it begins with a slash', async () => {
+
+        const promise = Wreck.request('get', 'baz', { baseUrl: 'http://localhost:0/foo/bar' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.path).to.equal('/foo/bar/baz');
+    });
+
     it('uses baseUrl option with a url that has a querystring', async () => {
 
-        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost:0/foo' });
+        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
         expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
