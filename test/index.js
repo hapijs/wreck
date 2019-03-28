@@ -988,6 +988,13 @@ describe('request()', () => {
 
 describe('options.baseUrl', () => {
 
+    it('uses path when path is a full URL', async () => {
+
+        const promise = Wreck.request('get', 'http://localhost:8080/foo', { baseUrl: 'http://localhost:0/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:8080');
+    });
+
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/' });
@@ -1032,6 +1039,14 @@ describe('options.baseUrl', () => {
         const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo' });
         await expect(promise).to.reject();
         expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.path).to.equal('/bar');
+    });
+
+    it('uses baseUrl option with a relative path', async () => {
+
+        const promise = Wreck.request('get', 'bar', { baseUrl: 'http://localhost:0/foo/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
@@ -1040,20 +1055,20 @@ describe('options.baseUrl', () => {
         const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
         expect(promise.req._headers.host).to.equal('localhost:0');
-        expect(promise.req.path).to.equal('/foo/bar');
-    });
-
-    it('includes the full path regardless of it begins with a slash', async () => {
-
-        const promise = Wreck.request('get', 'baz', { baseUrl: 'http://localhost:0/foo/bar' });
-        await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
-        expect(promise.req.path).to.equal('/foo/bar/baz');
+        expect(promise.req.path).to.equal('/bar');
     });
 
     it('uses baseUrl option with a url that has a querystring', async () => {
 
-        const promise = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost:0/foo/' });
+        const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: 'http://localhost:0/foo/' });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.path).to.equal('/foo/bar?test=hello');
+    });
+
+    it('uses baseUrl option with a url that has a querystring will override any base querystring', async () => {
+
+        const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: 'http://localhost:0/foo/?test=hi' });
         await expect(promise).to.reject();
         expect(promise.req._headers.host).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
