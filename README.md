@@ -11,7 +11,7 @@ Lead Maintainer: [Wyatt Preul](https://github.com/geek)
 <!-- eslint-disable no-undef -->
 <!-- eslint-disable no-unused-vars -->
 ```javascript
-const Wreck = require('wreck');
+const Wreck = require('@hapi/wreck');
 
 const example = async function () {
 
@@ -31,7 +31,7 @@ catch (ex) {
 <!-- eslint-disable no-undef -->
 <!-- eslint-disable no-unused-vars -->
 ```javascript
-const Wreck = require('wreck');
+const Wreck = require('@hapi/wreck');
 
 const method = 'GET'; // GET, POST, PUT, DELETE
 const uri = '/';
@@ -303,7 +303,7 @@ For example, the following code demonstrates changing `maxSockets` on the `http`
 agent.
 
  ```js
- const Wreck = require('wreck');
+ const Wreck = require('@hapi/wreck');
 
  Wreck.agents.http.maxSockets = 20;
  ```
@@ -313,7 +313,7 @@ Below is another example that sets the certificate details for all HTTPS request
 <!-- eslint-disable no-undef -->
 ```js
 const HTTPS = require('https');
-const Wreck = require('wreck');
+const Wreck = require('@hapi/wreck');
 
 Wreck.agents.https = new HTTPS.Agent({
     cert,
