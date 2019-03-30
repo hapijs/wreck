@@ -1,8 +1,7 @@
-![wreck Logo](https://raw.github.com/hapijs/wreck/master/images/wreck.png)
+# wreck
 
 ### HTTP Client Utilities
 
-[![Npm Version](https://img.shields.io/npm/v/wreck.svg)](https://npmjs.com/package/wreck)
 [![Build Status](https://secure.travis-ci.org/hapijs/wreck.svg)](http://travis-ci.org/hapijs/wreck)
 
 Lead Maintainer: [Wyatt Preul](https://github.com/geek)

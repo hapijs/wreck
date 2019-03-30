@@ -8,11 +8,11 @@ const Events = require('events');
 const Stream = require('stream');
 const Zlib = require('zlib');
 
-const Boom = require('boom');
-const Code = require('code');
-const Hoek = require('hoek');
-const Lab = require('lab');
-const Wreck = require('../');
+const Boom = require('@hapi/boom');
+const Code = require('@hapi/code');
+const Hoek = require('@hapi/hoek');
+const Lab = require('@hapi/lab');
+const Wreck = require('..');
 
 
 const internals = {
@@ -1272,7 +1272,7 @@ describe('read()', () => {
 
     it('reads a file streamed via HTTP', async () => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const fileStream = Fs.createReadStream(path);
 
@@ -1293,7 +1293,7 @@ describe('read()', () => {
 
     it('reads a multiple buffers response', async () => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const file = Fs.readFileSync(path);
 
@@ -1319,7 +1319,7 @@ describe('read()', () => {
 
     it('writes a file streamed via HTTP', async () => {
 
-        const path = Path.join(__dirname, '../images/wreck.png');
+        const path = Path.join(__dirname, '../LICENSE.md');
         const stats = Fs.statSync(path);
         const fileStream = Fs.createReadStream(path);
 
