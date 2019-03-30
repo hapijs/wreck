@@ -444,7 +444,7 @@ describe('request()', () => {
 
     it('handles uri with WHATWG parsing', async () => {
 
-        const promise = Wreck.request('get', 'http://localhost%60malicious.org',);
+        const promise = Wreck.request('get', 'http://localhost%60malicious.org');
         await expect(promise).to.reject();
         expect(promise.req._headers.host).to.equal('localhost`malicious.org');
     });
@@ -917,7 +917,7 @@ describe('request()', () => {
         expect(promise.req._headers).to.include('authorization');
     });
 
-    describe('unix socket', () => {
+    describe('unix socket', { skip: process.platform === 'win32' }, () => {
 
         it('requests a resource', async () => {
 
@@ -983,6 +983,11 @@ describe('request()', () => {
             expect(payload.toString()).to.equal(internals.payload);
             server.close();
         });
+    });
+
+    it('errors on unix socket under Windows', { skip: process.platform !== 'win32' }, async () => {
+
+        await expect(Wreck.request('get', '/', { socketPath: internals.socket })).to.reject();
     });
 });
 
@@ -1999,7 +2004,7 @@ describe('Defaults', () => {
         }).to.throw();
     });
 
-    it('respects defaults without bleeding across instances', async () => {
+    it('respects defaults without bleeding across instances', { timeout: 3000 }, async () => {      // Windows takes longer to error
 
         const optionsA = { headers: { foo: 123 } };
         const optionsB = { headers: { bar: 321 } };
@@ -2008,19 +2013,19 @@ describe('Defaults', () => {
         const wreckB = Wreck.defaults(optionsB);
         const wreckAB = wreckA.defaults(optionsB);
 
-        const promise1 = wreckA.request('get', 'http://localhost:0/', { headers: { banana: 911 } });
+        const promise1 = wreckA.request('get', 'http://no_such_host_error/', { headers: { banana: 911 } });
         await expect(promise1).to.reject();
         expect(promise1.req._headers.banana).to.exist();
         expect(promise1.req._headers.foo).to.exist();
         expect(promise1.req._headers.bar).to.not.exist();
 
-        const promise2 = wreckB.request('get', 'http://localhost:0/', { headers: { banana: 911 } });
+        const promise2 = wreckB.request('get', 'http://no_such_host_error/', { headers: { banana: 911 } });
         await expect(promise2).to.reject();
         expect(promise2.req._headers.banana).to.exist();
         expect(promise2.req._headers.foo).to.not.exist();
         expect(promise2.req._headers.bar).to.exist();
 
-        const promise3 = wreckAB.request('get', 'http://localhost:0/', { headers: { banana: 911 } });
+        const promise3 = wreckAB.request('get', 'http://no_such_host_error/', { headers: { banana: 911 } });
         await expect(promise3).to.reject();
         expect(promise3.req._headers.banana).to.exist();
         expect(promise3.req._headers.foo).to.exist();
@@ -2034,7 +2039,7 @@ describe('Defaults', () => {
 
         const wreckA = Wreck.defaults(optionsA);
 
-        const promise1 = wreckA.request('get', 'http://localhost:0/', optionsB);
+        const promise1 = wreckA.request('get', 'http://no_such_host_error/', optionsB);
         await expect(promise1).to.reject();
         expect(promise1.req._headers.accept).to.equal('bar');
         expect(promise1.req._headers.test).to.equal(123);
