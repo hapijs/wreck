@@ -183,21 +183,21 @@ describe('request()', () => {
         await expect(Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null })).to.not.reject();
     });
 
-    it('requests an https resource', { timeout: 5000 }, async () => {
+    it('requests an https resource', async () => {
 
         const res = await Wreck.request('get', 'https://google.com', { rejectUnauthorized: true });
         const body = await Wreck.read(res);
         expect(body.toString()).to.contain('<HTML>');
     });
 
-    it('requests an https resource with secure protocol set', { timeout: 5000 }, async () => {
+    it('requests an https resource with secure protocol set', async () => {
 
         const res = await Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, secureProtocol: 'SSLv23_method' });
         const body = await Wreck.read(res);
         expect(body.toString()).to.contain('<HTML>');
     });
 
-    it('requests an https resource with TLS ciphers set', { timeout: 5000 }, async () => {
+    it('requests an https resource with TLS ciphers set', async () => {
 
         const res = await Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, ciphers: 'HIGH' });
         const body = await Wreck.read(res);
@@ -1911,7 +1911,7 @@ describe('Events', () => {
         server.close();
     });
 
-    it('response event includes error when it occurs', { timeout: 10000 }, async () => {
+    it('response event includes error when it occurs', async () => {
 
         const wreck = Wreck.defaults({ events: true });
         let once = false;
@@ -1928,7 +1928,7 @@ describe('Events', () => {
         expect(once).to.be.true();
     });
 
-    it('multiple requests execute the same response handler', { timeout: 10000 }, async () => {
+    it('multiple requests execute the same response handler', async () => {
 
         let count = 0;
         const handler = (err, details) => {
@@ -2004,7 +2004,7 @@ describe('Defaults', () => {
         }).to.throw();
     });
 
-    it('respects defaults without bleeding across instances', { timeout: 3000 }, async () => {      // Windows takes longer to error
+    it('respects defaults without bleeding across instances', async () => {      // Windows takes longer to error
 
         const optionsA = { headers: { foo: 123 } };
         const optionsB = { headers: { bar: 321 } };
