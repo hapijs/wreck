@@ -1002,7 +1002,7 @@ describe('options.baseUrl', () => {
 
     it('uses lower-case host header when path is not a full URL', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/', headers: { Host: 'localhost:8080' } });
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/', headers: { host: 'localhost:8080' } });
         await expect(promise).to.reject();
         expect(promise.req._headers.host).to.equal('localhost:8080');
     });
