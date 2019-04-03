@@ -1000,6 +1000,20 @@ describe('options.baseUrl', () => {
         expect(promise.req._headers.host).to.equal('localhost:8080');
     });
 
+    it('uses lower-case host header when path is not a full URL', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/', headers: { host: 'localhost:8080' } });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:8080');
+    });
+
+    it('uses upper-case host header when path is not a full URL', async () => {
+
+        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/', headers: { Host: 'localhost:8080' } });
+        await expect(promise).to.reject();
+        expect(promise.req._headers.host).to.equal('localhost:8080');
+    });
+
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/' });
@@ -2013,19 +2027,19 @@ describe('Defaults', () => {
         const wreckB = Wreck.defaults(optionsB);
         const wreckAB = wreckA.defaults(optionsB);
 
-        const promise1 = wreckA.request('get', 'http://no_such_host_error/', { headers: { banana: 911 } });
+        const promise1 = wreckA.request('get', 'http://127.0.0.1:0/', { headers: { banana: 911 } });
         await expect(promise1).to.reject();
         expect(promise1.req._headers.banana).to.exist();
         expect(promise1.req._headers.foo).to.exist();
         expect(promise1.req._headers.bar).to.not.exist();
 
-        const promise2 = wreckB.request('get', 'http://no_such_host_error/', { headers: { banana: 911 } });
+        const promise2 = wreckB.request('get', 'http://127.0.0.1:0/', { headers: { banana: 911 } });
         await expect(promise2).to.reject();
         expect(promise2.req._headers.banana).to.exist();
         expect(promise2.req._headers.foo).to.not.exist();
         expect(promise2.req._headers.bar).to.exist();
 
-        const promise3 = wreckAB.request('get', 'http://no_such_host_error/', { headers: { banana: 911 } });
+        const promise3 = wreckAB.request('get', 'http://127.0.0.1:0/', { headers: { banana: 911 } });
         await expect(promise3).to.reject();
         expect(promise3.req._headers.banana).to.exist();
         expect(promise3.req._headers.foo).to.exist();
@@ -2039,7 +2053,7 @@ describe('Defaults', () => {
 
         const wreckA = Wreck.defaults(optionsA);
 
-        const promise1 = wreckA.request('get', 'http://no_such_host_error/', optionsB);
+        const promise1 = wreckA.request('get', 'http://127.0.0.1:0/', optionsB);
         await expect(promise1).to.reject();
         expect(promise1.req._headers.accept).to.equal('bar');
         expect(promise1.req._headers.test).to.equal(123);
