@@ -1601,7 +1601,7 @@ describe('json', () => {
         server.close();
     });
 
-    it('should not be parsed on empty buffer', async () => {
+    it('should not be parsed on empty buffer (json: SMART)', async () => {
 
         const handler = (req, res) => {
 
@@ -1611,6 +1611,58 @@ describe('json', () => {
 
         const server = await internals.server(handler);
         const options = { json: 'SMART' };
+
+        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        expect(res.statusCode).to.equal(204);
+        expect(payload).to.equal(null);
+        server.close();
+    });
+
+    it('should not be parsed on empty buffer (json: force)', async () => {
+
+        const handler = (req, res) => {
+
+            res.writeHead(204, { 'Content-Type': 'application/json' });
+            res.end();
+        };
+
+        const server = await internals.server(handler);
+        const options = { json: 'force' };
+
+        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        expect(res.statusCode).to.equal(204);
+        expect(payload).to.equal(null);
+        server.close();
+    });
+
+    it('should return the empty buffer on text content-type (json: true)', async () => {
+
+        const handler = (req, res) => {
+
+            res.writeHead(204, { 'Content-Type': 'text/plain' });
+            res.end();
+        };
+
+        const server = await internals.server(handler);
+        const options = { json: true };
+
+        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        expect(res.statusCode).to.equal(204);
+        expect(Buffer.isBuffer(payload)).to.equal(true);
+        expect(payload.toString()).to.equal('');
+        server.close();
+    });
+
+    it('should return null on empty buffer with text content-type (json: force)', async () => {
+
+        const handler = (req, res) => {
+
+            res.writeHead(204, { 'Content-Type': 'text/plain' });
+            res.end();
+        };
+
+        const server = await internals.server(handler);
+        const options = { json: 'force' };
 
         const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
         expect(res.statusCode).to.equal(204);
