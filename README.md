@@ -6,8 +6,6 @@
 
 [![Build Status](https://secure.travis-ci.org/hapijs/wreck.svg)](http://travis-ci.org/hapijs/wreck)
 
-Lead Maintainer: [Wyatt Preul](https://github.com/geek)
-
 ## Usage
 
 <!-- eslint-disable no-undef -->
