@@ -103,7 +103,7 @@ Initiate an HTTP request.
     - `baseUrl` - fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
                   If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/end/point?test=true`. Any
                   querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string. In order to retain the `/api/` portion of the `baseUrl` in the example, the `path` must not start with a leading `/` and the `baseUrl` must end with a trailing `/`.
-    - `socketPath` - `/path/to/unix/socket` for Server. When using `socketPath` the `uri` parameter to `request` and the shortcut functions will be ignored.
+    - `socketPath` - `/path/to/unix/socket` for Server.
     - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
     - `headers` - An object containing request headers.
     - `redirects` - The maximum number of redirects to follow.
