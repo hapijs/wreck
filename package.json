@@ -20,7 +20,7 @@
     "eslint-plugin-markdown": "1.x.x"
   },
   "scripts": {
-    "lint-md": "eslint --config hapi --parser-options=ecmaVersion:8 --rule \"strict: 0, eol-last: 0\" --plugin markdown --ext md .",
+    "lint-md": "eslint --config @hapi/eslint-config-hapi --parser-options=ecmaVersion:8 --rule \"strict: 0, eol-last: 0\" --plugin markdown --ext md .",
     "posttest": "npm run lint-md",
     "test": "lab -t 100 -L -a @hapi/code -m 10000",
     "test-cov-html": "lab -r html -o coverage.html -a @hapi/code -m 10000"
