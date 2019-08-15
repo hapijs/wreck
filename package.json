@@ -12,16 +12,13 @@
   "dependencies": {
     "@hapi/bourne": "1.x.x",
     "@hapi/boom": "7.x.x",
-    "@hapi/hoek": "6.x.x"
+    "@hapi/hoek": "8.x.x"
   },
   "devDependencies": {
-    "@hapi/code": "5.x.x",
-    "@hapi/lab": "18.x.x",
-    "eslint-plugin-markdown": "1.x.x"
+    "@hapi/code": "6.x.x",
+    "@hapi/lab": "20.x.x"
   },
   "scripts": {
-    "lint-md": "eslint --config hapi --parser-options=ecmaVersion:8 --rule \"strict: 0, eol-last: 0\" --plugin markdown --ext md .",
-    "posttest": "npm run lint-md",
     "test": "lab -t 100 -L -a @hapi/code -m 10000",
     "test-cov-html": "lab -r html -o coverage.html -a @hapi/code -m 10000"
   },
