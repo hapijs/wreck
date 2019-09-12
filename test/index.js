@@ -408,7 +408,7 @@ describe('request()', () => {
 
         const handler = (req, res) => {
 
-            res.writeHead(301, { 'Location': 'https://hapijs.com' });
+            res.writeHead(301, { 'Location': 'https://hapi.dev' });
             res.end();
         };
 
@@ -418,12 +418,12 @@ describe('request()', () => {
             redirects: 1,
             redirected: (statusCode, location, req) => {
 
-                expect(location).to.equal('https://hapijs.com');
+                expect(location).to.equal('https://hapi.dev');
                 if (req.output) {
-                    expect(req.output[0]).to.include('hapijs.com');
+                    expect(req.output[0]).to.include('hapi.dev');
                 }
                 else {
-                    expect(req.outputData[0].data).to.include('hapijs.com');
+                    expect(req.outputData[0].data).to.include('hapi.dev');
                 }
             }
         };
@@ -446,7 +446,7 @@ describe('request()', () => {
 
         const promise = Wreck.request('get', 'http://localhost%60malicious.org');
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost`malicious.org');
+        expect(promise.req.getHeader('host')).to.equal('localhost`malicious.org');
     });
 
     it('reaches max redirections count', async () => {
@@ -905,16 +905,16 @@ describe('request()', () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://username:password@localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
-        expect(promise.req._headers).to.include('authorization');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('authorization')).to.exist();
     });
 
     it('sets the auth value on the request with missing username', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://:password@localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
-        expect(promise.req._headers).to.include('authorization');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('authorization')).to.exist();
     });
 
     describe('unix socket', { skip: process.platform === 'win32' }, () => {
@@ -997,35 +997,35 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'http://localhost:8080/foo', { baseUrl: 'http://localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:8080');
+        expect(promise.req.getHeader('host')).to.equal('localhost:8080');
     });
 
     it('uses lower-case host header when path is not a full URL', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/', headers: { host: 'localhost:8080' } });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:8080');
+        expect(promise.req.getHeader('host')).to.equal('localhost:8080');
     });
 
     it('uses upper-case host header when path is not a full URL', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/', headers: { Host: 'localhost:8080' } });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:8080');
+        expect(promise.req.getHeader('host')).to.equal('localhost:8080');
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
@@ -1033,7 +1033,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
@@ -1041,7 +1041,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'foo', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo');
     });
 
@@ -1049,7 +1049,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '', { baseUrl: 'http://localhost:0' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/');
     });
 
@@ -1057,7 +1057,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/bar');
     });
 
@@ -1065,7 +1065,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'bar', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
@@ -1073,7 +1073,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '/bar', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/bar');
     });
 
@@ -1081,7 +1081,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: 'http://localhost:0/foo/' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
     });
 
@@ -1089,7 +1089,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: 'http://localhost:0/foo/?test=hi' });
         await expect(promise).to.reject();
-        expect(promise.req._headers.host).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal('localhost:0');
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
     });
 });
@@ -2029,21 +2029,21 @@ describe('Defaults', () => {
 
         const promise1 = wreckA.request('get', 'http://127.0.0.1:0/', { headers: { banana: 911 } });
         await expect(promise1).to.reject();
-        expect(promise1.req._headers.banana).to.exist();
-        expect(promise1.req._headers.foo).to.exist();
-        expect(promise1.req._headers.bar).to.not.exist();
+        expect(promise1.req.getHeader('banana')).to.exist();
+        expect(promise1.req.getHeader('foo')).to.exist();
+        expect(promise1.req.getHeader('bar')).to.not.exist();
 
         const promise2 = wreckB.request('get', 'http://127.0.0.1:0/', { headers: { banana: 911 } });
         await expect(promise2).to.reject();
-        expect(promise2.req._headers.banana).to.exist();
-        expect(promise2.req._headers.foo).to.not.exist();
-        expect(promise2.req._headers.bar).to.exist();
+        expect(promise2.req.getHeader('banana')).to.exist();
+        expect(promise2.req.getHeader('foo')).to.not.exist();
+        expect(promise2.req.getHeader('bar')).to.exist();
 
         const promise3 = wreckAB.request('get', 'http://127.0.0.1:0/', { headers: { banana: 911 } });
         await expect(promise3).to.reject();
-        expect(promise3.req._headers.banana).to.exist();
-        expect(promise3.req._headers.foo).to.exist();
-        expect(promise3.req._headers.bar).to.exist();
+        expect(promise3.req.getHeader('banana')).to.exist();
+        expect(promise3.req.getHeader('foo')).to.exist();
+        expect(promise3.req.getHeader('bar')).to.exist();
     });
 
     it('applies defaults correctly to requests', async () => {
@@ -2055,8 +2055,8 @@ describe('Defaults', () => {
 
         const promise1 = wreckA.request('get', 'http://127.0.0.1:0/', optionsB);
         await expect(promise1).to.reject();
-        expect(promise1.req._headers.accept).to.equal('bar');
-        expect(promise1.req._headers.test).to.equal(123);
+        expect(promise1.req.getHeader('accept')).to.equal('bar');
+        expect(promise1.req.getHeader('test')).to.equal(123);
     });
 
     it('defaults inherits agents properly', () => {
