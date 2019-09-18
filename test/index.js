@@ -937,6 +937,15 @@ describe('request()', () => {
             server.close();
         });
 
+        it('requests a resource at a subpath with a default top level path', async () => {
+
+            const server = await internals.server(null, internals.socket);
+            const wreck = Wreck.defaults({ socketPath: internals.socket });
+            const res = await wreck.request('get', '/subpath');
+            expect(res.req.path).to.equal('/subpath');
+            server.close();
+        });
+
         it('requests a POST resource', async () => {
 
             const server = await internals.server('echo', internals.socket);
