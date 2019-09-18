@@ -879,7 +879,7 @@ describe('request()', () => {
 
         const server = Http.createServer((req, res) => {
 
-            res.writeHead(301, { 'Location': 'https://hapijs.com' });
+            res.writeHead(301, { 'Location': 'https://hapi.dev' });
             res.end();
         });
 
@@ -890,13 +890,13 @@ describe('request()', () => {
                 redirects: 1,
                 redirected: (statusCode, location, req) => {
 
-                    expect(location).to.equal('https://hapijs.com');
+                    expect(location).to.equal('https://hapi.dev');
 
                     if (req.output) {
-                        expect(req.output[0]).to.include('hapijs.com');
+                        expect(req.output[0]).to.include('hapi.dev');
                     }
                     else {
-                        expect(req.outputData[0].data).to.include('hapijs.com');
+                        expect(req.outputData[0].data).to.include('hapi.dev');
                     }
                 }
             }, done);
