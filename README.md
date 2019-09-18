@@ -108,6 +108,7 @@ Initiate an HTTP request.
     - `headers` - An object containing request headers.
     - `redirects` - The maximum number of redirects to follow.
     - `redirect303` - if `true`, a HTTP 303 status code will redirect using a GET method. Defaults to no redirection on 303.
+    - `redirectMethod` - override the HTTP method used when following 301 and 302 redirections. Defaults to the original method.
     - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature
       `function(redirectMethod, statusCode, location, resHeaders, redirectOptions, next)` where:
           - `redirectMethod` - A string specifying the redirect method.

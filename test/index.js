@@ -328,6 +328,35 @@ describe('request()', () => {
         server.close();
     });
 
+    it('overrides 301 redirection method', async () => {
+
+        const payload = 'HELLO POST';
+        let gen = 0;
+        const handler = async (req, res) => {
+
+            const res2 = await Wreck.read(req);
+
+            if (!gen++) {
+                expect(req.method).to.equal('POST');
+                expect(res2.toString()).to.equal(payload);
+                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.end();
+            }
+            else {
+                expect(req.method).to.equal('GET');
+                expect(res2.toString()).to.equal('');
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end(internals.payload);
+            }
+        };
+
+        const server = await internals.server(handler);
+        const res = await Wreck.request('POST', 'http://localhost:' + server.address().port, { redirectMethod: 'GET', redirects: 1, beforeRedirect: null, redirected: null, payload });
+        const body = await Wreck.read(res);
+        expect(body.toString()).to.equal(internals.payload);
+        server.close();
+    });
+
     it('handles redirections from http to https', async () => {
 
         const handler = (req, res) => {
@@ -758,11 +787,11 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 15 });
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 50 });
         expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
         expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
 
-        await Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 15 });
+        await Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 50 });
         expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
         expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
 
