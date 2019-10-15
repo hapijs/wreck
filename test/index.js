@@ -1011,7 +1011,7 @@ describe('request()', () => {
         });
     });
 
-    it('errors on unix socket under Windows', { skip: process.platform !== 'win32' }, async () => {
+    it('errors on unix socket under Windows', { skip: process.platform !== 'win32' }, () => {
 
         expect(() => Wreck.request('get', '/', { socketPath: internals.socket })).to.throw(/Invalid URL/);
     });
