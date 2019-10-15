@@ -1013,7 +1013,7 @@ describe('request()', () => {
 
     it('errors on unix socket under Windows', { skip: process.platform !== 'win32' }, async () => {
 
-        await expect(Wreck.request('get', '/', { socketPath: internals.socket })).to.reject();
+        expect(() => Wreck.request('get', '/', { socketPath: internals.socket })).to.throw(/Invalid URL/);
     });
 });
 

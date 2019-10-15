@@ -59,7 +59,7 @@ declare class Client {
      * 
      * @returns the parsed payload based on the provided options.
      */
-    read<T = Buffer>(res: Http.IncomingMessage, options?: Client.read.Options): Promise<T>;
+    read<T = Buffer>(res: Stream.Readable | Http.IncomingMessage, options?: Client.read.Options): Promise<T>;
 
     /**
      * Converts a buffer, string, or an array of them into a readable stream.

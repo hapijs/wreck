@@ -31,3 +31,12 @@ Code.expect(Buffer.isBuffer(body)).to.equal(true);
 Code.expect(body.toString()).to.equal('Some payload');
 
 server.close();
+
+expect.error(Wreck.request());
+
+
+// read()
+
+const stream = Wreck.toReadableStream('One two three');
+const result = Buffer.from('One two three');
+Code.expect<Buffer>(await Wreck.read(stream)).to.equal(result);
