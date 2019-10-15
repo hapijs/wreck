@@ -1,8 +1,5 @@
-
 ## Usage
 
-<!-- eslint-disable no-undef -->
-<!-- eslint-disable no-unused-vars -->
 ```javascript
 const Wreck = require('@hapi/wreck');
 
@@ -21,8 +18,7 @@ catch (ex) {
 ```
 
 ### Advanced
-<!-- eslint-disable no-undef -->
-<!-- eslint-disable no-unused-vars -->
+
 ```javascript
 const Wreck = require('@hapi/wreck');
 
@@ -56,7 +52,6 @@ const options = {
     timeout: 1000,    // 1 second, default: unlimited
     maxBytes: 1048576, // 1 MB, default: unlimited
     rejectUnauthorized: true || false,
-    downstreamRes: null,
     agent: null,         // Node Core http.Agent
     secureProtocol: 'SSLv3_method', // The SSL method to use
     ciphers: 'DES-CBC3-SHA' // The TLS ciphers to support
@@ -79,73 +74,83 @@ const example = async function () {
 Use `promise.req.abort()` to terminate the request early. Note that this is limited to the initial request only.
 If the request was already redirected, aborting the original request will not abort execution of pending redirections.
 
-
 ### `defaults(options)`
 
-Returns a *new* instance of Wreck which merges the provided `options` with those provided on a per-request basis. You can call defaults repeatedly to build up multiple http clients.
-- `options` - Config object containing settings for both `request` and `read` operations.
+Returns a *new* instance of Wreck which merges the provided `options` with those provided on a per-request basis. You can call defaults repeatedly to build up multiple clients.
+- `options` - Config object containing settings for both `request` and `read` operations as well as:
+    - `agents` - an object that contains the agents for pooling connections with the following required keys:
+        - `http` - an [HTTP Agent](http://nodejs.org/api/http.html#http_class_http_agent) instance.
+        - `https` - an [HTTPS Agent](https://nodejs.org/api/https.html#https_class_https_agent) instance.
+        - `httpsAllowUnauthorized` - an [HTTPS Agent](https://nodejs.org/api/https.html#https_class_https_agent) instance.
+    - `events` - if `true`, enables events. Events are available via the `events` emitter property.
 
 ### `request(method, uri, [options])`
 
 Initiate an HTTP request.
-- `method` - A string specifying the HTTP request method, defaulting to 'GET'.
-- `uri` - The URI of the requested resource.
-- `options` - An optional configuration object. To omit this argument but still
-  use a callback, pass `null` in this position. The options object supports the
-  following optional keys:
-    - `baseUrl` - fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain.
-                  If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/end/point?test=true`. Any
-                  querystring in the `baseUrl` will be overwritten with the querystring in the `uri` When `baseUrl` is given, `uri` must also be a string. In order to retain the `/api/` portion of the `baseUrl` in the example, the `path` must not start with a leading `/` and the `baseUrl` must end with a trailing `/`.
-    - `socketPath` - `/path/to/unix/socket` for Server.
-    - `payload` - The request body as a string, Buffer, Readable Stream, or an object that can be serialized using `JSON.stringify()`.
-    - `headers` - An object containing request headers.
-    - `redirects` - The maximum number of redirects to follow.
-    - `redirect303` - if `true`, a HTTP 303 status code will redirect using a GET method. Defaults to no redirection on 303.
-    - `redirectMethod` - override the HTTP method used when following 301 and 302 redirections. Defaults to the original method.
-    - `beforeRedirect` - A callback function that is called before a redirect is triggered, using the signature
-      `function(redirectMethod, statusCode, location, resHeaders, redirectOptions, next)` where:
+- `method` - a string specifying the HTTP request method. Defaults to `'GET'`.
+- `uri` - the URI of the requested resource.
+
+- `options` - optional configuration object with the following keys:
+
+    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent). Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
+
+    - `baseUrl` - fully qualified URL string used as the base URL. Most useful with `Wreck.defaults()` when making multiple requests to the same domain. For example, if `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/end/point?test=true`. Any query string in the `baseUrl` will be overwritten with the query string in the `uri` When `baseUrl` is given, `uri` must also be a string. In order to retain the `/api/` portion of the `baseUrl` in the example, the `path` must not start with a leading `/` and the `baseUrl` must end with a trailing `/`.
+
+    - `beforeRedirect` - a function to call before a redirect is triggered, using the signature `async function(redirectMethod, statusCode, location, resHeaders, redirectOptions, next)` where:
           - `redirectMethod` - A string specifying the redirect method.
           - `statusCode` - HTTP status code of the response that triggered the redirect.
           - `location` - The redirect location string.
           - `resHeaders` - An object with the headers received as part of the redirection response.
           - `redirectOptions` - Options that will be applied to the redirect request. Changes to this object are applied to the redirection request.
           - `next` - the callback function called to perform the redirection using signature `function()`.
-    - `redirected` - A callback function that is called when a redirect was triggered, using the signature `function(statusCode, location, req)` where:
+          
+    - `ciphers` - [TLS](https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite) list of TLS ciphers to override node's default. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs for possible [TLS_CIPHERS](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT).
+
+    - `headers` - an object containing the request headers.
+
+    - `payload` - the request body as a string, Buffer, readable stream, or an object that can be serialized using `JSON.stringify()`.
+
+    - `redirect303` - if `true`, a HTTP 303 status code will redirect using a GET method. Defaults to `false` (no redirection on 303).
+
+    - `redirected` - a function to call when a redirect was triggered, using the signature `function(statusCode, location, req)` where:
+
       - `statusCode` - HTTP status code of the response that triggered the redirect.
       - `location` - The redirected location string.
       - `req` - The new [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object which replaces the one initially returned.
-    - `timeout` - The number of milliseconds to wait without receiving a response
-      before aborting the request. Defaults to unlimited.
-    - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating
-      whether the client should reject a response from a server with invalid certificates.  This cannot be set at the
-      same time as the `agent` option is set.
-    - `downstreamRes`: downstream Resource dependency.
-    - `agent` - Node Core [http.Agent](http://nodejs.org/api/http.html#http_class_http_agent).
-      Defaults to either `wreck.agents.http` or `wreck.agents.https`.  Setting to `false` disables agent pooling.
-    - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method`
-      to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
-      for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).
-    - `ciphers` - [TLS](https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite) list of TLS ciphers to override node's default.
-      The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs
-      for possible [TLS_CIPHERS](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT).
 
-Returns a promise that resolves into a node response object. The promise has a `req` property which is the instance of the node.js
-[ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
+    - `redirectMethod` - override the HTTP method used when following 301 and 302 redirections. Defaults to the original method.
+
+    - `redirects` - the maximum number of redirects to follow. Default to `false` (no redirects).
+
+    - `rejectUnauthorized` - [TLS](http://nodejs.org/api/tls.html) flag indicating whether the client should reject a response from a server with invalid certificates. This cannot be set at the same time as the `agent` option is set.
+
+    - `secureProtocol` - [TLS](http://nodejs.org/api/tls.html) flag indicating the SSL method to use, e.g. `SSLv3_method` to force SSL version 3. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs for possible [SSL_METHODS](http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS).
+
+    - `socketPath` - a UNIX socket path string for direct server connection.
+
+    - `timeout` - number of milliseconds to wait without receiving a response before aborting the request. Defaults to `0` (no limit).
+
+Returns a promise that resolves into a node response object. The promise has a `req` property which is the instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
 
 ### `read(response, options)`
+
 - `response` - An HTTP Incoming Message object.
 - `options` - `null` or a configuration object with the following optional keys:
-    - `timeout` - The number of milliseconds to wait while reading data before
-    aborting handling of the response. Defaults to unlimited.
-    - `json` - A value indicating how to try to parse the payload as JSON. Defaults to `undefined` meaning no parse logic.
-        - `true`, 'smart' - only try `JSON.parse` if the response indicates a JSON content-type.
-        - `strict` - as 'smart', except returns an error for non-JSON content-type.
-        - `force` - try `JSON.parse` regardless of the content-type header.
-    - `gunzip` - A value indicating the behavior to adopt when the payload is gzipped. Defaults to `undefined` meaning no gunzipping.
+
+    - `gunzip` - determines how to handle gzipped payloads. Defaults to `false`.
         - `true` - only try to gunzip if the response indicates a gzip content-encoding.
         - `false` - explicitly disable gunzipping.
         - `force` - try to gunzip regardless of the content-encoding header.
-    - `maxBytes` - The maximum allowed response payload size. Defaults to unlimited.
+
+    - `json` - determines how to parse the payload as JSON:
+        - `false` - leaves payload raw. This is the default value.
+        - `true` - only try `JSON.parse` if the response indicates a JSON content-type.
+        - `'strict'` - as `true`, except returns an error for non-JSON content-type.
+        - `'force'` - try `JSON.parse` regardless of the content-type header.
+
+    - `maxBytes` - the maximum allowed response payload size. Defaults to `0` (no limit).
+
+    - `timeout` - the number of milliseconds to wait while reading data before aborting handling of the response. Defaults to `0`.
 
 Returns a promise that resolves into the payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
@@ -286,15 +291,9 @@ const result = Wreck.parseCacheControl('private, max-age=0, no-cache');
 
 ### `agents`
 
-Object that contains the agents for pooling connections for `http` and `https`.
-The properties are `http`, `https`, and `httpsAllowUnauthorized` which is an
-`https` agent with `rejectUnauthorized` set to false.  All agents have
-`maxSockets` configured to `Infinity`.  They are each instances of the Node.js
-[Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the
-standard properties.
+An object containing the node agents used for pooling connections for `http` and `https`. The properties are `http`, `https`, and `httpsAllowUnauthorized` which is an `https` agent with `rejectUnauthorized` set to false.  All agents have `maxSockets` configured to `Infinity`.  They are each instances of the Node.js [Agent](http://nodejs.org/api/http.html#http_class_http_agent) and expose the standard properties.
 
-For example, the following code demonstrates changing `maxSockets` on the `http`
-agent.
+For example, the following code demonstrates changing `maxSockets` on the `http` agent.
 
  ```js
  const Wreck = require('@hapi/wreck');
@@ -304,7 +303,6 @@ agent.
 
 Below is another example that sets the certificate details for all HTTPS requests.
 
-<!-- eslint-disable no-undef -->
 ```js
 const HTTPS = require('https');
 const Wreck = require('@hapi/wreck');
@@ -318,8 +316,7 @@ Wreck.agents.https = new HTTPS.Agent({
 
 ### Events
 
-To enable events, use `Wreck.defaults({ events: true })`. Events are available via the
-`events` emitter attached to the client returned by `Wreck.defaults()`.
+To enable events, use `Wreck.defaults({ events: true })`. Events are available via the `events` emitter attached to the client returned by `Wreck.defaults()`.
 
 #### `preRequest`
 

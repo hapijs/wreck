@@ -237,26 +237,6 @@ describe('request()', () => {
         server.close();
     });
 
-    it('requests a resource with downstream dependency', async () => {
-
-        const up = await internals.server();
-
-        const handler = async (req, res1) => {
-
-            res1.writeHead(200, { 'Content-Type': 'text/plain' });
-            const res2 = await Wreck.request('get', 'http://localhost:' + up.address().port, { downstreamRes: res1 });
-            res2.pipe(res1);
-        };
-
-        const down = await internals.server(handler);
-
-        const res = await Wreck.request('get', 'http://localhost:' + down.address().port);
-        const body = await Wreck.read(res);
-        expect(body.toString()).to.equal(internals.payload);
-        up.close();
-        down.close();
-    });
-
     it('does not follow redirections by default', async () => {
 
         let gen = 0;
