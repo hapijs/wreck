@@ -1,7 +1,7 @@
 {
     "name": "@hapi/wreck",
     "description": "HTTP Client Utilities",
-    "version": "16.0.0",
+    "version": "16.0.1",
     "repository": "git://github.com/hapijs/wreck",
     "main": "lib/index",
     "types": "lib/index.d.ts",
