@@ -2298,7 +2298,7 @@ internals.server = function (handler, socket) {
 
             return req.headers.host === 'localhost:' + server.address().port ||
                    req.headers.host === '127.0.0.1:' + server.address().port;
-        }
+        };
 
         if (!socket && !isValidHost()) {
 
