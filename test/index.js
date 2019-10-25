@@ -337,6 +337,25 @@ describe('request()', () => {
         server.close();
     });
 
+    it('handles redirections with new hostname', async () => {
+
+        const handler = (req, res) => {
+
+            res.writeHead(302, { 'Location': 'http://localhost:' + http2.address().port });
+            res.end();
+        };
+
+        const http1 = await internals.server(handler);
+        const http2 = await internals.server();
+
+        const headers = {};                              // Headers object is needed to trigger bug
+
+        const res = await Wreck.request('get', 'http://localhost:' + http1.address().port, { redirects: 1, headers });
+        expect(res.statusCode).to.equal(200);
+        http1.close();
+        http2.close();
+    });
+
     it('handles redirections from http to https', async () => {
 
         const handler = (req, res) => {
@@ -2273,7 +2292,22 @@ internals.server = function (handler, socket) {
         }
     }
 
-    const server = Http.createServer(handler);
+    const server = Http.createServer((req, res) => {
+
+        const isValidHost = () => {
+
+            return req.headers.host === 'localhost:' + server.address().port ||
+                   req.headers.host === '127.0.0.1:' + server.address().port;
+        }
+
+        if (!socket && !isValidHost()) {
+
+            res.writeHead(500);
+            return res.end('bad host: ' + req.headers.host);
+        }
+
+        return handler(req, res);
+    });
     return new Promise((resolve) => {
 
         server.listen(socket || 0, () => resolve(server));
