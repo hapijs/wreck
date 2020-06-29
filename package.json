@@ -3,6 +3,9 @@
   "description": "HTTP Client Utilities",
   "version": "12.6.1",
   "repository": "git://github.com/hapijs/wreck",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "main": "lib/index",
   "keywords": [
     "utilities",

@@ -1606,10 +1606,10 @@ describe('options.baseUrl', () => {
 
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', (done) => {
 
-        const r = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/' }, (err, res) => {
+        const request = Wreck.request('get', '/foo', { baseUrl: 'http://localhost:0/' }, (err, res) => {
 
             expect(err).to.exist();         // Can't connect
-            expect(r._headers.host).to.equal('localhost:0');
+            expect(internals.header(request, 'host')).to.equal('localhost:0');
             done();
         });
     });
@@ -1618,7 +1618,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', '/foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/foo');
         done();
     });
@@ -1627,7 +1627,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost/' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/foo');
         done();
     });
@@ -1636,7 +1636,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', 'foo', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/foo');
         done();
     });
@@ -1645,7 +1645,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', '', { baseUrl: 'http://localhost' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/');
         done();
     });
@@ -1654,7 +1654,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/foo/bar');
         done();
     });
@@ -1663,7 +1663,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', '/bar', { baseUrl: 'http://localhost/foo/' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/foo/bar');
         done();
     });
@@ -1672,7 +1672,7 @@ describe('options.baseUrl', () => {
 
         const request = Wreck.request('get', '/bar?test=hello', { baseUrl: 'http://localhost/foo' }, Hoek.ignore);
 
-        expect(request._headers.host).to.equal('localhost');
+        expect(internals.header(request, 'host')).to.equal('localhost');
         expect(request.path).to.equal('/foo/bar?test=hello');
         done();
     });
@@ -3058,23 +3058,23 @@ describe('Defaults', () => {
         const req1 = wreckA.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
             expect(err).to.exist();
-            expect(req1._headers.banana).to.exist();
-            expect(req1._headers.foo).to.exist();
-            expect(req1._headers.bar).to.not.exist();
+            expect(internals.header(req1, 'banana')).to.exist();
+            expect(internals.header(req1, 'foo')).to.exist();
+            expect(internals.header(req1, 'bar')).to.not.exist();
 
             const req2 = wreckB.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
                 expect(err).to.exist();
-                expect(req2._headers.banana).to.exist();
-                expect(req2._headers.foo).to.not.exist();
-                expect(req2._headers.bar).to.exist();
+                expect(internals.header(req2, 'banana')).to.exist();
+                expect(internals.header(req2, 'foo')).to.not.exist();
+                expect(internals.header(req2, 'bar')).to.exist();
 
                 const req3 = wreckAB.request('get', 'http://localhost:0/', { headers: { banana: 911 } }, (err) => {
 
                     expect(err).to.exist();
-                    expect(req3._headers.banana).to.exist();
-                    expect(req3._headers.foo).to.exist();
-                    expect(req3._headers.bar).to.exist();
+                    expect(internals.header(req3, 'banana')).to.exist();
+                    expect(internals.header(req3, 'foo')).to.exist();
+                    expect(internals.header(req3, 'bar')).to.exist();
 
                     done();
                 });
@@ -3092,8 +3092,8 @@ describe('Defaults', () => {
         const req1 = wreckA.request('get', 'http://localhost:0/', optionsB, (err) => {
 
             expect(err).to.exist();
-            expect(req1._headers.accept).to.equal('bar');
-            expect(req1._headers.test).to.equal(123);
+            expect(internals.header(req1, 'accept')).to.equal('bar');
+            expect(internals.header(req1, 'test')).to.equal(123);
 
             done();
         });
@@ -3210,3 +3210,10 @@ describe('Defaults', () => {
         done();
     });
 });
+
+
+internals.header = function (request, header) {
+
+    const headers = typeof request.getHeaders === 'function' ? request.getHeaders() : request._headers;
+    return headers[header];
+};
