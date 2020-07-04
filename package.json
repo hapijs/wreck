@@ -1,8 +1,11 @@
 {
-  "name": "@hapi/wreck",
+  "name": "@commercial/wreck",
   "description": "HTTP Client Utilities",
   "version": "15.1.0",
   "repository": "git://github.com/hapijs/wreck",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "main": "lib/index",
   "keywords": [
     "utilities",
@@ -10,9 +13,9 @@
     "client"
   ],
   "dependencies": {
-    "@hapi/bourne": "1.x.x",
-    "@hapi/boom": "7.x.x",
-    "@hapi/hoek": "8.x.x"
+    "@commercial/bourne": "^1.3.2",
+    "@commercial/boom": "^7.4.11",
+    "@commercial/hoek": "^8.5.1"
   },
   "devDependencies": {
     "@hapi/code": "6.x.x",
@@ -22,5 +25,5 @@
     "test": "lab -t 100 -L -a @hapi/code -m 10000",
     "test-cov-html": "lab -r html -o coverage.html -a @hapi/code -m 10000"
   },
-  "license": "BSD-3-Clause"
+  "license": "SEE LICENSE IN LICENSE.md"
 }
