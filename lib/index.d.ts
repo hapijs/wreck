@@ -6,7 +6,7 @@ import * as Https from 'https';
 import * as Stream from 'stream';
 import * as Url from 'url';
 
-import { Boom } from '@hapi/boom';
+import { Boom } from '@commercial/boom';
 
 
 /**
