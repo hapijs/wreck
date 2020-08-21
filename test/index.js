@@ -535,6 +535,36 @@ describe('request()', () => {
         server.close();
     });
 
+    it('handles timeouts after a redirect', async () => {
+
+        let redirectCount = 0;
+        let timeout = 0;
+
+        const handler = (req, res) => {
+
+            setTimeout(() => {
+
+                res.writeHead(302, { 'Location': 'http://localhost:' + server.address().port });
+                res.end();
+            }, timeout);
+
+            redirectCount++;
+            timeout = 10;
+        };
+
+        const server = await internals.server(handler);
+        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, timeout: 20 })).to.reject();
+        expect(err.output.statusCode).to.equal(504);
+
+        // Validate that no further requests are made
+
+        const targetCount = redirectCount;
+        await Hoek.wait(15);
+        expect(redirectCount).to.equal(targetCount);
+
+        server.close();
+    });
+
     it('calls beforeRedirect option callback before redirections', async () => {
 
         let gen = 0;
@@ -837,7 +867,7 @@ describe('request()', () => {
         server.close();
     });
 
-    it('handles read timeout', async () => {
+    it('handles request timeout', async () => {
 
         const handler = (req, res) => {
 
@@ -854,7 +884,7 @@ describe('request()', () => {
         expect(err.output.statusCode).to.equal(504);
     });
 
-    it('cleans socket on agent deferred read timeout', async () => {
+    it('cleans socket on agent deferred request timeout', async () => {
 
         let complete;
 
