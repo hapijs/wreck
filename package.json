@@ -20,7 +20,8 @@
     },
     "devDependencies": {
         "@hapi/code": "8.x.x",
-        "@hapi/lab": "22.x.x"
+        "@hapi/lab": "24.x.x",
+        "typescript": "~4.0.2"
     },
     "scripts": {
         "test": "lab -t 100 -L -a @hapi/code -m 10000 -Y",
