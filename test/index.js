@@ -41,6 +41,17 @@ describe('request()', () => {
         server.close();
     });
 
+    it('requests a resource with IPv6', async () => {
+
+        const server = await internals.server();
+        const res = await Wreck.request('get', 'http://[::1]:' + server.address().port);
+        const body = await Wreck.read(res);
+
+        expect(Buffer.isBuffer(body)).to.equal(true);
+        expect(body.toString()).to.equal(internals.payload);
+        server.close();
+    });
+
     it('requests a POST resource', async () => {
 
         const handler = (req, res) => {
@@ -2327,7 +2338,8 @@ internals.server = function (handler, socket) {
         const isValidHost = () => {
 
             return req.headers.host === 'localhost:' + server.address().port ||
-                   req.headers.host === '127.0.0.1:' + server.address().port;
+                   req.headers.host === '127.0.0.1:' + server.address().port ||
+                   req.headers.host === '[::1]:' + server.address().port;
         };
 
         if (!socket && !isValidHost()) {
