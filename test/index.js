@@ -41,7 +41,7 @@ describe('request()', () => {
         server.close();
     });
 
-    it('requests a resource with IPv6', async () => {
+    it('requests a resource with IPv6', { skip: !process.features.ipv6 }, async () => {
 
         const server = await internals.server();
         const res = await Wreck.request('get', 'http://[::1]:' + server.address().port);
