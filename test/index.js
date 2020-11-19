@@ -472,9 +472,8 @@ describe('request()', () => {
 
     it('handles uri with WHATWG parsing', async () => {
 
-        const promise = Wreck.request('get', 'http://localhost%60malicious.org');
+        const promise = Wreck.get('http://localhost%60malicious.org');
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost`malicious.org');
     });
 
     it('reaches max redirections count', async () => {
