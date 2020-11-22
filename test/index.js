@@ -14,6 +14,8 @@ const Hoek = require('@hapi/hoek');
 const Lab = require('@hapi/lab');
 const Wreck = require('..');
 
+console.log(JSON.stringify(process.env, null, '  '));
+console.log(process.env.ImageOS);
 
 const internals = {
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
