@@ -14,6 +14,7 @@ const Hoek = require('@hapi/hoek');
 const Lab = require('@hapi/lab');
 const Wreck = require('..');
 
+
 const internals = {
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
     gzippedPayload: Zlib.gzipSync(new Array(1640).join('0123456789')),
