@@ -14,9 +14,6 @@ const Hoek = require('@hapi/hoek');
 const Lab = require('@hapi/lab');
 const Wreck = require('..');
 
-console.log(JSON.stringify(process.env, null, '  '));
-console.log(process.env.ImageOS);
-
 const internals = {
     payload: new Array(1640).join('0123456789'), // make sure we have a payload larger than 16384 bytes for chunking coverage
     gzippedPayload: Zlib.gzipSync(new Array(1640).join('0123456789')),
@@ -963,7 +960,7 @@ describe('request()', () => {
 
     it('sets the auth value on the request', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: 'http://username:password@localhost:0/' });
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://username:password@localhost:${internals.refusePort}/` });
         await expect(promise).to.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.getHeader('authorization')).to.exist();
@@ -973,7 +970,7 @@ describe('request()', () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://:password@localhost:${internals.refusePort}/` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.getHeader('authorization')).to.exist();
     });
 
@@ -1095,14 +1092,14 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${internals.refusePort}/` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', async () => {
 
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${internals.refusePort}` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/foo');
     });
 
@@ -1110,7 +1107,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'foo', { baseUrl: `http://localhost:${internals.refusePort}/` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/foo');
     });
 
@@ -1118,7 +1115,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'foo', { baseUrl: `http://localhost:${internals.refusePort}` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/foo');
     });
 
@@ -1126,7 +1123,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '', { baseUrl: `http://localhost:${internals.refusePort}` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/');
     });
 
@@ -1134,7 +1131,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '/bar', { baseUrl: `http://localhost:${internals.refusePort}/foo` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/bar');
     });
 
@@ -1142,7 +1139,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'bar', { baseUrl: `http://localhost:${internals.refusePort}/foo/` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/foo/bar');
     });
 
@@ -1150,7 +1147,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', '/bar', { baseUrl: `http://localhost:${internals.refusePort}/foo/` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/bar');
     });
 
@@ -1158,7 +1155,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: `http://localhost:${internals.refusePort}/foo/` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
     });
 
@@ -1166,7 +1163,7 @@ describe('options.baseUrl', () => {
 
         const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: `http://localhost:${internals.refusePort}/foo/?test=hi` });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:0');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
     });
 });
