@@ -102,7 +102,7 @@ Initiate an HTTP request.
           - `location` - The redirect location string.
           - `resHeaders` - An object with the headers received as part of the redirection response.
           - `redirectOptions` - Options that will be applied to the redirect request. Changes to this object are applied to the redirection request.
-          - `next` - the callback function called to perform the redirection using signature `function()`.
+          - `next` - the callback function called to perform the redirection using signature `function(err)`. Passing an error into callback will stop the redirect request.
           
     - `ciphers` - [TLS](https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite) list of TLS ciphers to override node's default. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs for possible [TLS_CIPHERS](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT).
 
