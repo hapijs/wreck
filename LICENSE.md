@@ -1,5 +1,5 @@
-Copyright (c) 2012-2020, Sideway Inc, and project contributors  
-Copyright (c) 2012-2014, Walmart.  
+Copyright (c) 2012-2022, Sideway Inc, and project contributors
+Copyright (c) 2012-2014, Walmart.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
