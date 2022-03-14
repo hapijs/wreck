@@ -20,7 +20,7 @@ const internals = {
     gzippedPayload: Zlib.gzipSync(new Array(1640).join('0123456789')),
     socket: __dirname + '/server.sock',
     emitSymbol: Symbol.for('wreck'),
-    refusePort: process.env.ImageOS === 'win19' ? 777 : 0
+    refusePort: ['win19', 'win22'].includes(process.env.ImageOS) ? 777 : 0
 };
 
 
