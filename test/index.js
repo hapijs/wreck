@@ -560,17 +560,17 @@ describe('request()', () => {
             }, timeout);
 
             redirectCount++;
-            timeout = 10;
+            timeout = 20;
         };
 
         const server = await internals.server(handler);
-        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, timeout: 20 })).to.reject();
+        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, timeout: 40 })).to.reject();
         expect(err.output.statusCode).to.equal(504);
 
         // Validate that no further requests are made
 
         const targetCount = redirectCount;
-        await Hoek.wait(15);
+        await Hoek.wait(30);
         expect(redirectCount).to.equal(targetCount);
 
         server.close();
@@ -1492,6 +1492,7 @@ describe('read()', () => {
         const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
 
         res.destroy = null;
+        res._readableState.autoDestroy = false; // As of node v16 autoDestroy is on, causing node to attempt to call destroy()
         const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
         expect(err.output.statusCode).to.equal(413);
         server.close();
