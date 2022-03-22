@@ -618,6 +618,28 @@ describe('request()', () => {
         server.close();
     });
 
+    it('cancels redirect if beforeRedirect callback is called with an error', async () => {
+
+        const handler = (req, res) => {
+
+            req.destroy();
+            res.end();
+        };
+
+        const server = await internals.server(handler);
+
+        const err = new Error('Cancel');
+        const beforeRedirectCallback = function (redirectMethod, statusCode, location, headers, redirectOptions, next) {
+
+            return next(err);
+        };
+
+        const thrown = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback })).to.reject();
+        expect(thrown.isBoom).to.equal(true);
+        expect(thrown.message).to.equal('Invalid redirect: ' + err.message);
+        server.close();
+    });
+
     it('calls redirected option callback on redirections', async () => {
 
         let gen = 0;
