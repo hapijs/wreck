@@ -622,7 +622,7 @@ describe('request()', () => {
 
         const handler = (req, res) => {
 
-            req.destroy();
+            res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
             res.end();
         };
 
@@ -636,7 +636,7 @@ describe('request()', () => {
 
         const thrown = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback })).to.reject();
         expect(thrown.isBoom).to.equal(true);
-        expect(thrown.message).to.equal('Invalid redirect: ' + err.message);
+        expect(thrown.message).to.equal('Invalid redirect: Cancel');
         server.close();
     });
 
