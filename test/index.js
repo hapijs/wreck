@@ -349,7 +349,7 @@ describe('request()', () => {
         server.close();
     });
 
-    it('handles redirections with new hostname', async () => {
+    it('handles redirections with new host', async () => {
 
         const handler = (req, res) => {
 
@@ -361,6 +361,39 @@ describe('request()', () => {
         const http2 = await internals.server();
 
         const headers = {};                              // Headers object is needed to trigger bug
+
+        const res = await Wreck.request('get', 'http://localhost:' + http1.address().port, { redirects: 1, headers });
+        expect(res.statusCode).to.equal(200);
+        http1.close();
+        http2.close();
+    });
+
+    it('handles redirections with new hostname, removing authorization and cookie headers', async () => {
+
+        const handler1 = (req, res) => {
+
+            res.writeHead(302, { 'Location': 'http://127.0.0.1:' + http2.address().port });
+            res.end();
+        };
+
+        const handler2 = (req, res) => {
+
+            // request must have 'x-foo' header, but must not have 'authorization' or 'cookie'
+            if (req.headers.authorization || req.headers.cookie || !req.headers['x-foo']) {
+                res.writeHead(500);
+            }
+
+            res.end();
+        };
+
+        const http1 = await internals.server(handler1);
+        const http2 = await internals.server(handler2);
+
+        const headers = {
+            authorization: 'some-auth-key',
+            cookie: 'some-cookie',
+            'x-foo': 'something-else'
+        };
 
         const res = await Wreck.request('get', 'http://localhost:' + http1.address().port, { redirects: 1, headers });
         expect(res.statusCode).to.equal(200);
