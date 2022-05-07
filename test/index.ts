@@ -17,7 +17,7 @@ const server = Http.createServer((req, res) => {
     res.end('Some payload');
 });
 
-await new Promise((resolve) => server.listen(0, resolve));
+await new Promise((resolve) => server.listen(0, () => resolve(null)));
 const address = server.address() as Net.AddressInfo;
 const url = `http://localhost:${address.port}`;
 
