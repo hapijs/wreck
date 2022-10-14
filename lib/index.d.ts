@@ -233,6 +233,13 @@ declare namespace Client {
             readonly gunzip?: boolean | 'force';
 
             /**
+             * Determines how to handle zlib compressed payloads.
+             * 
+             * @default false
+             */
+            readonly inflate?: boolean | 'force';
+
+            /**
              * The request body as a string, Buffer, readable stream, or an object that can be serialized using `JSON.stringify()`.
              */
             readonly payload?: Payload;
@@ -307,6 +314,13 @@ declare namespace Client {
             * @default false
             */
             readonly gunzip?: boolean | 'force';
+
+            /**
+            * Determines how to handle zlib compressed payloads.
+            *
+            * @default false
+            */
+            readonly inflate?: boolean | 'force';
 
             /**
              * Determines how to parse the payload as JSON.

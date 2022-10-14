@@ -2056,6 +2056,180 @@ describe('gunzip', () => {
     });
 });
 
+describe('inflate', () => {
+
+    describe('true', () => {
+
+        it('automatically handles zlib', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: true };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
+        it('automatically handles zlib (manual header)', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: true, headers: { 'accept-encoding': 'deflate' } };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
+        it('automatically handles zlib (with identity)', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate, identity' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: true };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
+        it('automatically handles zlib (without json)', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { inflate: true };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload.toString()).to.equal('{"foo":"bar"}');
+            server.close();
+        });
+
+        it('automatically handles zlib (ignores when not compressed)', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ foo: 'bar' }));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: true };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
+        it('handles zlib errors', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })).slice(0, 10));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: true };
+
+            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            expect(err).to.be.an.error('unexpected end of file');
+            expect(err.data.res.statusCode).to.equal(200);
+            server.close();
+        });
+    });
+
+    describe('false/undefined', () => {
+
+        it('fails parsing zlib content', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.not.exist();
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true };
+
+            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            expect(err).to.be.an.error('Unexpected token x in JSON at position 0');
+            expect(err.data.res.statusCode).to.equal(200);
+            expect(err.data.payload).to.equal(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            server.close();
+        });
+    });
+
+    describe('force', () => {
+
+        it('forcefully handles zlib', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: 'force' };
+            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            expect(res.statusCode).to.equal(200);
+            expect(payload).to.not.equal(null);
+            expect(payload.foo).to.exist();
+            server.close();
+        });
+
+        it('handles zlib errors', async () => {
+
+            const handler = (req, res) => {
+
+                expect(req.headers['accept-encoding']).to.equal('deflate');
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'deflate' });
+                res.end(Zlib.deflateSync(JSON.stringify({ foo: 'bar' })).slice(0, 10));
+            };
+
+            const server = await internals.server(handler);
+            const options = { json: true, inflate: 'force' };
+
+            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            expect(err).to.be.an.error('unexpected end of file');
+            expect(err.data.res.statusCode).to.equal(200);
+            server.close();
+        });
+    });
+});
+
 describe('toReadableStream()', () => {
 
     it('handle empty payload', () => {

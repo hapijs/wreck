@@ -142,6 +142,11 @@ Returns a promise that resolves into a node response object. The promise has a `
         - `false` - explicitly disable gunzipping.
         - `force` - try to gunzip regardless of the content-encoding header.
 
+    - `inflate` - determines how to handle zlib compressed payloads. Defaults to `false`.
+        - `true` - only try to inflate if the response indicates a deflate content-encoding.
+        - `false` - explicitly disable inflate.
+        - `force` - try to inflate regardless of the content-encoding header.
+
     - `json` - determines how to parse the payload as JSON:
         - `false` - leaves payload raw. This is the default value.
         - `true` - only try `JSON.parse` if the response indicates a JSON content-type.
