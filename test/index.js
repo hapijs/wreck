@@ -33,7 +33,7 @@ describe('request()', () => {
     it('requests a resource', async () => {
 
         const server = await internals.server();
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         const body = await Wreck.read(res);
 
         expect(Buffer.isBuffer(body)).to.equal(true);
@@ -62,7 +62,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload: internals.payload });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload: internals.payload });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -79,7 +79,7 @@ describe('request()', () => {
 
         const server = await internals.server(handler);
         const unicodePayload = JSON.stringify({ field: 'ć' });
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload: unicodePayload });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload: unicodePayload });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(unicodePayload);
         server.close();
@@ -96,7 +96,7 @@ describe('request()', () => {
 
         const server = await internals.server(handler);
         const payload = { my: 'object' };
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(JSON.stringify(payload));
         server.close();
@@ -117,7 +117,7 @@ describe('request()', () => {
         const headers = {};
         headers['content-type'] = 'application/json-patch+json';
 
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload, headers });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload, headers });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(JSON.stringify(payload));
         server.close();
@@ -135,7 +135,7 @@ describe('request()', () => {
         const server = await internals.server(handler);
 
         const options = { payload: internals.payload, headers: { 'Content-Length': '16390' } };
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, options);
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, options);
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -156,7 +156,7 @@ describe('request()', () => {
         const headers = {};
         headers['Content-Type'] = 'application/json-patch+json';
 
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload, headers });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload, headers });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(JSON.stringify(payload));
         server.close();
@@ -165,7 +165,7 @@ describe('request()', () => {
     it('requests a POST resource with headers', async () => {
 
         const server = await internals.server('echo');
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { 'user-agent': 'wreck' }, payload: internals.payload });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { headers: { 'user-agent': 'wreck' }, payload: internals.payload });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -174,7 +174,7 @@ describe('request()', () => {
     it('requests a POST resource with stream payload', async () => {
 
         const server = await internals.server('echo');
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload: Wreck.toReadableStream(internals.payload) });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload: Wreck.toReadableStream(internals.payload) });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -182,17 +182,23 @@ describe('request()', () => {
 
     it('cannot set agent and rejectUnauthorized at the same time', async () => {
 
-        await expect(Wreck.request('get', 'https://google.com', { rejectUnauthorized: true, agent: new Https.Agent() })).to.reject();
+        const server = await internals.server('echo');
+        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { rejectUnauthorized: true, agent: new Https.Agent() })).to.reject();
+        server.close();
     });
 
     it('cannot set a false agent and rejectUnauthorized at the same time', async () => {
 
-        await expect(Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: false })).to.reject();
+        const server = await internals.server('echo');
+        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { rejectUnauthorized: false, agent: false })).to.reject();
+        server.close();
     });
 
     it('can set a null agent and rejectUnauthorized at the same time', async () => {
 
-        await expect(Wreck.request('get', 'https://google.com', { rejectUnauthorized: false, agent: null })).to.not.reject();
+        const server = await internals.server('echo');
+        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { rejectUnauthorized: false, agent: null })).to.not.reject();
+        server.close();
     });
 
     it('requests an https resource', async () => {
@@ -255,7 +261,7 @@ describe('request()', () => {
         const handler = (req, res) => {
 
             if (!gen++) {
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }
             else {
@@ -265,7 +271,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         await Wreck.read(res);
         expect(res.statusCode).to.equal(301);
         server.close();
@@ -277,7 +283,7 @@ describe('request()', () => {
         const handler = (req, res) => {
 
             if (!gen++) {
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }
             else {
@@ -287,7 +293,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1, beforeRedirect: null, redirected: null });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -304,7 +310,7 @@ describe('request()', () => {
             expect(res2.toString()).to.equal(payload);
 
             if (!gen++) {
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }
             else {
@@ -314,7 +320,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('POST', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null, payload });
+        const res = await Wreck.request('POST', `http://localhost:${server.address().port}`, { redirects: 1, beforeRedirect: null, redirected: null, payload });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -331,7 +337,7 @@ describe('request()', () => {
             if (!gen++) {
                 expect(req.method).to.equal('POST');
                 expect(res2.toString()).to.equal(payload);
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }
             else {
@@ -343,7 +349,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('POST', 'http://localhost:' + server.address().port, { redirectMethod: 'GET', redirects: 1, beforeRedirect: null, redirected: null, payload });
+        const res = await Wreck.request('POST', `http://localhost:${server.address().port}`, { redirectMethod: 'GET', redirects: 1, beforeRedirect: null, redirected: null, payload });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -435,7 +441,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1 });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -445,12 +451,12 @@ describe('request()', () => {
 
         const handler = (req, res) => {
 
-            res.writeHead(303, { 'Location': 'http://localhost:' + server.address().port });
+            res.writeHead(303, { 'Location': `http://localhost:${server.address().port}` });
             res.end();
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1, beforeRedirect: null, redirected: null });
         expect(res.statusCode).to.equal(303);
         server.close();
     });
@@ -461,7 +467,7 @@ describe('request()', () => {
         const handler = (req, res) => {
 
             if (!gen++) {
-                res.writeHead(303, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(303, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }
             else {
@@ -471,7 +477,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, beforeRedirect: null, redirected: null, redirect303: true });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1, beforeRedirect: null, redirected: null, redirect303: true });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -486,7 +492,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const wreckA = Wreck.defaults({ baseUrl: 'http://localhost:' + server.address().port });
+        const wreckA = Wreck.defaults({ baseUrl: `http://localhost:${server.address().port}` });
         const options = {
             redirects: 1,
             redirected: (statusCode, location, req) => {
@@ -508,7 +514,7 @@ describe('request()', () => {
 
         const server = await internals.server();
         const wreckA = Wreck.defaults({ baseUrl: 'http://no.such.domain.error' });
-        const res = await wreckA.request('get', 'http://localhost:' + server.address().port);
+        const res = await wreckA.request('get', `http://localhost:${server.address().port}`);
         const body = await Wreck.read(res);
         expect(Buffer.isBuffer(body)).to.equal(true);
         expect(body.toString()).to.equal(internals.payload);
@@ -527,7 +533,7 @@ describe('request()', () => {
         const handler = (req, res) => {
 
             if (gen++ < 2) {
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }
             else {
@@ -537,7 +543,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 })).to.reject('Maximum redirections reached');
+        await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1 })).to.reject('Maximum redirections reached');
         server.close();
     });
 
@@ -550,7 +556,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1 })).to.reject('Received redirection without location');
+        await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1 })).to.reject('Received redirection without location');
         server.close();
     });
 
@@ -573,7 +579,7 @@ describe('request()', () => {
         const server = await internals.server(handler);
         const payload = new Array(1639).join('0123456789');
         const stream = Wreck.toReadableStream(payload);
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { redirects: 1, payload: stream });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { redirects: 1, payload: stream });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(payload);
         server.close();
@@ -588,7 +594,7 @@ describe('request()', () => {
 
             setTimeout(() => {
 
-                res.writeHead(302, { 'Location': 'http://localhost:' + server.address().port });
+                res.writeHead(302, { 'Location': `http://localhost:${server.address().port}` });
                 res.end();
             }, timeout);
 
@@ -597,7 +603,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, timeout: 40 })).to.reject();
+        const err = await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 5, timeout: 40 })).to.reject();
         expect(err.output.statusCode).to.equal(504);
 
         // Validate that no further requests are made
@@ -615,7 +621,7 @@ describe('request()', () => {
         const handler = (req, res) => {
 
             if (gen++ < 2) {
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` + '/redirected/' });
                 res.end();
             }
             else {
@@ -645,7 +651,7 @@ describe('request()', () => {
             return next();
         };
 
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 5, beforeRedirect: beforeRedirectCallback });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -655,7 +661,7 @@ describe('request()', () => {
 
         const handler = (req, res) => {
 
-            res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
+            res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` + '/redirected/' });
             res.end();
         };
 
@@ -667,7 +673,7 @@ describe('request()', () => {
             return next(err);
         };
 
-        const thrown = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, beforeRedirect: beforeRedirectCallback })).to.reject();
+        const thrown = await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 5, beforeRedirect: beforeRedirectCallback })).to.reject();
         expect(thrown.isBoom).to.equal(true);
         expect(thrown.message).to.equal('Invalid redirect: Cancel');
         server.close();
@@ -679,7 +685,7 @@ describe('request()', () => {
         const handler = (req, res) => {
 
             if (gen++ < 2) {
-                res.writeHead(301, { 'Location': 'http://localhost:' + server.address().port + '/redirected/' });
+                res.writeHead(301, { 'Location': `http://localhost:${server.address().port}` + '/redirected/' });
                 res.end();
             }
             else {
@@ -695,12 +701,12 @@ describe('request()', () => {
         const redirectedCallback = function (statusCode, location, req) {
 
             expect(statusCode).to.equal(301);
-            expect(location).to.equal('http://localhost:' + server.address().port + '/redirected/');
+            expect(location).to.equal(`http://localhost:${server.address().port}` + '/redirected/');
             expect(req).to.exist();
             redirects++;
         };
 
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 5, redirected: redirectedCallback });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 5, redirected: redirectedCallback });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         expect(redirects).to.equal(2);
@@ -794,7 +800,7 @@ describe('request()', () => {
     it('ignores negative timeout', async () => {
 
         const server = await internals.server();
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         const body = await Wreck.read(res, { timeout: -1 });
 
         expect(Buffer.isBuffer(body)).to.equal(true);
@@ -806,7 +812,7 @@ describe('request()', () => {
 
         const server = await internals.server();
 
-        const promise = Wreck.request('get', 'http://localhost:' + server.address().port);
+        const promise = Wreck.request('get', `http://localhost:${server.address().port}`);
         promise.req.abort();
         await expect(promise).to.reject();
     });
@@ -822,7 +828,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const promise = Wreck.request('get', 'http://localhost:' + server.address().port);
+        const promise = Wreck.request('get', `http://localhost:${server.address().port}`);
         await expect(promise).to.reject();
     });
 
@@ -831,8 +837,10 @@ describe('request()', () => {
         const agent = new Http.Agent();
         expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        await expect(Wreck.request('get', `http://localhost:${internals.refusePort}/`, { agent })).to.reject();
+        const server = await internals.server('echo');
+        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { agent })).to.not.reject();
         expect(Object.keys(agent.sockets).length).to.equal(1);
+        server.close();
     });
 
     it('applies agent option when redirected', async () => {
@@ -860,7 +868,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, agent });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { redirects: 1, agent });
         expect(res.statusCode).to.equal(200);
         expect(requestCount).to.equal(2);
         server.close();
@@ -882,11 +890,11 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { agent: false, timeout: 50 });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { agent: false, timeout: 50 });
         expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
         expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
 
-        await Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent: false, timeout: 50 });
+        await Wreck.request('get', `http://localhost:${server.address().port}` + '/thatone', { agent: false, timeout: 50 });
         expect(Object.keys(Wreck.agents.http.sockets).length).to.equal(0);
         expect(Object.keys(Wreck.agents.http.requests).length).to.equal(0);
 
@@ -903,7 +911,7 @@ describe('request()', () => {
         const server = await internals.server('echo');
         const buf = Buffer.from(internals.payload, 'ascii');
 
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload: buf });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload: buf });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal(internals.payload);
         server.close();
@@ -912,7 +920,7 @@ describe('request()', () => {
     it('requests head method', async () => {
 
         const server = await internals.server('echo');
-        const res = await Wreck.request('head', 'http://localhost:' + server.address().port, { payload: null });
+        const res = await Wreck.request('head', `http://localhost:${server.address().port}`, { payload: null });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal('');
         server.close();
@@ -927,7 +935,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { headers: { connection: 'close' }, payload: null });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { headers: { connection: 'close' }, payload: null });
         const body = await Wreck.read(res);
         expect(body.toString()).to.equal('');
         server.close();
@@ -946,7 +954,7 @@ describe('request()', () => {
         };
 
         const server = await internals.server(handler);
-        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 })).to.reject();
+        const err = await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { timeout: 100 })).to.reject();
         expect(err.output.statusCode).to.equal(504);
     });
 
@@ -970,11 +978,11 @@ describe('request()', () => {
         const agent = new Http.Agent({ maxSockets: 1 });
         expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { agent, timeout: 15 });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { agent, timeout: 15 });
         expect(Object.keys(agent.sockets).length).to.equal(1);
         expect(Object.keys(agent.requests).length).to.equal(0);
 
-        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { agent, timeout: 15 })).to.reject();
+        const err = await expect(Wreck.request('get', `http://localhost:${server.address().port}` + '/thatone', { agent, timeout: 15 })).to.reject();
         expect(err.output.statusCode).to.equal(504);
 
         expect(Object.keys(agent.sockets).length).to.equal(1);
@@ -991,7 +999,7 @@ describe('request()', () => {
     it('defaults maxSockets to Infinity', async () => {
 
         const server = await internals.server();
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 100 });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { timeout: 100 });
         expect(res.statusCode).to.equal(200);
         expect(Wreck.agents.http.maxSockets).to.equal(Infinity);
     });
@@ -1014,9 +1022,9 @@ describe('request()', () => {
         const server = await internals.server(handler);
         Wreck.agents.http.maxSockets = 1;
 
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { timeout: 15 });
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`, { timeout: 15 });
 
-        const err = await expect(Wreck.request('get', 'http://localhost:' + server.address().port + '/thatone', { timeout: 15 })).to.reject();
+        const err = await expect(Wreck.request('get', `http://localhost:${server.address().port}` + '/thatone', { timeout: 15 })).to.reject();
         expect(err.output.statusCode).to.equal(504);
 
         complete();
@@ -1027,18 +1035,22 @@ describe('request()', () => {
 
     it('sets the auth value on the request', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: `http://username:password@localhost:${internals.refusePort}/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('echo');
+        const promise = Wreck.request('post', '/foo', { baseUrl: `http://username:password@localhost:${server.address().port}` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.getHeader('authorization')).to.exist();
+        server.close();
     });
 
     it('sets the auth value on the request with missing username', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: `http://:password@localhost:${internals.refusePort}/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('echo');
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://:password@localhost:${server.address().port}/` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.getHeader('authorization')).to.exist();
+        server.close();
     });
 
     describe('unix socket', { skip: process.platform === 'win32' }, () => {
@@ -1122,7 +1134,7 @@ describe('request()', () => {
             const server = await internals.server('echo', internals.socket);
             const { payload } = await Wreck.post('/', { socketPath: internals.socket, headers: { 'user-agent': 'wreck' }, payload: internals.payload });
             expect(payload.toString()).to.equal(internals.payload);
-            server.close();
+            await server.close();
         });
     });
 
@@ -1143,95 +1155,119 @@ describe('options.baseUrl', () => {
 
     it('uses lower-case host header when path is not a full URL', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${internals.refusePort}/`, headers: { host: 'localhost:8080' } });
-        await expect(promise).to.reject();
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}`, headers: { host: 'localhost:8080' } });
+        await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal('localhost:8080');
+        await server.close();
     });
 
     it('uses upper-case host header when path is not a full URL', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${internals.refusePort}/`, headers: { Host: 'localhost:8080' } });
-        await expect(promise).to.reject();
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}/`, headers: { Host: 'localhost:8080' } });
+        await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal('localhost:8080');
+        await server.close();
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${internals.refusePort}/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}/` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
+        await server.close();
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', async () => {
 
-        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${internals.refusePort}` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo');
+        await server.close();
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed without a slash', async () => {
 
-        const promise = Wreck.request('get', 'foo', { baseUrl: `http://localhost:${internals.refusePort}/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', 'foo', { baseUrl: `http://localhost:${server.address().port}/` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo');
+        await server.close();
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed without a slash', async () => {
 
-        const promise = Wreck.request('get', 'foo', { baseUrl: `http://localhost:${internals.refusePort}` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', 'foo', { baseUrl: `http://localhost:${server.address().port}` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo');
+        await server.close();
     });
 
     it('uses baseUrl option when uri is an empty string', async () => {
 
-        const promise = Wreck.request('get', '', { baseUrl: `http://localhost:${internals.refusePort}` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '', { baseUrl: `http://localhost:${server.address().port}` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/');
+        await server.close();
     });
 
     it('uses baseUrl option with a path', async () => {
 
-        const promise = Wreck.request('get', '/bar', { baseUrl: `http://localhost:${internals.refusePort}/foo` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/bar', { baseUrl: `http://localhost:${server.address().port}/foo` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/bar');
+        await server.close();
     });
 
     it('uses baseUrl option with a relative path', async () => {
 
-        const promise = Wreck.request('get', 'bar', { baseUrl: `http://localhost:${internals.refusePort}/foo/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', 'bar', { baseUrl: `http://localhost:${server.address().port}/foo/` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo/bar');
+        await server.close();
     });
 
     it('uses baseUrl option with a path and removes extra slashes', async () => {
 
-        const promise = Wreck.request('get', '/bar', { baseUrl: `http://localhost:${internals.refusePort}/foo/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/bar', { baseUrl: `http://localhost:${server.address().port}/foo/` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/bar');
+        await server.close();
     });
 
     it('uses baseUrl option with a url that has a querystring', async () => {
 
-        const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: `http://localhost:${internals.refusePort}/foo/` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: `http://localhost:${server.address().port}/foo/` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
+        await server.close();
     });
 
     it('uses baseUrl option with a url that has a querystring will override any base querystring', async () => {
 
-        const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: `http://localhost:${internals.refusePort}/foo/?test=hi` });
-        await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal(`localhost:${internals.refusePort}`);
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', 'bar?test=hello', { baseUrl: `http://localhost:${server.address().port}/foo/?test=hi` });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
+        await server.close();
     });
 });
 
@@ -1299,7 +1335,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const promise = Wreck.request('post', 'http://localhost:' + server.address().port, { payload, headers });
+        const promise = Wreck.request('post', `http://localhost:${server.address().port}`, { payload, headers });
         await expect(promise).to.reject();
         const err = await expect(readPromise).to.reject(Error, 'Payload stream closed prematurely');
         expect(err.isBoom).to.equal(true);
@@ -1316,7 +1352,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(res.headers['transfer-encoding']).to.not.exist();
         const err = await expect(Wreck.read(res)).to.reject(Error, 'Payload stream closed prematurely');
@@ -1336,7 +1372,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(res.headers['transfer-encoding']).to.equal('chunked');
         const err = await expect(Wreck.read(res)).to.reject(Error, 'Payload stream closed prematurely');
@@ -1370,7 +1406,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, {
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, {
             payload: stream
         });
         expect(res.statusCode).to.equal(200);
@@ -1402,7 +1438,7 @@ describe('read()', () => {
             keepAlive: true
         });
         const streamA = Wreck.toReadableStream('hello world', 'utf8');
-        const { payload: payloadA } = await Wreck.post('http://localhost:' + server.address().port, {
+        const { payload: payloadA } = await Wreck.post(`http://localhost:${server.address().port}`, {
             agent,
             payload: streamA
         });
@@ -1410,7 +1446,7 @@ describe('read()', () => {
         expect(payloadA.toString('utf8')).to.equal('hello world');
 
         const streamB = Wreck.toReadableStream('hello world', 'utf8');
-        const { payload: payloadB } = await Wreck.post('http://localhost:' + server.address().port, {
+        const { payload: payloadB } = await Wreck.post(`http://localhost:${server.address().port}`, {
             agent,
             payload: streamB
         });
@@ -1447,7 +1483,7 @@ describe('read()', () => {
     it('errors when stream is too big', async () => {
 
         const server = await internals.server();
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         const err = await expect(Wreck.read(res, { maxBytes: 120 })).to.reject();
         expect(err.output.statusCode).to.equal(413);
         server.close();
@@ -1456,7 +1492,7 @@ describe('read()', () => {
     it('ignores maxBytes when stream is not too big', async () => {
 
         const server = await internals.server();
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         await Wreck.read(res, { maxBytes: 120000 });
         server.close();
     });
@@ -1474,7 +1510,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
 
         const body = await Wreck.read(res);
@@ -1500,7 +1536,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
 
         const body = await Wreck.read(res);
@@ -1521,7 +1557,7 @@ describe('read()', () => {
         };
 
         const server = await internals.server(handler);
-        const res = await Wreck.request('post', 'http://localhost:' + server.address().port, { payload: fileStream });
+        const res = await Wreck.request('post', `http://localhost:${server.address().port}`, { payload: fileStream });
         expect(res.statusCode).to.equal(200);
 
         const body = await Wreck.read(res);
@@ -1544,7 +1580,7 @@ describe('read()', () => {
     it('skips destroy when not available', async () => {
 
         const server = await internals.server();
-        const res = await Wreck.request('get', 'http://localhost:' + server.address().port);
+        const res = await Wreck.request('get', `http://localhost:${server.address().port}`);
 
         res.destroy = null;
         res._readableState.autoDestroy = false; // As of node v16 autoDestroy is on, causing node to attempt to call destroy()
@@ -1590,7 +1626,7 @@ describe('Shortcut', () => {
     it('get request', async () => {
 
         const server = await internals.server('ok');
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         server.close();
@@ -1617,7 +1653,7 @@ describe('Shortcut', () => {
     it('put request', async () => {
 
         const server = await internals.server('ok');
-        const { res, payload } = await Wreck.put('http://localhost:' + server.address().port);
+        const { res, payload } = await Wreck.put(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         server.close();
@@ -1626,7 +1662,7 @@ describe('Shortcut', () => {
     it('delete request', async () => {
 
         const server = await internals.server('ok');
-        const { res, payload } = await Wreck.delete('http://localhost:' + server.address().port);
+        const { res, payload } = await Wreck.delete(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         server.close();
@@ -1675,7 +1711,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: true };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(200);
         expect(payload).to.not.equal(null);
         expect(payload.foo).to.exist();
@@ -1693,7 +1729,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: true };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(200);
         expect(payload).to.not.equal(null);
         expect(payload.foo).to.exist();
@@ -1705,7 +1741,7 @@ describe('json', () => {
         const server = await internals.server('ok');
         const options = { json: true };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(200);
         expect(payload).to.not.equal(null);
         server.close();
@@ -1722,7 +1758,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: true };
 
-        await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+        await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
         server.close();
     });
 
@@ -1737,7 +1773,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: false };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(200);
         expect(payload).to.not.equal(null);
         server.close();
@@ -1754,7 +1790,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'SMART' };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(204);
         expect(payload).to.equal(null);
         server.close();
@@ -1771,7 +1807,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'force' };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(204);
         expect(payload).to.equal(null);
         server.close();
@@ -1788,7 +1824,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: true };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(204);
         expect(Buffer.isBuffer(payload)).to.equal(true);
         expect(payload.toString()).to.equal('');
@@ -1806,7 +1842,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'force' };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(204);
         expect(payload).to.equal(null);
         server.close();
@@ -1823,7 +1859,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'force' };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(200);
         expect(payload).to.not.equal(null);
         expect(payload).to.equal({ foo: 'bar' });
@@ -1842,7 +1878,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'force' };
 
-        await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+        await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
         server.close();
     });
 
@@ -1857,7 +1893,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'strict' };
 
-        const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+        const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
         expect(res.statusCode).to.equal(200);
         expect(payload).to.not.equal(null);
         expect(payload).to.equal({ foo: 'bar' });
@@ -1876,7 +1912,7 @@ describe('json', () => {
         const server = await internals.server(handler);
         const options = { json: 'strict' };
 
-        const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+        const err = await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
         expect(err.output.statusCode).to.equal(406);
         server.close();
     });
@@ -1897,7 +1933,7 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true };
-            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
             expect(res.statusCode).to.equal(200);
             expect(payload).to.not.equal(null);
             expect(payload.foo).to.exist();
@@ -1915,7 +1951,7 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true, headers: { 'accept-encoding': 'gzip' } };
-            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
             expect(res.statusCode).to.equal(200);
             expect(payload).to.not.equal(null);
             expect(payload.foo).to.exist();
@@ -1933,7 +1969,7 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true };
-            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
             expect(res.statusCode).to.equal(200);
             expect(payload).to.not.equal(null);
             expect(payload.foo).to.exist();
@@ -1951,7 +1987,7 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { gunzip: true };
-            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
             expect(res.statusCode).to.equal(200);
             expect(payload.toString()).to.equal('{"foo":"bar"}');
             server.close();
@@ -1968,7 +2004,7 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true };
-            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
             expect(res.statusCode).to.equal(200);
             expect(payload).to.not.equal(null);
             expect(payload.foo).to.exist();
@@ -1987,7 +2023,7 @@ describe('gunzip', () => {
             const server = await internals.server(handler);
             const options = { json: true, gunzip: true };
 
-            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            const err = await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
             expect(err).to.be.an.error('unexpected end of file');
             expect(err.data.res.statusCode).to.equal(200);
             server.close();
@@ -2008,7 +2044,7 @@ describe('gunzip', () => {
             const server = await internals.server(handler);
             const options = { json: true };
 
-            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            const err = await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
             expect(err).to.be.an.error('Unexpected token \u001f in JSON at position 0');
             expect(err.data.res.statusCode).to.equal(200);
             expect(err.data.payload).to.equal(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
@@ -2029,7 +2065,7 @@ describe('gunzip', () => {
 
             const server = await internals.server(handler);
             const options = { json: true, gunzip: 'force' };
-            const { res, payload } = await Wreck.get('http://localhost:' + server.address().port, options);
+            const { res, payload } = await Wreck.get(`http://localhost:${server.address().port}`, options);
             expect(res.statusCode).to.equal(200);
             expect(payload).to.not.equal(null);
             expect(payload.foo).to.exist();
@@ -2048,7 +2084,7 @@ describe('gunzip', () => {
             const server = await internals.server(handler);
             const options = { json: true, gunzip: 'force' };
 
-            const err = await expect(Wreck.get('http://localhost:' + server.address().port, options)).to.reject();
+            const err = await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
             expect(err).to.be.an.error('unexpected end of file');
             expect(err.data.res.statusCode).to.equal(200);
             server.close();
@@ -2107,12 +2143,12 @@ describe('Events', () => {
             expect(details.req).to.exist();
             expect(details.res).to.exist();
             expect(typeof details.start).to.equal('number');
-            expect(details.uri.href).to.equal('http://localhost:' + server.address().port + '/');
+            expect(details.uri.href).to.equal(`http://localhost:${server.address().port}` + '/');
             once = true;
         });
 
         const server = await internals.server('ok');
-        const { res, payload } = await wreck.put('http://localhost:' + server.address().port);
+        const { res, payload } = await wreck.put(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         expect(once).to.be.true();
@@ -2195,7 +2231,7 @@ describe('Events', () => {
             expect(req).to.exist();
         });
 
-        const { res, payload } = await wreck.put('http://localhost:' + server.address().port);
+        const { res, payload } = await wreck.put(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
         server.close();
