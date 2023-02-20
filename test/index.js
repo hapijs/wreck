@@ -182,22 +182,22 @@ describe('request()', () => {
 
     it('cannot set agent and rejectUnauthorized at the same time', async () => {
 
-        const server = await internals.server('echo');
-        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { rejectUnauthorized: true, agent: new Https.Agent() })).to.reject();
+        const server = await internals.server('ok');
+        await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { rejectUnauthorized: true, agent: new Https.Agent() })).to.reject();
         server.close();
     });
 
     it('cannot set a false agent and rejectUnauthorized at the same time', async () => {
 
-        const server = await internals.server('echo');
-        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { rejectUnauthorized: false, agent: false })).to.reject();
+        const server = await internals.server('ok');
+        await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { rejectUnauthorized: false, agent: false })).to.reject();
         server.close();
     });
 
     it('can set a null agent and rejectUnauthorized at the same time', async () => {
 
-        const server = await internals.server('echo');
-        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { rejectUnauthorized: false, agent: null })).to.not.reject();
+        const server = await internals.server('ok');
+        await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { rejectUnauthorized: false, agent: null })).to.not.reject();
         server.close();
     });
 
@@ -837,8 +837,8 @@ describe('request()', () => {
         const agent = new Http.Agent();
         expect(Object.keys(agent.sockets).length).to.equal(0);
 
-        const server = await internals.server('echo');
-        await expect(Wreck.request('post', `http://localhost:${server.address().port}`, { agent })).to.not.reject();
+        const server = await internals.server('ok');
+        await expect(Wreck.request('get', `http://localhost:${server.address().port}`, { agent })).to.not.reject();
         expect(Object.keys(agent.sockets).length).to.equal(1);
         server.close();
     });
@@ -1035,8 +1035,8 @@ describe('request()', () => {
 
     it('sets the auth value on the request', async () => {
 
-        const server = await internals.server('echo');
-        const promise = Wreck.request('post', '/foo', { baseUrl: `http://username:password@localhost:${server.address().port}` });
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://username:password@localhost:${server.address().port}` });
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.getHeader('authorization')).to.exist();
@@ -1045,7 +1045,7 @@ describe('request()', () => {
 
     it('sets the auth value on the request with missing username', async () => {
 
-        const server = await internals.server('echo');
+        const server = await internals.server('ok');
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://:password@localhost:${server.address().port}/` });
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
@@ -1134,7 +1134,7 @@ describe('request()', () => {
             const server = await internals.server('echo', internals.socket);
             const { payload } = await Wreck.post('/', { socketPath: internals.socket, headers: { 'user-agent': 'wreck' }, payload: internals.payload });
             expect(payload.toString()).to.equal(internals.payload);
-            await server.close();
+            server.close();
         });
     });
 
@@ -1159,7 +1159,7 @@ describe('options.baseUrl', () => {
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}`, headers: { host: 'localhost:8080' } });
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal('localhost:8080');
-        await server.close();
+        server.close();
     });
 
     it('uses upper-case host header when path is not a full URL', async () => {
@@ -1168,7 +1168,7 @@ describe('options.baseUrl', () => {
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}/`, headers: { Host: 'localhost:8080' } });
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal('localhost:8080');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', async () => {
@@ -1177,7 +1177,7 @@ describe('options.baseUrl', () => {
         const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}/` });
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed with a slash', async () => {
@@ -1187,7 +1187,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with trailing slash and uri is prefixed without a slash', async () => {
@@ -1197,7 +1197,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option without trailing slash and uri is prefixed without a slash', async () => {
@@ -1207,7 +1207,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option when uri is an empty string', async () => {
@@ -1217,7 +1217,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with a path', async () => {
@@ -1227,7 +1227,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/bar');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with a relative path', async () => {
@@ -1237,7 +1237,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo/bar');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with a path and removes extra slashes', async () => {
@@ -1247,7 +1247,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/bar');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with a url that has a querystring', async () => {
@@ -1257,7 +1257,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
-        await server.close();
+        server.close();
     });
 
     it('uses baseUrl option with a url that has a querystring will override any base querystring', async () => {
@@ -1267,7 +1267,7 @@ describe('options.baseUrl', () => {
         await expect(promise).to.not.reject();
         expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
         expect(promise.req.path).to.equal('/foo/bar?test=hello');
-        await server.close();
+        server.close();
     });
 });
 
@@ -2168,8 +2168,10 @@ describe('Events', () => {
             once = true;
         });
 
-        await expect(wreck.get(`http://localhost:${internals.refusePort}`, { timeout: 10 })).to.reject();
+        const server = await internals.server('fail');
+        await expect(wreck.get(`http://localhost:${server.address().port}`, { timeout: 10 })).to.reject();
         expect(once).to.be.true();
+        server.close();
     });
 
     it('multiple requests execute the same response handler', async () => {
@@ -2186,9 +2188,11 @@ describe('Events', () => {
         const wreck = Wreck.defaults({ events: true });
         wreck.events.on('response', handler);
 
-        await expect(wreck.get(`http://localhost:${internals.refusePort}`, { timeout: 10 })).to.reject();
-        await expect(wreck.get(`http://localhost:${internals.refusePort}`, { timeout: 10 })).to.reject();
+        const server = await internals.server('fail');
+        await expect(wreck.get(`http://localhost:${server.address().port}`, { timeout: 10 })).to.reject();
+        await expect(wreck.get(`http://localhost:${server.address().port}`, { timeout: 10 })).to.reject();
         expect(count).to.equal(2);
+        server.close();
     });
 
     it('emits preRequest event before wreck creates a request', async () => {
@@ -2257,23 +2261,25 @@ describe('Defaults', () => {
         const wreckB = Wreck.defaults(optionsB);
         const wreckAB = wreckA.defaults(optionsB);
 
-        const promise1 = wreckA.request('get', `http://127.0.0.1:${internals.refusePort}/`, { headers: { banana: 911 } });
-        await expect(promise1).to.reject();
+        const server = await internals.server('ok');
+        const promise1 = wreckA.request('get', `http://127.0.0.1:${server.address().port}/`, { headers: { banana: 911 } });
+        await expect(promise1).to.not.reject();
         expect(promise1.req.getHeader('banana')).to.exist();
         expect(promise1.req.getHeader('foo')).to.exist();
         expect(promise1.req.getHeader('bar')).to.not.exist();
 
-        const promise2 = wreckB.request('get', `http://127.0.0.1:${internals.refusePort}/`, { headers: { banana: 911 } });
-        await expect(promise2).to.reject();
+        const promise2 = wreckB.request('get', `http://127.0.0.1:${server.address().port}/`, { headers: { banana: 911 } });
+        await expect(promise2).to.not.reject();
         expect(promise2.req.getHeader('banana')).to.exist();
         expect(promise2.req.getHeader('foo')).to.not.exist();
         expect(promise2.req.getHeader('bar')).to.exist();
 
-        const promise3 = wreckAB.request('get', `http://127.0.0.1:${internals.refusePort}/`, { headers: { banana: 911 } });
-        await expect(promise3).to.reject();
+        const promise3 = wreckAB.request('get', `http://127.0.0.1:${server.address().port}/`, { headers: { banana: 911 } });
+        await expect(promise3).to.not.reject();
         expect(promise3.req.getHeader('banana')).to.exist();
         expect(promise3.req.getHeader('foo')).to.exist();
         expect(promise3.req.getHeader('bar')).to.exist();
+        server.close();
     });
 
     it('applies defaults correctly to requests', async () => {
@@ -2283,10 +2289,12 @@ describe('Defaults', () => {
 
         const wreckA = Wreck.defaults(optionsA);
 
-        const promise1 = wreckA.request('get', `http://127.0.0.1:${internals.refusePort}/`, optionsB);
-        await expect(promise1).to.reject();
+        const server = await internals.server('ok');
+        const promise1 = wreckA.request('get', `http://127.0.0.1:${server.address().port}/`, optionsB);
+        await expect(promise1).to.not.reject();
         expect(promise1.req.getHeader('accept')).to.equal('bar');
         expect(promise1.req.getHeader('test')).to.equal(123);
+        server.close();
     });
 
     it('defaults inherits agents properly', () => {
@@ -2386,9 +2394,12 @@ describe('Defaults', () => {
 
         expect(wreck.agents.http.maxSockets).to.equal(1);
         const agent = new Http.Agent({ maxSockets: 2 });
-        const promise = wreck.request('get', `http://localhost:${internals.refusePort}/`, { agent });
-        await expect(promise).to.reject();
+
+        const server = await internals.server('ok');
+        const promise = wreck.request('get', `http://localhost:${server.address().port}/`, { agent });
+        await expect(promise).to.not.reject();
         expect(promise.req.agent.maxSockets).to.equal(2);
+        server.close();
     });
 });
 
