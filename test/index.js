@@ -52,6 +52,22 @@ describe('request()', () => {
         expect(body.toString()).to.equal(internals.payload);
     });
 
+    it('requests a DELETE resource with payload', async (flags) => {
+
+        const handler = (req, res) => {
+
+            expect(req.headers['content-length']).to.equal('16390');
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            req.pipe(res);
+        };
+
+        const server = await internals.server(handler);
+        flags.onCleanup = () => server.close();
+        const res = await Wreck.request('delete', `http://localhost:${server.address().port}`, { payload: internals.payload });
+        const body = await Wreck.read(res);
+        expect(body.toString()).to.equal(internals.payload);
+    });
+
     it('requests a POST resource', async (flags) => {
 
         const handler = (req, res) => {
@@ -1680,28 +1696,44 @@ describe('Shortcut', () => {
     it('patch request', async (flags) => {
 
         const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
         const { res, payload } = await Wreck.patch(`http://localhost:${server.address().port}`, { payload: '123' });
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
-        flags.onCleanup = () => server.close();
     });
 
     it('put request', async (flags) => {
 
         const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
         const { res, payload } = await Wreck.put(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
-        flags.onCleanup = () => server.close();
     });
 
     it('delete request', async (flags) => {
 
         const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
         const { res, payload } = await Wreck.delete(`http://localhost:${server.address().port}`);
         expect(res.statusCode).to.equal(200);
         expect(payload.toString()).to.equal('ok');
+    });
+
+    it('delete request with payload', async (flags) => {
+
+        const handler = (req, res) => {
+
+            expect(req.headers['content-length']).to.equal('16390');
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            req.pipe(res);
+        };
+
+        const server = await internals.server(handler);
         flags.onCleanup = () => server.close();
+        const { res, payload } = await Wreck.delete('http://localhost:' + server.address().port, { payload: internals.payload });
+        expect(res.statusCode).to.equal(200);
+        expect(payload.toString()).to.equal(internals.payload);
     });
 
     it('errors on bad request', async (flags) => {
