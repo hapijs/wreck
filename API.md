@@ -97,12 +97,12 @@ Initiate an HTTP request.
     - `baseUrl` - fully qualified URL string used as the base URL. Most useful with `Wreck.defaults()` when making multiple requests to the same domain. For example, if `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/end/point?test=true`. Any query string in the `baseUrl` will be overwritten with the query string in the `uri` When `baseUrl` is given, `uri` must also be a string. In order to retain the `/api/` portion of the `baseUrl` in the example, the `path` must not start with a leading `/` and the `baseUrl` must end with a trailing `/`.
 
     - `beforeRedirect` - a function to call before a redirect is triggered, using the signature `async function(redirectMethod, statusCode, location, resHeaders, redirectOptions, next)` where:
-          - `redirectMethod` - A string specifying the redirect method.
-          - `statusCode` - HTTP status code of the response that triggered the redirect.
-          - `location` - The redirect location string.
-          - `resHeaders` - An object with the headers received as part of the redirection response.
-          - `redirectOptions` - Options that will be applied to the redirect request. Changes to this object are applied to the redirection request.
-          - `next` - the callback function called to perform the redirection using signature `function(err)`. Passing an error into callback will stop the redirect request.
+        - `redirectMethod` - A string specifying the redirect method.
+        - `statusCode` - HTTP status code of the response that triggered the redirect.
+        - `location` - The redirect location string.
+        - `resHeaders` - An object with the headers received as part of the redirection response.
+        - `redirectOptions` - Options that will be applied to the redirect request. Changes to this object are applied to the redirection request.
+        - `next` - the callback function called to perform the redirection using signature `function(err)`. Passing an error into callback will stop the redirect request.
           
     - `ciphers` - [TLS](https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite) list of TLS ciphers to override node's default. The possible values depend on your installation of OpenSSL. Read the official OpenSSL docs for possible [TLS_CIPHERS](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT).
 
@@ -166,17 +166,17 @@ Convenience method for GET operations.
   `read` operations.
 
 Returns a promise that resolves into an object with the following properties:
-    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-       object, which is a readable stream that has "ended" and contains no more data to read.
-    - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+- `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+   object, which is a readable stream that has "ended" and contains no more data to read.
+- `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
-    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-    - `data.headers` - object containing the response headers
-    - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
+- `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+- `data.headers` - object containing the response headers
+- `data.payload` - the payload in the form of a Buffer or as a parsed object
+- `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
 ### `post(uri, [options])`
 
@@ -186,17 +186,17 @@ Convenience method for POST operations.
   `read` operations.
 
 Returns a promise that resolves into an object with the following properties:
-    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-       object, which is a readable stream that has "ended" and contains no more data to read.
-    - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+- `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+   object, which is a readable stream that has "ended" and contains no more data to read.
+- `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
-    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-    - `data.headers` - object containing the response headers
-    - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
+- `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+- `data.headers` - object containing the response headers
+- `data.payload` - the payload in the form of a Buffer or as a parsed object
+- `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
 ### `patch(uri, [options])`
 
@@ -206,17 +206,17 @@ Convenience method for PATCH operations.
   `read` operations.
 
 Returns a promise that resolves into an object with the following properties:
-    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-       object, which is a readable stream that has "ended" and contains no more data to read.
-    - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+- `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+   object, which is a readable stream that has "ended" and contains no more data to read.
+- `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
-    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-    - `data.headers` - object containing the response headers
-    - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
+- `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+- `data.headers` - object containing the response headers
+- `data.payload` - the payload in the form of a Buffer or as a parsed object
+- `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
 ### `put(uri, [options])`
 
@@ -226,17 +226,17 @@ Convenience method for PUT operations.
   `read` operations.
 
 Returns a promise that resolves into an object with the following properties:
-    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-       object, which is a readable stream that has "ended" and contains no more data to read.
-    - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+- `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+   object, which is a readable stream that has "ended" and contains no more data to read.
+- `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
-    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-    - `data.headers` - object containing the response headers
-    - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
+- `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+- `data.headers` - object containing the response headers
+- `data.payload` - the payload in the form of a Buffer or as a parsed object
+- `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
 ### `delete(uri, [options])`
 
@@ -246,17 +246,17 @@ Convenience method for DELETE operations.
   `read` operations.
 
 Returns a promise that resolves into an object with the following properties:
-    - `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-       object, which is a readable stream that has "ended" and contains no more data to read.
-    - `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
+- `res` - The [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+   object, which is a readable stream that has "ended" and contains no more data to read.
+- `payload` - The payload in the form of a Buffer or (optionally) parsed JavaScript object (JSON).
 
 Throws any error that may have occurred during handling of the request or a Boom error object if the response has an error status
 code (i.e. 4xx or 5xx). If the error is a boom error object it will have the following properties in addition to the standard boom
 properties:
-    - `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
-    - `data.headers` - object containing the response headers
-    - `data.payload` - the payload in the form of a Buffer or as a parsed object
-    - `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
+- `data.isResponseError` - boolean, indicates if the error is a result of an error response status code
+- `data.headers` - object containing the response headers
+- `data.payload` - the payload in the form of a Buffer or as a parsed object
+- `data.res` - the [HTTP Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) object
 
 ### `toReadableStream(payload, [encoding])`
 
