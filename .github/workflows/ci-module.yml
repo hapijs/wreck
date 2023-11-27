@@ -9,6 +9,21 @@ on:
 
 jobs:
   test:
-    uses: hapijs/.github/.github/workflows/ci-module.yml@master
-    with:
-      min-node-version: 14
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+        node: [14, 16, 18, 20, '*']
+
+    runs-on: ${{ matrix.os }}-latest
+    name: ${{ matrix.os }} node@${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          check-latest: ${{ matrix.node == '*' }}
+      - name: install
+        run: npm install
+      - name: test
+        run: npm test
