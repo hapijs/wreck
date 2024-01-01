@@ -9,7 +9,7 @@ const Stream = require('stream');
 const Zlib = require('zlib');
 
 const Code = require('code');
-const Hoek = require('@commercial/hoek');
+const Hoek = require('hoek');
 const Lab = require('lab');
 const Reload = require('require-reload');
 const Wreck = require('../');

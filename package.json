@@ -1,5 +1,5 @@
 {
-  "name": "@commercial/wreck",
+  "name": "wreck",
   "description": "HTTP Client Utilities",
   "version": "12.6.1",
   "repository": "git://github.com/hapijs/wreck",
@@ -13,8 +13,8 @@
     "client"
   ],
   "dependencies": {
-    "@commercial/boom": "5.x.x",
-    "@commercial/hoek": "4.x.x"
+    "boom": "5.x.x",
+    "hoek": "4.x.x"
   },
   "devDependencies": {
     "code": "4.x.x",

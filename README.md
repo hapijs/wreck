@@ -1,4 +1,4 @@
-# @commercial/wreck
+# wreck
 
 ### HTTP Client Utilities
 
