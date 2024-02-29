@@ -7,6 +7,7 @@ const Fs = require('fs');
 const Events = require('events');
 const Stream = require('stream');
 const Zlib = require('zlib');
+const Dns = require('dns');
 
 const Boom = require('@hapi/boom');
 const Code = require('@hapi/code');
@@ -1200,19 +1201,17 @@ describe('options.lookup', () => {
 
     it('uses the lookup function to resolve the server ip address', async (flags) => {
 
+        let dnsLookupCalled = false;
+
         const server = await internals.server('ok');
-        const promise = Wreck.request('get', `http://localhost:${server.address().port}/`, {
-            lookup: (_hostname, options, callback) => {
+        await Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (hostname, options, callback) => {
 
-                if (options.all) {
-                    callback(null, [{ address: '127.0.0.1', family: 4 }]);
-                    return;
-                }
-
-                callback(null, '127.0.0.1', 4);
+                dnsLookupCalled = true;
+                return Dns.lookup(hostname, options, callback);
             }
         });
-        await expect(promise).to.not.reject();
+        expect(dnsLookupCalled).to.equal(true);
         flags.onCleanup = () => server.close();
     });
 
