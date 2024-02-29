@@ -1196,6 +1196,29 @@ describe('request()', () => {
     });
 });
 
+describe('options.lookup', () => {
+
+    it('uses the lookup function to resolve the server ip address', async (flags) => {
+
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (_hostname, _options, callback) => callback(null, [{ address: '127.0.0.1', family: 4 }])
+        });
+        await expect(promise).to.not.reject();
+        flags.onCleanup = () => server.close();
+    });
+
+    it('uses the lookup function and fails if the lookup function rejects the domain', async (flags) => {
+
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (_hostname, _options, callback) => callback(new Error('failed lookup'))
+        });
+        await expect(promise).to.reject('Client request error: failed lookup');
+        flags.onCleanup = () => server.close();
+    });
+});
+
 describe('options.baseUrl', () => {
 
     it('uses path when path is a full URL', async (flags) => {

@@ -148,6 +148,8 @@ Returns a promise that resolves into a node response object. The promise has a `
         - `'strict'` - as `true`, except returns an error for non-JSON content-type.
         - `'force'` - try `JSON.parse` regardless of the content-type header.
 
+    - `lookup` - DNS lookup function. see [http.request(url[,options][,callback])](https://nodejs.org/api/http.html#httprequestoptions-callback). Defaults to [dns.lookup()](https://nodejs.org/api/dns.html#dnslookuphostname-options-callback).
+
     - `maxBytes` - the maximum allowed response payload size. Defaults to `0` (no limit).
 
     - `timeout` - the number of milliseconds to wait while reading data before aborting handling of the response. Defaults to `0`.
