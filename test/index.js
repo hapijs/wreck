@@ -1202,7 +1202,15 @@ describe('options.lookup', () => {
 
         const server = await internals.server('ok');
         const promise = Wreck.request('get', `http://localhost:${server.address().port}/`, {
-            lookup: (_hostname, _options, callback) => callback(null, [{ address: '127.0.0.1', family: 4 }])
+            lookup: (_hostname, options, callback) => {
+
+                if (options.all) {
+                    callback(null, [{ address: '127.0.0.1', family: 4 }]);
+                    return;
+                }
+
+                callback(null, '127.0.0.1', 4);
+            }
         });
         await expect(promise).to.not.reject();
         flags.onCleanup = () => server.close();
