@@ -1366,9 +1366,13 @@ describe('read()', () => {
     it('handles requests that close early', async (flags) => {
 
         let readPromise;
+        let readError;
         const handler = (req, res) => {
 
-            readPromise = Wreck.read(req);
+            readPromise = Wreck.read(req).catch((err) => {
+
+                readError = err;
+            });
             promise.req.abort();
         };
 
@@ -1389,8 +1393,9 @@ describe('read()', () => {
         const server = await internals.server(handler);
         const promise = Wreck.request('post', `http://localhost:${server.address().port}`, { payload, headers });
         await expect(promise).to.reject();
-        const err = await expect(readPromise).to.reject(Error, 'Payload stream closed prematurely');
-        expect(err.isBoom).to.equal(true);
+        await readPromise;
+        expect(readError).to.be.an.error('Payload stream closed prematurely');
+        expect(readError.isBoom).to.equal(true);
     });
 
     it('errors on partial payload transfers', async (flags) => {
