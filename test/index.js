@@ -2111,7 +2111,8 @@ describe('gunzip', () => {
             const options = { json: true };
 
             const err = await expect(Wreck.get(`http://localhost:${server.address().port}`, options)).to.reject();
-            expect(err).to.be.an.error('Unexpected token \u001f in JSON at position 0');
+            expect(err).to.be.an.error(/Unexpected token/);
+            expect(Boom.isBoom(err)).to.be.true();
             expect(err.data.res.statusCode).to.equal(200);
             expect(err.data.payload).to.equal(Zlib.gzipSync(JSON.stringify({ foo: 'bar' })));
             flags.onCleanup = () => server.close();
