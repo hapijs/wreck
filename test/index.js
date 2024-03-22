@@ -1223,6 +1223,15 @@ describe('options.baseUrl', () => {
         flags.onCleanup = () => server.close();
     });
 
+    it('ignores host header when it is undefined', async (flags) => {
+
+        const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
+        const promise = Wreck.request('get', '/foo', { baseUrl: `http://localhost:${server.address().port}/`, headers: { host: undefined } });
+        await expect(promise).to.not.reject();
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${server.address().port}`);
+    });
+
     it('uses baseUrl option with trailing slash and uri is prefixed with a slash', async (flags) => {
 
         const server = await internals.server('ok');
