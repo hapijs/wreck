@@ -1204,6 +1204,7 @@ describe('options.lookup', () => {
         let dnsLookupCalled = false;
 
         const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
         await Wreck.request('get', `http://localhost:${server.address().port}/`, {
             lookup: (hostname, options, callback) => {
 
@@ -1212,7 +1213,6 @@ describe('options.lookup', () => {
             }
         });
         expect(dnsLookupCalled).to.equal(true);
-        flags.onCleanup = () => server.close();
     });
 
     it('uses the lookup function and fails if the lookup function rejects the domain', async (flags) => {
@@ -1223,6 +1223,48 @@ describe('options.lookup', () => {
         });
         await expect(promise).to.reject('Client request error: failed lookup');
         flags.onCleanup = () => server.close();
+    });
+});
+
+describe('options.hints', () => {
+
+    it('passes the hint parameter to the lookup function to resolve the server ip address', async (flags) => {
+
+        const expectedHints = Dns.ADDRCONFIG;
+        let actualHints;
+
+        const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
+        await Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (hostname, options, callback) => {
+
+                actualHints = options.hints;
+                return Dns.lookup(hostname, options, callback);
+            },
+            hints: expectedHints
+        });
+        expect(actualHints).to.equal(expectedHints);
+    });
+});
+
+describe('options.family', () => {
+
+    it('passes the family parameter to the lookup function to resolve the server ip address', async (flags) => {
+
+        const expectedFamily = 4;
+        let actualFamily;
+
+        const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
+        await Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (hostname, options, callback) => {
+
+                actualFamily = options.family;
+                return Dns.lookup(hostname, options, callback);
+            },
+            family: expectedFamily // IPv4
+        });
+        expect(actualFamily).to.equal(expectedFamily);
     });
 });
 

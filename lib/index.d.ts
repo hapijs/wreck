@@ -205,6 +205,16 @@ declare namespace Client {
             readonly lookup?: LookupFunction;
 
             /**
+             * IP address family to use when resolving host or hostname. Valid values are 4 or 6. When unspecified, both IP v4 and v6 will be used.
+             */
+            readonly family?: number;
+
+            /**
+             * Optional dns.lookup() hints.
+             */
+            readonly hints?: number;
+
+            /**
              * Fully qualified URL string used as the base URL.
              */
             readonly baseUrl?: string;

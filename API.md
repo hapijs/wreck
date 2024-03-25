@@ -130,6 +130,13 @@ Initiate an HTTP request.
 
     - `timeout` - number of milliseconds to wait without receiving a response before aborting the request. Defaults to `0` (no limit).
 
+    - `lookup` - DNS lookup function. see [http.request(url[,options][,callback])](https://nodejs.org/api/http.html#httprequestoptions-callback). Defaults to [dns.lookup()](https://nodejs.org/api/dns.html#dnslookuphostname-options-callback).
+
+    - `family` - IP address family to use when resolving `host` or `hostname`. Valid values are `4` or `6`. When unspecified, both IP v4 and v6 will be used.
+
+    - `hints` - Optional `dns.lookup()` hints.
+
+
 Returns a promise that resolves into a node response object. The promise has a `req` property which is the instance of the node.js [ClientRequest](http://nodejs.org/api/http.html#http_class_http_clientrequest) object.
 
 ### `read(response, options)`
@@ -147,8 +154,6 @@ Returns a promise that resolves into a node response object. The promise has a `
         - `true` - only try `JSON.parse` if the response indicates a JSON content-type.
         - `'strict'` - as `true`, except returns an error for non-JSON content-type.
         - `'force'` - try `JSON.parse` regardless of the content-type header.
-
-    - `lookup` - DNS lookup function. see [http.request(url[,options][,callback])](https://nodejs.org/api/http.html#httprequestoptions-callback). Defaults to [dns.lookup()](https://nodejs.org/api/dns.html#dnslookuphostname-options-callback).
 
     - `maxBytes` - the maximum allowed response payload size. Defaults to `0` (no limit).
 
