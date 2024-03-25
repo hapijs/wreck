@@ -7,6 +7,7 @@ const Fs = require('fs');
 const Events = require('events');
 const Stream = require('stream');
 const Zlib = require('zlib');
+const Dns = require('dns');
 
 const Boom = require('@hapi/boom');
 const Code = require('@hapi/code');
@@ -1193,6 +1194,77 @@ describe('request()', () => {
     it('errors on unix socket under Windows', { skip: process.platform !== 'win32' }, async () => {
 
         await expect(Wreck.request('get', '/', { socketPath: '/some/path/to/nothing' })).to.reject();
+    });
+});
+
+describe('options.lookup', () => {
+
+    it('uses the lookup function to resolve the server ip address', async (flags) => {
+
+        let dnsLookupCalled = false;
+
+        const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
+        await Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (hostname, options, callback) => {
+
+                dnsLookupCalled = true;
+                return Dns.lookup(hostname, options, callback);
+            }
+        });
+        expect(dnsLookupCalled).to.equal(true);
+    });
+
+    it('uses the lookup function and fails if the lookup function rejects the domain', async (flags) => {
+
+        const server = await internals.server('ok');
+        const promise = Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (_hostname, _options, callback) => callback(new Error('failed lookup'))
+        });
+        await expect(promise).to.reject('Client request error: failed lookup');
+        flags.onCleanup = () => server.close();
+    });
+});
+
+describe('options.hints', () => {
+
+    it('passes the hint parameter to the lookup function to resolve the server ip address', async (flags) => {
+
+        const expectedHints = Dns.ADDRCONFIG;
+        let actualHints;
+
+        const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
+        await Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (hostname, options, callback) => {
+
+                actualHints = options.hints;
+                return Dns.lookup(hostname, options, callback);
+            },
+            hints: expectedHints
+        });
+        expect(actualHints).to.equal(expectedHints);
+    });
+});
+
+describe('options.family', () => {
+
+    it('passes the family parameter to the lookup function to resolve the server ip address', async (flags) => {
+
+        const expectedFamily = 4;
+        let actualFamily;
+
+        const server = await internals.server('ok');
+        flags.onCleanup = () => server.close();
+        await Wreck.request('get', `http://localhost:${server.address().port}/`, {
+            lookup: (hostname, options, callback) => {
+
+                actualFamily = options.family;
+                return Dns.lookup(hostname, options, callback);
+            },
+            family: expectedFamily // IPv4
+        });
+        expect(actualFamily).to.equal(expectedFamily);
     });
 });
 

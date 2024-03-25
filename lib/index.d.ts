@@ -5,6 +5,7 @@ import * as Http from 'http';
 import * as Https from 'https';
 import * as Stream from 'stream';
 import * as Url from 'url';
+import { LookupFunction } from "node:net"
 
 import { Boom } from '@hapi/boom';
 
@@ -197,6 +198,21 @@ declare namespace Client {
              * Node HTTP or HTTPS Agent object (false disables agent pooling).
              */
             readonly agent?: Http.Agent | Https.Agent | false;
+
+            /**
+             * Custom lookup function. Default: dns.lookup().
+             */
+            readonly lookup?: LookupFunction;
+
+            /**
+             * IP address family to use when resolving host or hostname. Valid values are 4 or 6. When unspecified, both IP v4 and v6 will be used.
+             */
+            readonly family?: number;
+
+            /**
+             * Optional dns.lookup() hints.
+             */
+            readonly hints?: number;
 
             /**
              * Fully qualified URL string used as the base URL.
