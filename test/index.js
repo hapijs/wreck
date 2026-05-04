@@ -2308,6 +2308,19 @@ describe('toReadableStream()', () => {
         buf = stream.read();
         expect(buf).to.equal(null);
     });
+
+    it('does not signal end after a partial _read', () => {
+
+        const data = Buffer.alloc(1000, 'x');
+        const stream = Wreck.toReadableStream(data);
+
+        stream._read(400);                                             // partial read leaves position < length
+        expect(stream._position).to.equal(400);
+        expect(stream.readableEnded).to.be.false();
+
+        stream._read(1000);                                            // drains remainder, signals end
+        expect(stream._position).to.equal(1000);
+    });
 });
 
 describe('Events', () => {
