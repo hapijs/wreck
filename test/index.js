@@ -408,7 +408,7 @@ describe('request()', () => {
         http2.close();
     });
 
-    it('handles redirections with new hostname, removing authorization and cookie headers', async (flags) => {
+    it('handles redirections with new hostname, removing authorization, cookie, and proxy-authorization headers', async (flags) => {
 
         const handler1 = (req, res) => {
 
@@ -418,8 +418,8 @@ describe('request()', () => {
 
         const handler2 = (req, res) => {
 
-            // request must have 'x-foo' header, but must not have 'authorization' or 'cookie'
-            if (req.headers.authorization || req.headers.cookie || !req.headers['x-foo']) {
+            // request must have 'x-foo' header, but must not have 'authorization', 'cookie' or 'proxy-authorization'
+            if (req.headers.authorization || req.headers.cookie || req.headers['proxy-authorization'] || !req.headers['x-foo']) {
                 res.writeHead(500);
             }
 
@@ -432,6 +432,7 @@ describe('request()', () => {
         const headers = {
             authorization: 'some-auth-key',
             cookie: 'some-cookie',
+            'proxy-authorization': 'some-proxy-auth',
             'x-foo': 'something-else'
         };
 
@@ -439,6 +440,36 @@ describe('request()', () => {
         expect(res.statusCode).to.equal(200);
         http1.close();
         http2.close();
+    });
+
+    it('preserves proxy-authorization header on same-hostname redirect', async (flags) => {
+
+        let gen = 0;
+        const handler = (req, res) => {
+
+            if (!gen++) {
+                res.writeHead(301, { 'Location': '/' });
+                res.end();
+                return;
+            }
+
+            // proxy-authorization must persist across same-host redirect
+            if (req.headers['proxy-authorization'] !== 'some-proxy-auth') {
+                res.writeHead(500);
+            }
+
+            res.end();
+        };
+
+        const server = await internals.server(handler);
+
+        const headers = {
+            'proxy-authorization': 'some-proxy-auth'
+        };
+
+        const res = await Wreck.request('get', 'http://localhost:' + server.address().port, { redirects: 1, headers });
+        expect(res.statusCode).to.equal(200);
+        server.close();
     });
 
     it('handles redirections from http to https', async (flags) => {
