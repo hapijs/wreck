@@ -442,6 +442,75 @@ describe('request()', () => {
         http2.close();
     });
 
+    it('removes sensitive headers when redirected to a different port on the same hostname', async (flags) => {
+
+        const handler2 = (req, res) => {
+
+            if (req.headers.authorization || req.headers.cookie || req.headers['proxy-authorization']) {
+                res.writeHead(500);
+                return res.end();
+            }
+
+            res.writeHead(200);
+            res.end();
+        };
+
+        const http2 = await internals.server(handler2);
+
+        const handler1 = (req, res) => {
+
+            res.writeHead(302, { 'Location': 'http://localhost:' + http2.address().port });
+            res.end();
+        };
+
+        const http1 = await internals.server(handler1);
+
+        const headers = {
+            authorization: 'some-auth-key',
+            cookie: 'some-cookie',
+            'proxy-authorization': 'some-proxy-auth'
+        };
+
+        const res = await Wreck.request('get', 'http://localhost:' + http1.address().port, { redirects: 1, headers });
+        expect(res.statusCode).to.equal(200);
+        http1.close();
+        http2.close();
+    });
+
+    it('removes sensitive headers when redirected to a different scheme on the same hostname', async (flags) => {
+
+        const handler1 = (req, res) => {
+
+            res.writeHead(302, { 'Location': 'https://127.0.0.1:' + https.address().port });
+            res.end();
+        };
+
+        const handler2 = (req, res) => {
+
+            if (req.headers.authorization || req.headers.cookie || req.headers['proxy-authorization']) {
+                res.writeHead(500);
+                return res.end();
+            }
+
+            res.writeHead(200);
+            res.end();
+        };
+
+        const https = await internals.https(handler2);
+        const http = await internals.server(handler1);
+
+        const headers = {
+            authorization: 'some-auth-key',
+            cookie: 'some-cookie',
+            'proxy-authorization': 'some-proxy-auth'
+        };
+
+        const res = await Wreck.request('get', 'http://localhost:' + http.address().port, { redirects: 1, rejectUnauthorized: false, headers });
+        expect(res.statusCode).to.equal(200);
+        http.close();
+        https.close();
+    });
+
     it('preserves proxy-authorization header on same-hostname redirect', async (flags) => {
 
         let gen = 0;
@@ -1303,9 +1372,10 @@ describe('options.baseUrl', () => {
 
     it('uses path when path is a full URL', async (flags) => {
 
-        const promise = Wreck.request('get', 'http://localhost:8080/foo', { baseUrl: 'http://localhost:0/' });
+        const unboundPort = await internals.unusedPort();
+        const promise = Wreck.request('get', `http://localhost:${unboundPort}/foo`, { baseUrl: 'http://localhost:0/' });
         await expect(promise).to.reject();
-        expect(promise.req.getHeader('host')).to.equal('localhost:8080');
+        expect(promise.req.getHeader('host')).to.equal(`localhost:${unboundPort}`);
     });
 
     it('uses lower-case host header when path is not a full URL', async (flags) => {
@@ -2599,6 +2669,22 @@ describe('Defaults', () => {
         flags.onCleanup = () => server.close();
     });
 });
+
+
+internals.unusedPort = function () {
+
+    return new Promise((resolve, reject) => {
+
+        const server = Http.createServer();
+        server.unref();
+        server.on('error', reject);
+        server.listen(0, '127.0.0.1', () => {
+
+            const { port } = server.address();
+            server.close(() => resolve(port));
+        });
+    });
+};
 
 
 internals.server = function (handler, socket) {
