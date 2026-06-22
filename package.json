@@ -2,7 +2,7 @@
     "name": "@hapi/wreck",
     "description": "HTTP Client Utilities",
     "version": "18.1.2",
-    "repository": "git://github.com/hapijs/wreck",
+    "repository": "https://github.com/hapijs/wreck",
     "main": "lib/index",
     "types": "lib/index.d.ts",
     "keywords": [
