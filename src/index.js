@@ -1,43 +1,38 @@
-'use strict';
+import * as Events from 'node:events';
+import * as Http from 'node:http';
+import * as Https from 'node:https';
+import * as Stream from 'node:stream';
+import * as Url from 'node:url';
+import * as Zlib from 'node:zlib';
 
-const Events = require('events');
-const Http = require('http');
-const Https = require('https');
-const Stream = require('stream');
-const Url = require('url');
-const Zlib = require('zlib');
+import * as Boom from '@hapi/boom';
+import * as Bourne from '@hapi/bourne';
+import * as Hoek from '@hapi/hoek';
 
-const Boom = require('@hapi/boom');
-const Bourne = require('@hapi/bourne');
-const Hoek = require('@hapi/hoek');
+import { Payload } from './payload.js';
+import { Recorder } from './recorder.js';
+import { Tap } from './tap.js';
 
-const Payload = require('./payload');
-const Recorder = require('./recorder');
-const Tap = require('./tap');
+const jsonRegex = /^application\/([a-z0-9.]*[+-]json|json)$/;
+const shallowOptions = ['agent', 'agents', 'beforeRedirect', 'payload', 'redirected'];
+const httpOptions = ['secureProtocol', 'ciphers', 'lookup', 'family', 'hints'];
+const sensitiveCrossHostHeaders = new Set(['authorization', 'cookie', 'proxy-authorization']);
 
+// New instance is exported as default export
 
-const internals = {
-    jsonRegex: /^application\/([a-z0-9.]*[+-]json|json)$/,
-    shallowOptions: ['agent', 'agents', 'beforeRedirect', 'payload', 'redirected'],
-    httpOptions: ['secureProtocol', 'ciphers', 'lookup', 'family', 'hints'],
-    sensitiveCrossHostHeaders: new Set(['authorization', 'cookie', 'proxy-authorization'])
-};
-
-
-// New instance is exported as module.exports
-
-internals.Client = class {
-
+class Client {
     constructor(options = {}) {
+        Hoek.assert(
+            !options.agents || (options.agents.https && options.agents.http && options.agents.httpsAllowUnauthorized),
+            'Option agents must include "http", "https", and "httpsAllowUnauthorized"',
+        );
 
-        Hoek.assert(!options.agents || options.agents.https && options.agents.http && options.agents.httpsAllowUnauthorized, 'Option agents must include "http", "https", and "httpsAllowUnauthorized"');
-
-        this._defaults = Hoek.clone(options, { shallow: internals.shallowOptions });
+        this._defaults = Hoek.clone(options, { shallow: shallowOptions });
 
         this.agents = this._defaults.agents || {
             https: new Https.Agent({ maxSockets: Infinity }),
             http: new Http.Agent({ maxSockets: Infinity }),
-            httpsAllowUnauthorized: new Https.Agent({ maxSockets: Infinity, rejectUnauthorized: false })
+            httpsAllowUnauthorized: new Https.Agent({ maxSockets: Infinity, rejectUnauthorized: false }),
         };
 
         if (this._defaults.events) {
@@ -46,74 +41,83 @@ internals.Client = class {
     }
 
     defaults(options) {
-
         Hoek.assert(options && typeof options === 'object', 'options must be provided to defaults');
 
-        options = Hoek.applyToDefaults(this._defaults, options, { shallow: internals.shallowOptions });
-        return new internals.Client(options);
+        options = Hoek.applyToDefaults(this._defaults, options, { shallow: shallowOptions });
+        return new Client(options);
     }
 
     request(method, url, options = {}) {
-
         try {
-            options = Hoek.applyToDefaults(this._defaults, options, { shallow: internals.shallowOptions });
+            options = Hoek.applyToDefaults(this._defaults, options, { shallow: shallowOptions });
 
-            Hoek.assert(options.payload === undefined || typeof options.payload === 'string' || typeof options.payload === 'object', 'options.payload must be a string, a Buffer, a Stream, or an Object');
-            Hoek.assert(internals.isNullOrUndefined(options.agent) || typeof options.rejectUnauthorized !== 'boolean', 'options.agent cannot be set to an Agent at the same time as options.rejectUnauthorized is set');
-            Hoek.assert(internals.isNullOrUndefined(options.beforeRedirect) || typeof options.beforeRedirect === 'function', 'options.beforeRedirect must be a function');
-            Hoek.assert(internals.isNullOrUndefined(options.redirected) || typeof options.redirected === 'function', 'options.redirected must be a function');
-            Hoek.assert(options.gunzip === undefined || typeof options.gunzip === 'boolean' || options.gunzip === 'force', 'options.gunzip must be a boolean or "force"');
-        }
-        catch (err) {
+            Hoek.assert(
+                options.payload === undefined ||
+                    typeof options.payload === 'string' ||
+                    typeof options.payload === 'object',
+                'options.payload must be a string, a Buffer, a Stream, or an Object',
+            );
+            Hoek.assert(
+                isNullOrUndefined(options.agent) || typeof options.rejectUnauthorized !== 'boolean',
+                'options.agent cannot be set to an Agent at the same time as options.rejectUnauthorized is set',
+            );
+            Hoek.assert(
+                isNullOrUndefined(options.beforeRedirect) || typeof options.beforeRedirect === 'function',
+                'options.beforeRedirect must be a function',
+            );
+            Hoek.assert(
+                isNullOrUndefined(options.redirected) || typeof options.redirected === 'function',
+                'options.redirected must be a function',
+            );
+            Hoek.assert(
+                options.gunzip === undefined || typeof options.gunzip === 'boolean' || options.gunzip === 'force',
+                'options.gunzip must be a boolean or "force"',
+            );
+        } catch (err) {
             return Promise.reject(err);
         }
 
         if (options.baseUrl) {
-            url = internals.resolveUrl(options.baseUrl, url);
+            url = resolveUrl(options.baseUrl, url);
             delete options.baseUrl;
         }
 
         const relay = {};
         const req = this._request(method, url, options, relay);
-        const promise = new Promise((resolve, reject) => {
+        const { promise, resolve, reject } = Promise.withResolvers();
 
-            relay.callback = (err, res) => {
-
-                if (err) {
-                    reject(err);
-                    return;
-                }
-
-                resolve(res);
+        relay.callback = (err, res) => {
+            if (err) {
+                reject(err);
                 return;
-            };
-        });
+            }
+
+            resolve(res);
+        };
 
         promise.req = req;
         return promise;
     }
 
     _request(method, url, options, relay, _trace) {
-
         const uri = {};
         if (options.socketPath) {
             uri.socketPath = options.socketPath;
 
             const parsedUri = new Url.URL(url, `unix://${options.socketPath}`);
-            internals.applyUrlToOptions(uri, {
-                host: '',                               // host must be empty according to https://tools.ietf.org/html/rfc2616#section-14.23
+            applyUrlToOptions(uri, {
+                host: '', // host must be empty according to https://tools.ietf.org/html/rfc2616#section-14.23
                 protocol: 'http:',
                 hash: parsedUri.hash,
                 search: parsedUri.search,
                 searchParams: parsedUri.searchParams,
                 pathname: parsedUri.pathname,
-                href: parsedUri.href
+                href: parsedUri.href,
             });
-        }
-        else {
+        } else {
             uri.setHost = false;
             const parsedUri = new Url.URL(url);
-            internals.applyUrlToOptions(uri, parsedUri);
+            applyUrlToOptions(uri, parsedUri);
         }
 
         uri.method = method.toUpperCase();
@@ -133,51 +137,51 @@ internals.Client = class {
             uri.headers.host = uri.host;
         }
 
-        if (options.payload && typeof options.payload === 'object' && !(options.payload instanceof Stream) && !Buffer.isBuffer(options.payload)) {
+        if (
+            options.payload &&
+            typeof options.payload === 'object' &&
+            !(options.payload instanceof Stream.default) &&
+            !Buffer.isBuffer(options.payload)
+        ) {
             options.payload = JSON.stringify(options.payload);
             if (!usedHeaders.has('content-type')) {
                 uri.headers['content-type'] = 'application/json';
             }
         }
 
-        if (options.gunzip &&
-            !usedHeaders.has('accept-encoding')) {
-
+        if (options.gunzip && !usedHeaders.has('accept-encoding')) {
             uri.headers['accept-encoding'] = 'gzip';
         }
 
-        const payloadSupported = uri.method !== 'GET' && uri.method !== 'HEAD' && !internals.isNullOrUndefined(options.payload);
-        if (payloadSupported &&
+        const payloadSupported = uri.method !== 'GET' && uri.method !== 'HEAD' && !isNullOrUndefined(options.payload);
+        if (
+            payloadSupported &&
             (typeof options.payload === 'string' || Buffer.isBuffer(options.payload)) &&
-            !usedHeaders.has('content-length')) {
-
-            uri.headers['content-length'] = Buffer.isBuffer(options.payload) ? options.payload.length : Buffer.byteLength(options.payload);
+            !usedHeaders.has('content-length')
+        ) {
+            uri.headers['content-length'] = Buffer.isBuffer(options.payload)
+                ? options.payload.length
+                : Buffer.byteLength(options.payload);
         }
 
-        let redirects = options.hasOwnProperty('redirects') ? options.redirects : false;        // Needed to allow 0 as valid value when passed recursively
+        let redirects = Object.hasOwn(options, 'redirects') ? options.redirects : false; // Needed to allow 0 as valid value when passed recursively
 
         _trace = _trace ?? [];
         _trace.push({ method: uri.method, url });
 
         const client = uri.protocol === 'https:' ? Https : Http;
 
-        for (const option of internals.httpOptions) {
+        for (const option of httpOptions) {
             if (options[option] !== undefined) {
                 uri[option] = options[option];
             }
         }
 
-        if (options.rejectUnauthorized !== undefined &&
-            uri.protocol === 'https:') {
-
+        if (options.rejectUnauthorized !== undefined && uri.protocol === 'https:') {
             uri.agent = options.rejectUnauthorized ? this.agents.https : this.agents.httpsAllowUnauthorized;
-        }
-        else if (options.agent ||
-            options.agent === false) {
-
+        } else if (options.agent || options.agent === false) {
             uri.agent = options.agent;
-        }
-        else {
+        } else {
             uri.agent = uri.protocol === 'https:' ? this.agents.https : this.agents.http;
         }
 
@@ -188,17 +192,15 @@ internals.Client = class {
 
         this._emit('request', req);
 
-        let shadow = null;                                                                      // A copy of the streamed request payload when redirects are enabled
+        let shadow = null; // A copy of the streamed request payload when redirects are enabled
         let timeoutId;
 
         const onError = (err) => {
-
             err.trace = _trace;
             return finishOnce(Boom.badGateway('Client request error', err));
         };
 
         const onAbort = () => {
-
             if (!req.socket) {
                 // Fake an ECONNRESET error on early abort
 
@@ -211,15 +213,12 @@ internals.Client = class {
         req.once('error', onError);
 
         const onResponse = (res) => {
-
             // Pass-through response
 
             const statusCode = res.statusCode;
-            const redirectMethod = internals.redirectMethod(statusCode, uri.method, options);
+            const redirectMethod = resolveRedirectMethod(statusCode, uri.method, options);
 
-            if (redirects === false ||
-                !redirectMethod) {
-
+            if (redirects === false || !redirectMethod) {
                 return finishOnce(null, res);
             }
 
@@ -240,13 +239,13 @@ internals.Client = class {
                 location = new Url.URL(location, uri.href).href;
             }
 
-            const redirectOptions = Hoek.clone(options, { shallow: internals.shallowOptions });
-            redirectOptions.payload = shadow ?? options.payload;                                    // shadow must be ready at this point if set
+            const redirectOptions = Hoek.clone(options, { shallow: shallowOptions });
+            redirectOptions.payload = shadow ?? options.payload; // shadow must be ready at this point if set
             redirectOptions.redirects = --redirects;
             if (timeoutId) {
                 clearTimeout(timeoutId);
                 const elapsed = Date.now() - start;
-                redirectOptions.timeout = (redirectOptions.timeout - elapsed).toString();           // stringify to not drop timeout when === 0
+                redirectOptions.timeout = (redirectOptions.timeout - elapsed).toString(); // stringify to not drop timeout when === 0
             }
 
             // When redirecting cross-origin (scheme, host, or port differs), remove sensitive credential headers
@@ -254,7 +253,7 @@ internals.Client = class {
                 const parsedLocation = new URL(location);
                 if (uri.origin !== parsedLocation.origin) {
                     for (const header of Object.keys(redirectOptions.headers)) {
-                        if (internals.sensitiveCrossHostHeaders.has(header.toLowerCase())) {
+                        if (sensitiveCrossHostHeaders.has(header.toLowerCase())) {
                             delete redirectOptions.headers[header];
                         }
                     }
@@ -262,13 +261,18 @@ internals.Client = class {
             }
 
             const followRedirect = (err) => {
-
                 if (err) {
                     err.trace = _trace;
                     return finishOnce(Boom.badGateway('Invalid redirect', err));
                 }
 
-                const redirectReq = this._request(redirectMethod, location, redirectOptions, { callback: finishOnce }, _trace);
+                const redirectReq = this._request(
+                    redirectMethod,
+                    location,
+                    redirectOptions,
+                    { callback: finishOnce },
+                    _trace,
+                );
                 if (options.redirected) {
                     options.redirected(statusCode, location, redirectReq);
                 }
@@ -278,13 +282,19 @@ internals.Client = class {
                 return followRedirect();
             }
 
-            return options.beforeRedirect(redirectMethod, statusCode, location, res.headers, redirectOptions, followRedirect);
+            return options.beforeRedirect(
+                redirectMethod,
+                statusCode,
+                location,
+                res.headers,
+                redirectOptions,
+                followRedirect,
+            );
         };
 
         // Register handlers
 
         const finish = (err, res) => {
-
             if (err) {
                 req.abort();
             }
@@ -314,20 +324,19 @@ internals.Client = class {
         // Write payload
 
         if (payloadSupported) {
-            if (options.payload instanceof Stream) {
+            if (options.payload instanceof Stream.default) {
                 let stream = options.payload;
 
                 if (redirects) {
                     const collector = new Tap();
                     collector.once('finish', () => {
-
                         shadow = collector.collect();
                     });
 
                     stream = options.payload.pipe(collector);
                 }
 
-                internals.deferPipeUntilSocketConnects(req, stream);
+                deferPipeUntilSocketConnects(req, stream);
                 return req;
             }
 
@@ -341,18 +350,14 @@ internals.Client = class {
     }
 
     _emit(...args) {
-
         if (this.events) {
             this.events.emit(...args);
         }
     }
 
     read(res, options = {}) {
-
         return new Promise((resolve, reject) => {
-
             this._read(res, options, (err, payload) => {
-
                 if (err) {
                     reject(err);
                     return;
@@ -365,15 +370,13 @@ internals.Client = class {
     }
 
     _read(res, options, callback) {
-
-        options = Hoek.applyToDefaults(this._defaults, options, { shallow: internals.shallowOptions });
+        options = Hoek.applyToDefaults(this._defaults, options, { shallow: shallowOptions });
 
         // Finish once
 
         let clientTimeoutId = null;
 
         const finish = (err, buffer) => {
-
             clearTimeout(clientTimeoutId);
             reader.removeListener('error', onReaderError);
             reader.removeListener('finish', onReaderFinish);
@@ -393,7 +396,7 @@ internals.Client = class {
             // Parse JSON
 
             if (options.json === 'force') {
-                return internals.tryParseBuffer(buffer, callback);
+                return tryParseBuffer(buffer, callback);
             }
 
             // 'strict' or true
@@ -401,7 +404,7 @@ internals.Client = class {
             const contentType = res.headers?.['content-type'] ?? '';
             const mime = contentType.split(';')[0].trim().toLowerCase();
 
-            if (!internals.jsonRegex.test(mime)) {
+            if (!jsonRegex.test(mime)) {
                 if (options.json === 'strict') {
                     return callback(Boom.notAcceptable('The content-type is not JSON compatible'));
                 }
@@ -409,27 +412,23 @@ internals.Client = class {
                 return callback(null, buffer);
             }
 
-            return internals.tryParseBuffer(buffer, callback);
+            return tryParseBuffer(buffer, callback);
         };
 
         const finishOnce = Hoek.once(finish);
 
         const clientTimeout = options.timeout;
-        if (clientTimeout &&
-            clientTimeout > 0) {
-
+        if (clientTimeout && clientTimeout > 0) {
             clientTimeoutId = setTimeout(() => finishOnce(Boom.clientTimeout()), clientTimeout);
         }
 
         // Hander errors
 
         const onResError = (err) => {
-
             return finishOnce(err.isBoom ? err : Boom.internal('Payload stream error', err));
         };
 
         const onResAborted = () => {
-
             if (!res.complete) {
                 finishOnce(Boom.internal('Payload stream closed prematurely'));
             }
@@ -444,8 +443,8 @@ internals.Client = class {
         const reader = new Recorder({ maxBytes: options.maxBytes });
 
         const onReaderError = (err) => {
-
-            if (res.destroy) {                          // GZip stream has no destroy() method
+            // GZip stream has no destroy() method
+            if (res.destroy) {
                 res.destroy();
             }
 
@@ -455,16 +454,13 @@ internals.Client = class {
         reader.once('error', onReaderError);
 
         const onReaderFinish = () => {
-
             return finishOnce(null, reader.collect());
         };
 
         reader.once('finish', onReaderFinish);
 
         if (options.gunzip) {
-            const contentEncoding = options.gunzip === 'force' ?
-                'gzip' :
-                res.headers?.['content-encoding'] ?? '';
+            const contentEncoding = options.gunzip === 'force' ? 'gzip' : (res.headers?.['content-encoding'] ?? '');
 
             if (/^(x-)?gzip(\s*,\s*identity)?$/.test(contentEncoding)) {
                 const gunzip = Zlib.createGunzip();
@@ -478,12 +474,10 @@ internals.Client = class {
     }
 
     toReadableStream(payload, encoding) {
-
         return new Payload(payload, encoding);
     }
 
     parseCacheControl(field) {
-
         /*
             Cache-Control   = 1#cache-directive
             cache-directive = token [ "=" ( token / quoted-string ) ]
@@ -492,11 +486,11 @@ internals.Client = class {
         */
 
         //                             1: directive                                        =   2: token                                              3: quoted-string
-        const regex = /(?:^|(?:\s*\,\s*))([^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)(?:\=(?:([^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)|(?:\"((?:[^"\\]|\\.)*)\")))?/g;
+        const regex =
+            /(?:^|(?:\s*\,\s*))([^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)(?:\=(?:([^\x00-\x20\(\)<>@\,;\:\\"\/\[\]\?\=\{\}\x7F]+)|(?:\"((?:[^"\\]|\\.)*)\")))?/g;
 
         const header = {};
         const error = field.replace(regex, ($0, $1, $2, $3) => {
-
             const value = $2 || $3;
             header[$1] = value ? value.toLowerCase() : true;
             return '';
@@ -510,8 +504,7 @@ internals.Client = class {
                 }
 
                 header['max-age'] = maxAge;
-            }
-            catch (err) { }
+            } catch (err) {}
         }
 
         return error ? null : header;
@@ -520,39 +513,32 @@ internals.Client = class {
     // Shortcuts
 
     get(uri, options) {
-
         return this._shortcut('GET', uri, options);
     }
 
     post(uri, options) {
-
         return this._shortcut('POST', uri, options);
     }
 
     patch(uri, options) {
-
         return this._shortcut('PATCH', uri, options);
     }
 
     put(uri, options) {
-
         return this._shortcut('PUT', uri, options);
     }
 
     delete(uri, options) {
-
         return this._shortcut('DELETE', uri, options);
     }
 
     async _shortcut(method, uri, options = {}) {
-
         const res = await this.request(method, uri, options);
 
         let payload;
         try {
             payload = await this.read(res, options);
-        }
-        catch (err) {
+        } catch (err) {
             err.data = err.data ?? {};
             err.data.res = res;
             throw err;
@@ -568,18 +554,19 @@ internals.Client = class {
             isResponseError: true,
             headers: res.headers,
             res,
-            payload
+            payload,
         };
 
-        throw new Boom.Boom(`Response Error: ${res.statusCode} ${res.statusMessage}`, { statusCode: res.statusCode, data });
+        throw new Boom.Boom(`Response Error: ${res.statusCode} ${res.statusMessage}`, {
+            statusCode: res.statusCode,
+            data,
+        });
     }
-};
-
+}
 
 // baseUrl needs to end in a trailing / if it contains paths that need to be preserved
 
-internals.resolveUrl = function (baseUrl, path) {
-
+function resolveUrl(baseUrl, path) {
     if (!path) {
         return baseUrl;
     }
@@ -587,13 +574,10 @@ internals.resolveUrl = function (baseUrl, path) {
     // Will default to path if it's not a relative URL
     const url = new Url.URL(path, baseUrl);
     return Url.format(url);
-};
+}
 
-
-internals.deferPipeUntilSocketConnects = function (req, stream) {
-
+function deferPipeUntilSocketConnects(req, stream) {
     const onSocket = (socket) => {
-
         if (!socket.connecting) {
             return onSocketConnect();
         }
@@ -602,23 +586,19 @@ internals.deferPipeUntilSocketConnects = function (req, stream) {
     };
 
     const onSocketConnect = () => {
-
         stream.pipe(req);
         stream.removeListener('error', onStreamError);
     };
 
     const onStreamError = (err) => {
-
         req.emit('error', err);
     };
 
     req.once('socket', onSocket);
     stream.on('error', onStreamError);
-};
+}
 
-
-internals.redirectMethod = function (code, method, options) {
-
+function resolveRedirectMethod(code, method, options) {
     switch (code) {
         case 301:
         case 302:
@@ -637,11 +617,9 @@ internals.redirectMethod = function (code, method, options) {
     }
 
     return null;
-};
+}
 
-
-internals.tryParseBuffer = function (buffer, next) {
-
+function tryParseBuffer(buffer, next) {
     if (buffer.length === 0) {
         return next(null, null);
     }
@@ -649,22 +627,20 @@ internals.tryParseBuffer = function (buffer, next) {
     let payload;
     try {
         payload = Bourne.parse(buffer.toString());
-    }
-    catch (err) {
+    } catch (err) {
         return next(Boom.badGateway(err.message, { payload: buffer }));
     }
 
     return next(null, payload);
-};
+}
 
-
-internals.applyUrlToOptions = (options, url) => {
-
+function applyUrlToOptions(options, url) {
     options.host = url.host;
     options.origin = url.origin;
     options.searchParams = url.searchParams;
     options.protocol = url.protocol;
-    options.hostname = typeof url.hostname === 'string' && url.hostname.startsWith('[') ? url.hostname.slice(1, -1) : url.hostname;
+    options.hostname =
+        typeof url.hostname === 'string' && url.hostname.startsWith('[') ? url.hostname.slice(1, -1) : url.hostname;
     options.hash = url.hash;
     options.search = url.search;
     options.pathname = url.pathname;
@@ -681,8 +657,8 @@ internals.applyUrlToOptions = (options, url) => {
     }
 
     return options;
-};
+}
 
-internals.isNullOrUndefined = (val) => [null, undefined].includes(val);
+const isNullOrUndefined = (val) => [null, undefined].includes(val);
 
-module.exports = new internals.Client();
+export default new Client();

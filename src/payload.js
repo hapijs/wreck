@@ -1,15 +1,7 @@
-'use strict';
+import * as Stream from 'node:stream';
 
-const Stream = require('stream');
-
-
-const internals = {};
-
-
-module.exports = internals.Payload = class extends Stream.Readable {
-
+export class Payload extends Stream.Readable {
     constructor(payload, encoding) {
-
         super();
 
         const data = [].concat(payload || '');
@@ -26,7 +18,6 @@ module.exports = internals.Payload = class extends Stream.Readable {
     }
 
     _read(size) {
-
         const chunk = this._data.slice(this._position, this._position + size);
         this.push(chunk, this._encoding);
         this._position = this._position + chunk.length;
@@ -35,4 +26,4 @@ module.exports = internals.Payload = class extends Stream.Readable {
             this.push(null);
         }
     }
-};
+}

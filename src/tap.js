@@ -1,29 +1,19 @@
-'use strict';
+import * as Stream from 'node:stream';
 
-const Stream = require('stream');
+import { Payload } from './payload.js';
 
-const Payload = require('./payload');
-
-
-const internals = {};
-
-
-module.exports = internals.Tap = class extends Stream.Transform {
-
+export class Tap extends Stream.Transform {
     constructor() {
-
         super();
         this.buffers = [];
     }
 
     _transform(chunk, encoding, next) {
-
         this.buffers.push(chunk);
         next(null, chunk);
     }
 
     collect() {
-
         return new Payload(this.buffers);
     }
-};
+}
